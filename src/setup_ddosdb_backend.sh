@@ -25,7 +25,7 @@ until $(curl --output /dev/null --silent --head --fail http://localhost:9200); d
     sleep 5
 done
 # config database
-./ddosdb/src/ddosdb.db
+sh ddosdb/src/ddosdb.db
 
 # PostgreSQL:
 sudo apt-get install -y postgresql postgresql-contrib
