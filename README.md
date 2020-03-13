@@ -1,4 +1,4 @@
-# DDoS Clearing House
+# DDoS Clearing House.
 
 DDoSCH is a platform used to share DDoS fingerprints. The system is composed by a set of software modules available in this repository and described in our research  [paper](https://research.utwente.nl/en/publications/ddos-as-a-service-investigating-booter-websites](https://research.utwente.nl/en/publications/ddos-as-a-service-investigating-booter-websites)). 
 
