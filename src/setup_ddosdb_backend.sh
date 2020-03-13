@@ -1,6 +1,18 @@
+# Installation process 
+
+# basic setup
+su - 
+apt-get update
+apt-get install -y sudo git
+adduser ddosdb 
+echo "ddosdb     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+su - ddosdb
+
+# download repo
+git clone https://github.com/ddos-clearing-house/ddosdb.git
+
 # Elasticsearch: 
-sudo apt-get update
-sudo apt-get install -y default-jre-headless
+sudo apt-get install -y gnupg default-jre-headless
 wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
 sudo apt-get install -y apt-transport-https
 echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
@@ -12,96 +24,8 @@ until $(curl --output /dev/null --silent --head --fail http://localhost:9200); d
     printf '.'
     sleep 5
 done
-curl -XPUT -H "Content-Type: application/json" "localhost:9200/ddosdb" --data '
-{
-    "mappings": {
-        "_doc": {
-            "properties": {
-                "additional": {
-                    "properties": {
-                        "dns_query": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "ignore_above": 256
-                                }
-                            }
-                        },
-                        "dns_type": {
-                            "type": "integer"
-                        },
-                        "fragmentation": {
-                            "type": "boolean"
-                        },
-                        "icmp_type": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "ignore_above": 256
-                                }
-                            }
-                        },
-                        "tcp_flag": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "ignore_above": 256
-                                }
-                            }
-                        }
-                    }
-                },
-                "dst_ports": {
-                    "type": "integer"
-                },
-                "duration_sec": {
-                    "type": "float"
-                },
-                "file_type": {
-                    "type": "keyword"
-                },
-                "key": {
-                    "type": "keyword"
-                },
-                "protocol": {
-                    "type": "keyword"
-                },
-                "src_ips": {
-                    "properties": {
-                        "as": {
-                            "type": "text"
-                        },
-                        "cc": {
-                            "type": "text"
-                        },
-                        "ip": {
-                            "type": "ip"
-                        }
-                    }
-                },
-                "src_ports": {
-                    "type": "integer"
-                },
-                "start_time": {
-                    "type": "text",
-                    "fields": {
-                        "keyword": {
-                            "type": "keyword",
-                            "ignore_above": 256
-                        }
-                    }
-                },
-                "start_timestamp": {
-                    "type": "float"
-                }
-            }
-        }
-    }
-}
-'
+# config database
+./ddosdb/src/ddosdb.db
 
 # PostgreSQL:
 sudo apt-get install -y postgresql postgresql-contrib
@@ -118,7 +42,7 @@ sudo apt-get install -y apache2 libapache2-mod-wsgi-py3 libapache2-mod-xsendfile
 sudo mkdir /opt/ddosdb-static
 sudo chown -R ddosdb /opt/ddosdb-static
 sudo mkdir /opt/ddosdb-data
-sudo chmod 777 /opt/ddosdb-data
+sudo chmod 755 /opt/ddosdb-data
 sudo chown -R ddosdb /opt/ddosdb-data
 sudo mkdir /opt/ddosdb
 sudo chown -R ddosdb /opt/ddosdb
@@ -147,11 +71,14 @@ EOL
 
 #sudo git clone https://github.com/Koenvh1/ddosdb-website.git /opt/ddosdb
 sudo apt-get install -y unzip
+cd ddosdb/src/
 sudo unzip backend_config.zip -d /opt/ddosdb
 sudo chown -R ddosdb /opt/ddosdb
+cd /opt/ddosdb
+mv backend_config/* .
+cd 
 
 # Edit /opt/ddosdb/website/settings.py
-
 sudo mv /opt/ddosdb/website/settings_local.example.py /opt/ddosdb/website/settings_local.py
 sudo printf "\nSTATIC_ROOT = \"/opt/ddosdb-static/\"\n\n" >> /opt/ddosdb/website/settings_local.py
 sudo tee -a /opt/ddosdb/website/settings_local.py << EOL
@@ -178,6 +105,6 @@ sudo chmod 777 /opt/ddosdb.log
 
 sudo chown ddosdb /opt/ddosdb.log
 
-sudo service apache2 restart
-
+#sudo service apache2 restart
+sudo systemctl restart apache2.service
 echo "DDoSDB setup done."
