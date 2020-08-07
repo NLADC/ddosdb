@@ -50,7 +50,7 @@ If you have a functioning Python3 running on your system you can use that. But i
 
 ##### Python packages
 
-Install the required python packages:
+When you have a functioning Python3, you can then install the required python packages:
 
 ```bash
 pip install django-sslserver pandas nclib elasticsearch demjson requests psycopg2-binary
