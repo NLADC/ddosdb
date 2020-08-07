@@ -87,6 +87,6 @@ Create some other users you can use for viewing, uploading etc.
 Finally visit the start/search page of the ddosdb at [https://localhost:8000/](https://localhost:8000/)
 
 
-If everything seems to be running you can upload fingerprints to the database using the [ddos_dissector](ddos_dissector), using one of the user accounts (with upload permissions) that you created previously.
+If everything seems to be running you can upload fingerprints to the database using the [ddos_dissector](https://github.com/ddos-clearing-house/ddos_dissector), using one of the user accounts (with upload permissions) that you created previously.
 
 Once you have a number of (example) fingerprints in the ddosdb, you can get an overview of all entries on the [overview page](https://localhost:8000/overview). 
