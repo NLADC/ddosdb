@@ -4,7 +4,7 @@ DDoSCH is a platform used to share DDoS fingerprints. The system is composed of 
 
 - [DDoSDB](https://github.com/ddos-clearing-house/ddosdb):  this is the backend database and graphical interface used to share the fingerprints.
 - [Dissector](https://github.com/ddos-clearing-house/ddos_dissector):  responsible for summarizing the DDoS traffic and generate the proper fingerprint.
-- [Converters](https://github.com/ddos-clearing-house/ddos_fingerprint_converters):  translate fingerprints to mitigation rules.
+- [Converters](https://github.com/ddos-clearing-house/converters):  translate fingerprints to mitigation rules.
 ## DDoSDB repository
 ### Installation process
 
