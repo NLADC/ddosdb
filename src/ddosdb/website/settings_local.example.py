@@ -47,7 +47,9 @@ RECAPTCHA_PUBLIC_KEY = ""
 RECAPTCHA_PRIVATE_KEY = ""
 
 # Raw path to fingerprint and attack vector data, with trailing slash
-RAW_PATH = ""
+# The standard path below is useful when running in development mode
+# (Running the django development server)
+RAW_PATH = "storage/"
 
 # Hosts that Elasticsearch runs on
 ELASTICSEARCH_HOSTS = ["127.0.0.1:9200"]

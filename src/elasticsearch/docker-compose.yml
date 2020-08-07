@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+
+  # Elasticsearch Docker Images: https://www.docker.elastic.co/
+  # version newest 7.8.0
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.11
+    container_name: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - 127.0.0.1:9200:9200
+
+volumes:
+  elasticsearch-data:
+    driver: local
