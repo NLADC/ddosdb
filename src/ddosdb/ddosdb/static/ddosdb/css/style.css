@@ -1,0 +1,47 @@
+/* JSON block for query page */
+.json-block {
+    font-family: monospace;
+    font-size: 11pt;
+}
+.json-block-indent {
+    padding-left: 2em;
+}
+.json-block-str {
+    color: #005cbf;
+}
+.json-block-int {
+    color: #1c7430;
+}
+.json-block-bool {
+    color: #ff8200;
+}
+.jumbotron {
+    border-radius: 0;
+}
+.ddosdb-title {
+    font-size: 3rem;
+}
+
+.ddosdb-subtitle {
+    font-size: 2.5rem;
+}
+
+@media (max-device-width: 600px) {
+    .ddosdb-title {
+        font-size: 2rem;
+    }
+
+    .ddosdb-subtitle {
+        font-size: 1.8rem;
+    }
+}
+
+.logo { max-width: 100%; }
+
+.is-warning {
+    border-color: #ffc107;
+}
+
+.is-warning:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
+}

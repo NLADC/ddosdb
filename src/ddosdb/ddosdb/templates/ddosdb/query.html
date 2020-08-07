@@ -1,0 +1,106 @@
+{% load static %}
+{% load get_class %}
+{% load multiply %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+{% include "ddosdb/header.html" %}
+<body class="bg-light">
+<div class="pb-3 box-shadow pt-3 border-bottom bg-white">
+    <div class="container d-flex flex-column flex-md-row align-items-center">
+        <a class="mr-md-auto" href="{% url "index" %}">
+            <img style="height: 40px" src="{% static "ddosdb/img/logo-new.svg" %}">
+        </a>
+        <form class="mx-4 w-100" method="get" action="{% url "query" %}">
+            <input type="text" class="form-control {% if not error == "" %}is-invalid{% endif %}" id="query" name="q" value="{{ q }}" placeholder="Search" required>
+        </form>
+        <nav class="ml-md-auto my-2 my-md-0 mr-md-3 d-block text-nowrap">
+            <a class="p-2 text-dark" href="{% url "account" %}">Account</a>
+            <a class="p-2 text-dark" href="{% url "logout" %}">Log out</a>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row py-1">
+        {% if not error == "" %}
+            <div class="col-md-12 alert alert-danger" role="alert">
+                {{ error }} - <a href="{% url "help" %}">Need help?</a>
+            </div>
+        {% elif amount == 0 %}
+            <div class="col-md-12 alert alert-warning" role="alert">
+                This query did not yield any results - <a href="{% url "help" %}">Need help?</a>
+            </div>
+        {% endif %}
+    </div>
+    <form action="{% url "query" %}" method="get">
+        <input type="hidden" name="q" value="{{ q }}">
+        <input type="hidden" name="p" value="{{ p }}">
+        <div class="input-group">
+            <input type="text" class="form-control form-control-sm" name="o" placeholder="e.g. duration_sec:desc,dst_ports" value="{{ o }}">
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-dark btn-sm rounded-right">Sort</button>
+                <a href="{% url "help" %}#sorting" class="btn btn-default btn-sm text-dark rounded">More about sorting</a>
+            </div>
+        </div>
+    </form>
+    <form action="{% url "compare" %}" method="get">
+        <div class="row" id="results">
+            {% for node in results %}
+                <div class="col-lg-6 col-md-12 my-2">
+                    <div class="card">
+                        <div class="card-body json-block" id="result-{{ forloop.counter0 }}">
+                            {% include "ddosdb/json-tree.html" %}
+                        </div>
+                        {% if node.comment %}
+                          <div class="card-footer">
+                            {{ node.comment|linebreaks }}
+                          </div>
+                        {% endif %}
+
+                        <div class="card-footer">
+                            {% if node.key %}
+                                <a href="{% url "fingerprint" node.key %}" class="text-dark">Fingerprint</a> -
+                                <a href="{% url "attack-trace" node.key %}" class="text-dark">Attack trace</a>
+                                <label class="float-right"><input type="checkbox" name="key" value="{{ node.key }}"> Compare</label>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm">Compare source IPs</button>
+    </form>
+    <div class="row mt-1">
+        <div class="col-12">
+            {% if p > 1 %}
+                <a class="btn btn-dark" href="{% url "query" %}?q={{ q|urlencode }}&p={{ p|add:-1 }}">Previous page</a>
+            {% endif %}
+            {% if p|multiply:10 < amount %}
+                <a class="btn btn-dark" href="{% url "query" %}?q={{ q|urlencode }}&p={{ p|add:1 }}">Next page</a>
+            {% endif %}
+            <form method="get" action="{% url "query" %}" class="float-right">
+                <input type="hidden" name="q" value="{{ q }}">
+                <input type="hidden" name="o" value="{{ o }}">
+                <div class="input-group">
+                    <select class="form-control" name="p" onchange="this.form.submit()">
+                        {% for i in pages %}
+                            <option value="{{ i }}" {% if i == p %}selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-dark">Go</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <small class="text-muted text-right">Found {{ amount|intword }} results in {{ time }} seconds</small>
+        </div>
+    </div>
+</div>
+{% include "ddosdb/footer.html" %}
+</body>
+</html>

@@ -1,0 +1,53 @@
+{% load static %}
+{% load get_item %}
+{% load multiply %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+{% include 'ddosdb/header.html' %}
+<body class="bg-light">
+{% include 'ddosdb/menu.html' %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-sm-12">
+            <h1 class="display-4 ddosdb-subtitle">Source IP comparison</h1>
+            {% if similarities.items|length == 0 %}
+                <div class="alert alert-danger">No fingerprints were selected for comparison</div>
+            {% else %}
+                <p class="lead">This table shows the similarity between two attack vectors as percentage and fraction.</p>
+                <table class="table">
+                    <tr>
+                        <td></td>
+                        {% for row_key, row_value in similarities.items %}
+                            <td class="font-italic align-bottom">
+                                <span style="writing-mode: vertical-lr; transform: rotate(180deg)">
+                                    <small>{{ items|get_item:row_key|get_item:"protocol" }}</small><br>
+                                    {{ row_key }}
+                                </span>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% for row_key, row_value in similarities.items %}
+                        <tr>
+                            <td class="font-italic text-right">
+                                {{ row_key }}<br>
+                                <small>{{ items|get_item:row_key|get_item:"protocol" }}</small>
+                            </td>
+                            {% for column_key, column_value in row_value.items %}
+                                <td class="text-center" style="background: rgba(52,58,64,{{ column_value.percentage }});
+                                        {% if column_value.percentage > 0.75 %}color: white;{% endif %}">
+                                    {{ column_value.percentage|multiply:100|floatformat }}%<br>
+                                    <small>{{ column_value.fraction }}</small>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% include "ddosdb/footer.html" %}
+</body>
+</html>

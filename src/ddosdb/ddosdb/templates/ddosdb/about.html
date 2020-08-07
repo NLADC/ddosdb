@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+{% include 'ddosdb/header.html' %}
+<body class="bg-light">
+{% include 'ddosdb/menu.html' %}
+<div class="jumbotron">
+    <div class="container">
+        <div class="text-left">
+            <h1 class="display-4">About</h1>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 col-md-7 col-lg-8 mt-sm-4">
+            <p class="lead">
+                DDoSDB is a platform for helping victims of DDoS attacks, the academic community,
+                and the security community to share and get access to actual and enriched information of DDoS attacks.
+                The purpose of sharing attacks is to enable comparison with other attacks, facilitate legal attribution,
+                and improve detection and mitigation strategies.
+            </p>
+            <p class="lead">
+                DDosDB provides an interface for searching unique characteristics of attacks (fingerprints) and
+                also provides a sample of its actual attack data (ex. pcap and nfdump file).
+                All data within DDoSDB come from collaborators that own attack data (usually collected as a victim).
+                We facilitate collaborators data sharing by providing an open source code that analyses an attack,
+                generates fingerprints, and anonymizes the identity of the victim (<a href="https://github.com/jjsantanna/ddosdb" target="_blank">link</a>).
+            </p>
+        </div>
+    </div>
+</div>
+
+{% include "ddosdb/footer.html" %}
+</body>
+</html>

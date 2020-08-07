@@ -1,0 +1,5 @@
+*.DS_Store
+
+# Ignore stored fingerprints
+*.json
+*.pcap

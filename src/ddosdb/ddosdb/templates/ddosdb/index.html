@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+{% include 'ddosdb/header.html' %}
+<body class="bg-light">
+{% include 'ddosdb/menu.html' %}
+<div class="jumbotron">
+    <div class="container py-md-4 py-sm-3">
+        <div class="pb-md-5 pb-sm-3 text-center">
+            <h2 class="display-4 ddosdb-title"><strong>Collecting</strong> and <strong>Sharing</strong> the most important information of <strong>DDoS attacks</strong></h2>
+        </div>
+
+        <div class="row">
+            <form class="col-md-12 input-group" method="get" action="{% url 'query' %}">
+                <input type="text" class="form-control border-secondary" id="query" name="q" value="" placeholder="Search" required>
+                <div class="input-group-append">
+                    <button type="submit" href="{% url "help" %}" class="btn btn-secondary">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-sm-12 col-md-5 col-lg-4">
+            <img src="{% static "ddosdb/img/illustration.svg" %}" class="img-fluid w-100 p-3">
+        </div>
+        <div class="col-sm-12 col-md-7 col-lg-8 mt-sm-4">
+            <h1 class="display-4 ddosdb-subtitle">What is DDoSDB?</h1>
+            <p class="lead">
+                DDoSDB is a platform for helping victims of DDoS attacks, the academic community,
+                and the security community to share and get access to actual and enriched information of DDoS attacks.
+                The purpose of sharing attacks is to enable comparison with other attacks,
+                facilitate legal attribution, and improve detection and mitigation strategies.
+            </p>
+            <p class="lead">
+                DDosDB provides an interface for searching unique characteristics of attacks (fingerprints) and
+                also provides a sample of its actual attack data (ex. pcap and nfdump file).
+                All data within DDoSDB come from collaborators that own attack data (usually collected as victim).
+                We facilitate collaborators data sharing by providing an open source code that analyses an attack,
+                generates fingerprints, and anonymizes the identity of the victim (<a href="https://github.com/jjsantanna/ddosdb" target="_blank">link</a>).
+            </p>
+        </div>
+    </div>
+</div>
+<div class="jumbotron bg-dark text-light text-center">
+    <div class="container my-5">
+        <h1 class="display-4 ddosdb-title">Search for attacks</h1>
+        <p class="lead">Take advantage of the best public DDoS attack database for improving your defence strategies.</p>
+        <a class="btn btn-lg btn-secondary" href="{% url "request-access" %}">Request access</a>
+    </div>
+</div>
+
+{% include "ddosdb/footer.html" %}
+</body>
+</html>

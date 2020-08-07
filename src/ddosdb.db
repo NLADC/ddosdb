@@ -1,4 +1,6 @@
 #!/bin/sh
+
+#curl -XDELETE "localhost:9200/ddosdb"
 curl -XPUT -H "Content-Type: application/json" "localhost:9200/ddosdb" --data '
 {
     "mappings": {
@@ -51,6 +53,9 @@ curl -XPUT -H "Content-Type: application/json" "localhost:9200/ddosdb" --data '
                     "type": "keyword"
                 },
                 "key": {
+                    "type": "keyword"
+                },
+                "multivector_key": {
                     "type": "keyword"
                 },
                 "protocol": {

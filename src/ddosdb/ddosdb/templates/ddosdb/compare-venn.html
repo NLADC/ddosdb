@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Compare venn</title>
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="{% static "ddosdb/js/venn.js" %}"></script>
+
+    <link rel="stylesheet" href="{% static "ddosdb/css/bootstrap.css" %}">
+</head>
+<body>
+<div id="venn" style="height: 100vh; width: 100vw;"></div>
+<script>
+    var chart = venn.VennDiagram();
+
+    var sets = [
+        {% for key, value in items.items %}
+            {sets: ['{{ key }}'], size: {{ value.src_ips|length }}},
+        {% endfor %}
+        {% for row_key, row_value in similarities.items %}
+            {% for column_key, column_value in row_value.items %}
+                {sets: ['{{ row_key }}', '{{ column_key }}'], size: {{ column_value }}},
+            {% endfor %}
+        {% endfor %}
+    ];
+
+    d3.select("#venn").datum(sets).call(chart);
+</script>
+</body>
+</html>

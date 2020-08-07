@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'ddosdb/header.html' %}
+<body class="bg-light">
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+{% include 'ddosdb/menu.html' %}
+<div class="jumbotron">
+    <div class="container">
+        <div class="text-left">
+            <h1 class="display-4">Request access</h1>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <form class="needs-validation" method="post" action="{% url "request-access" %}">
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% elif success %}
+                    <div class="alert alert-success">Access has been requested</div>
+                {% endif %}
+                {% csrf_token %}
+                <h4 class="mb-3">Request access</h4>
+                <p>
+                    In order to access the data stored in DDoSDB, you will need an account.
+                    All applications are manually reviewed, so it may take some time before access is granted.
+                    You will receive an email when that happens.
+                </p>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="firstName">First name</label>
+                        <input type="text" class="form-control" id="firstName" name="first-name" placeholder="" value="" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lastName">Last name</label>
+                        <input type="text" class="form-control" id="lastName" name="last-name" placeholder="" value="" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="institution">Institution</label>
+                    <input type="text" class="form-control" id="institution" name="institution" placeholder="" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="purpose">Purpose</label>
+                    <textarea class="form-control" id="purpose" name="purpose" required></textarea>
+                </div>
+
+                <div class="g-recaptcha mb-3" data-sitekey="6Ler-FoUAAAAAIaZp61kYEhlAw2ivmJ2CNmPN27r"></div>
+                <noscript>
+                    <div>
+                        <div style="width: 302px; height: 422px; position: relative;">
+                            <div style="width: 302px; height: 422px; position: absolute;">
+                                <iframe src="https://www.google.com/recaptcha/api/fallback?k=6Ler-FoUAAAAAIaZp61kYEhlAw2ivmJ2CNmPN27r" frameborder="0" scrolling="no" style="width: 302px; height:422px; border-style: none;">
+                                </iframe>
+                            </div>
+                        </div>
+                        <div style="width: 300px; height: 60px; border-style: none; bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px; background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                            <textarea id="g-recaptcha-response" name="g-recaptcha-response" class="g-recaptcha-response" style="width: 250px; height: 40px; border: 1px solid #c1c1c1; margin: 10px 25px; padding: 0px; resize: none;" ></textarea>
+                        </div>
+                    </div>
+                </noscript>
+
+                <button class="btn btn-dark btn-lg btn-block" type="submit">Request access</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% include "ddosdb/footer.html" %}
+
+</body>
+</html>

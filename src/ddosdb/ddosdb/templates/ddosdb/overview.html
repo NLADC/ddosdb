@@ -1,0 +1,72 @@
+{% load static %}
+{% load get_class %}
+{% load get_item %}
+{% load multiply %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+{% include 'ddosdb/header.html' %}
+<body class="bg-light">
+{% include 'ddosdb/menu.html' %}
+  {% if q != "" %}
+    <h1 align="center" class="display-4 ddosdb-subtitle">Overview of some fingerprints ({{ results|length }})</h1>
+  {% else %}
+    <h1 align="center" class="display-4 ddosdb-subtitle">Overview of all fingerprints ({{ results|length }})</h1>
+  {% endif %}
+<div>
+  <table class="table" id="overview-table">
+    <thead>
+      <tr>
+        {% for hdr,name in headers.items %}
+          <th nowrap="nowrap">
+            {% if hdr == o %}
+              <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ son }}&son={{ so }}">
+                <img width="16" height="16" src="{% static "ddosdb/img/" %}{{ so }}.png" alt="sort order is {{ so }}">
+            {% else %}
+              <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ so }}&son={{ son }}">
+                <img width="16" height="16" src="{% static "ddosdb/img/empty_sort.png" %}">
+            {% endif %}
+              {{ name }}
+              {% if hdr == "submitter" and q != "" %}
+                <a href="{% url "overview" %}?q=&o={{ o }}&so={{ so }}&son={{ son }}">
+                  <img width="16" height="16" src="{% static "ddosdb/img/clear.png" %}">
+                </a>
+              {% endif %}
+            </a>
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for node in results %}
+        <tr>
+          {% for hdr,name in headers.items %}
+          <td>
+            {% if hdr == "multivector_key" %}
+              <a target="blank" href="{% url "query" %}?q=multivector_key:{{ node|get_item:hdr|urlencode }}">
+                {{node|get_item:hdr}}
+              </a>
+            {% elif hdr == "key" %}
+              <a target="blank" href="{% url "query" %}?q=key:{{ node|get_item:hdr|urlencode }}">
+                {{node|get_item:hdr}}
+              </a>
+            {% elif hdr == "submitter" %}
+              <a href="{% url "overview" %}?q=submitter:{{ node|get_item:hdr|urlencode }}&o={{ o }}&so={{ so }}&son={{ son }}">
+                {{node|get_item:hdr}}
+              </a>
+            {% else %}
+              {{node|get_item:hdr}}
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="col-sm-12">
+  {% include "ddosdb/footer.html" %}
+</div>
+</body>
+</html>
