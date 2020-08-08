@@ -63,7 +63,7 @@ In the `website` directory, copy `settings_local_example.py` to `settings_local.
 
 Change to the `src/ddosdb` directory.
 
-Migrate django:
+Perform the Django migrations:
 
 ```
 python manage.py migrate
@@ -76,10 +76,14 @@ Create a superuser for your user management:
 python manage.py createsuperuser
 ```
 
-Run django:
+Run the Django development (SSL) server:
 
 ```
 python manage.py runsslserver
+```
+If you want to run the project without ssl support (most browsers will complain about the self-signed certificate), replace runsslserver with runserver:
+```
+python manage.py runserver
 ```
 
 Go to admin section of the website at [https://localhost:8000/admin](https://localhost:8000/admin) and log in using the credentials you created in the createsuperuser step.
