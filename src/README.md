@@ -1,6 +1,9 @@
 # DDoSDB website
 
-For production deployment see [deployment.md](https://github.com/ddos-clearing-house/ddosdb/blob/master/src/ddosdb/deployment.md)
+## Getting to know DDoSDB
+If you want to get familiar with the DDoSDB setup and the way it works, probably it is easier to start with [DDoSDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box): A Virtual Machine with an up and running DDoSDB instance to play with. 
+
+For a production deployment of DDoSDB, see [deployment.md](https://github.com/ddos-clearing-house/ddosdb/blob/master/src/ddosdb/deployment.md). This is slightly outdated, but can still be used as a general guide.
 ## DDoSDB components
 
 The heart of DDoSDB is a **Django** Webapp. **Elasticsearch** is used for storing the fingerprints, the raw .json files and the *pcap* samples are stored locally on disk.
@@ -55,7 +58,7 @@ When you have a functioning Python3, you can then install the required python pa
 ```bash
 pip install django-sslserver pandas nclib elasticsearch demjson requests psycopg2-binary
 ```
-Stricly speaking you don't need the last package (psycopg2-binary) - since it is for PostgreSQL support - but you might as well install it for when you want to use PostgreSQL in a production setting.
+Strictly speaking you don't need the last package (psycopg2-binary) - since it is for PostgreSQL support - but you might as well install it for when you want to use PostgreSQL in a production setting.
  
 In the `website` directory, copy `settings_local_example.py` to `settings_local.py` and make changes to `settings_local.py` if needed (but it probably isn't).
 
