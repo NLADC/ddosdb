@@ -55,7 +55,8 @@ When you have a functioning Python3, you can then install the required python pa
 ```bash
 pip install django-sslserver pandas nclib elasticsearch demjson requests psycopg2-binary
 ```
-
+Stricly speaking you don't need the last package (psycopg2-binary) - since it is for PostgreSQL support - but you might as well install it for when you want to use PostgreSQL in a production setting.
+ 
 In the `website` directory, copy `settings_local_example.py` to `settings_local.py` and make changes to `settings_local.py` if needed (but it probably isn't).
 
 ##### Prepare the Django project
