@@ -3,6 +3,8 @@
 {% load get_item %}
 {% load multiply %}
 {% load humanize %}
+{% load precision %}
+
 <!DOCTYPE html>
 <html lang="en">
 {% include 'ddosdb/header.html' %}
@@ -54,6 +56,14 @@
               <a href="{% url "overview" %}?q=submitter:{{ node|get_item:hdr|urlencode }}&o={{ o }}&so={{ so }}&son={{ son }}">
                 {{node|get_item:hdr}}
               </a>
+            {% elif hdr == "duration_sec" %}
+                {{node|get_item:hdr|precision:3}}
+            {% elif hdr == "avg_bps" %}
+                {{node|get_item:hdr|precision:0|intcomma}}
+            {% elif hdr == "avg_pps" %}
+                {{node|get_item:hdr|precision:0|intcomma}}
+            {% elif hdr == "total_packets" %}
+                {{node|get_item:hdr|precision:0|intcomma}}
             {% else %}
               {{node|get_item:hdr}}
             {% endif %}
