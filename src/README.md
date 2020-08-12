@@ -3,7 +3,7 @@
 ## Getting to know DDoSDB
 If you want to get familiar with the DDoSDB setup and the way it works, probably it is easier to start with [DDoSDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box): A Virtual Machine with an up and running DDoSDB instance to play with. 
 
-For a production deployment of DDoSDB, see [deployment.md](https://github.com/ddos-clearing-house/ddosdb/blob/master/src/ddosdb/deployment.md). This is slightly outdated, but can still be used as a general guide.
+For a production deployment of DDoSDB, see [deployment.md](https://github.com/ddos-clearing-house/ddosdb/blob/master/src/deployment.md). This is slightly outdated, but can still be used as a general guide.
 ## DDoSDB components
 
 The heart of DDoSDB is a **Django** Webapp. **Elasticsearch** is used for storing the fingerprints, the raw .json files and the *pcap* samples are stored locally on disk.
