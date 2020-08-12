@@ -1,21 +1,8 @@
 # Deploying DDoSDB for production
 
-- [Prerequisites](#prerequisites)
-- [Clone the repository](#clone-the-repository)
-- [Elasticsearch](#elasticsearch)
-    - [Create a ddosdb index](#create-a-ddosdb-index)
-- [PostgreSQL](#postgresql)
-- [Django and other modules](#django-and-other-modules)
-- [Apache2](#apache2)
-    - [Apache2 virtualhost](#apache2-virtualhost)
-- [Prepare the ddosdb project](#prepare-the-ddosdb-project)
-    - [Copy project to /opt/ddosdb](#copy-project-to-optddosdb)
-    - [Create local settings](#create-local-settings)
-    - [Do the Django migrations](#do-the-django-migrations)
-- [Restart Apache](#restart-apache)
 
 ##Prerequisites
-We assume (and this is tested on) a debian based setup, although probably any ubuntu based distro will do. 
+We assume (and this is tested on) a debian based setup, although probably any ubuntu based distro will do.
 We further assume a user called _ddosdb_ with sudo privileges.
 
 ##Clone the repository
@@ -49,7 +36,7 @@ sudo -u postgres createuser -P -s ddosdb
 ```
 ##Django and other modules
 ```bash
-sudo apt-get install python3 python3-pip libpq-dev 
+sudo apt-get install python3 python3-pip libpq-dev
 sudo pip3 install demjson nclib django-sslserver psycopg2 psycopg2-binary elasticsearch requests pandas
 ```
 
@@ -134,4 +121,3 @@ python3 /opt/ddosdb/manage.py createsuperuser
 ```bash
 sudo service apache2 restart
 ```
-
