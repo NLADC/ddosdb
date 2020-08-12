@@ -1,4 +1,4 @@
-#Deploying DDoSDB for production
+# Deploying DDoSDB for production
 
 - [Prerequisites](#prerequisites)
 - [Clone the repository](#clone-the-repository)
@@ -16,18 +16,18 @@
 
 
 
-##Prerequisites
+## Prerequisites
 
 We assume (and this is tested on) a debian based setup, although probably any ubuntu based distro will do.
 We further assume a user called _ddosdb_ with sudo privileges.
 
-##Clone the repository
+## Clone the repository
 
 ```bash
 cd ~
 git clone https://github.com/ddos-clearing-house/ddosdb
 ```
-##Elasticsearch
+## Elasticsearch
 ```bash
 sudo apt-get update
 sudo apt-get install -y default-jre-headless
@@ -38,12 +38,12 @@ sudo apt-get update && sudo apt-get install -y elasticsearch
 sudo -i service elasticsearch start
 sudo /bin/systemctl enable elasticsearch.service
 ```
-###Create a ddosdb index
+### Create a ddosdb index
 ```bash
 cd src
 sh ddosdb.db
 ```
-##postgreSQL
+## postgreSQL
 When asked for a password by one of the commands below, use `ddosdb` or change the line ` 'PASSWORD': 'ddosdb',` in `settings_local.py` later in the Create local settings step.
 ```bash
 # PostgreSQL:
@@ -51,13 +51,13 @@ sudo apt-get install -y postgresql postgresql-contrib
 sudo -u postgres createdb ddosdb
 sudo -u postgres createuser -P -s ddosdb
 ```
-##Django and other modules
+## Django and other modules
 ```bash
 sudo apt-get install python3 python3-pip libpq-dev
 sudo pip3 install demjson nclib django-sslserver psycopg2 psycopg2-binary elasticsearch requests pandas
 ```
 
-##Apache2
+## Apache2
 ```bash
 sudo apt-get install -y apache2 libapache2-mod-wsgi-py3 libapache2-mod-xsendfile
 sudo mkdir /opt/ddosdb-static
@@ -68,7 +68,7 @@ sudo chown -R ddosdb /opt/ddosdb-data
 sudo mkdir /opt/ddosdb
 sudo chown -R ddosdb /opt/ddosdb
 ```
-###Apache2 virtualhost
+### Apache2 virtualhost
 ```bash
 sudo bash -c "cat > /etc/apache2/sites-available/000-default.conf" << EOL
 <VirtualHost *:80>
@@ -93,9 +93,9 @@ WSGIScriptAlias / /opt/ddosdb/website/wsgi.py
 EOL
 ```
 
-##Prepare the ddosdb project
+## Prepare the ddosdb project
 
-###Copy project to /opt/ddosdb
+### Copy project to /opt/ddosdb
 
 ```bash
 cd /opt/ddosdb
@@ -128,13 +128,13 @@ DATABASES = {
 EOL
 ```
 
-###Do the Django migrations
+### Do the Django migrations
 ```bash
 python3 /opt/ddosdb/manage.py collectstatic
 python3 /opt/ddosdb/manage.py migrate
 python3 /opt/ddosdb/manage.py createsuperuser
 ```
-##Restart Apache
+## Restart Apache
 ```bash
 sudo service apache2 restart
 ```
