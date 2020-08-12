@@ -1,4 +1,18 @@
-# Deploying DDoSDB for production
+#Deploying DDoSDB for production
+
+- [Prerequisites](#prerequisites)
+- [Clone the repository](#clone-the-repository)
+- [Elasticsearch](#elasticsearch)
+    - [Create a ddosdb index](#create-a-ddosdb-index)
+- [PostgreSQL](#postgresql)
+- [Django and other modules](#django-and-other-modules)
+- [Apache2](#apache2)
+    - [Apache2 virtualhost](#apache2-virtualhost)
+- [Prepare the ddosdb project](#prepare-the-ddosdb-project)
+    - [Copy project to /opt/ddosdb](#copy-project-to-optddosdb)
+    - [Create local settings](#create-local-settings)
+    - [Do the Django migrations](#do-the-django-migrations)
+- [Restart Apache](#restart-apache)
 
 
 ##Prerequisites
@@ -6,6 +20,7 @@ We assume (and this is tested on) a debian based setup, although probably any ub
 We further assume a user called _ddosdb_ with sudo privileges.
 
 ##Clone the repository
+
 ```bash
 cd ~
 git clone https://github.com/ddos-clearing-house/ddosdb
