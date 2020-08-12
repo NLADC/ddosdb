@@ -1,36 +1,30 @@
-# Deploying DDoSDB website for production
+# Deploying DDoSDB for production
 
-This description *may* be a bit outdated, so don't expect it to work flawlessly. You can use it as a guide through the steps to get a more production ready version up and running.
+- [Prerequisites](#prerequisites)
+- [Clone the repository](#clone-the-repository)
+- [Elasticsearch](#elasticsearch)
+    - [Create a ddosdb index](#create-a-ddosdb-index)
+- [PostgreSQL](#postgresql)
+- [Django and other modules](#django-and-other-modules)
+- [Apache2](#apache2)
+    - [Apache2 virtualhost](#apache2-virtualhost)
+- [Prepare the ddosdb project](#prepare-the-ddosdb-project)
+    - [Copy project to /opt/ddosdb](#copy-project-to-optddosdb)
+    - [Create local settings](#create-local-settings)
+    - [Do the Django migrations](#do-the-django-migrations)
+- [Restart Apache](#restart-apache)
 
-* Install elasticsearch
-* Create a *ddosdb* index
-* Install and initialise PostgreSQL
-* Install python, Django and all other needed Python stuff
-* Install Apache
-	* Create directory structure for ddosdb for apache
-	* Add a virtualhost 
-* Prepare the ddosdb Django project for running
-	* Collect static files in right place for Apache to pick it up
-	* Migrate the django project
-	* Create a superuser for the ddosdb website
-* Start Apache
+##Prerequisites
+We assume (and this is tested on) a debian based setup, although probably any ubuntu based distro will do. 
+We further assume a user called _ddosdb_ with sudo privileges.
 
-
-
-## Components making up DDoSDB
-
-DDoSDB runs on a combination of Apache 2.4 with wsgi, Django 2.2, Elasticsearch and PostgreSQL. 
-The main entry point is the Apache server, which forwards the request to the Django server. 
-Elasticsearch manages the fingerprint querying, and PostgreSQL handles the authentication and logging.
-For the downloading of the fingerprints/attack vectors, X-Sendfile is used. X-Sendfile is an Apache mod 
-(though also available for Nginx) for serving static files. 
-This means that Django does not have to handle those files, which should save quite some CPU and memory.
-
-## Installation
-The following installation is based on a fresh copy of Ubuntu Server 18.04.
-
+##Clone the repository
 ```bash
-# Elasticsearch:
+cd ~
+git clone https://github.com/ddos-clearing-house/ddosdb
+```
+##Elasticsearch
+```bash
 sudo apt-get update
 sudo apt-get install -y default-jre-headless
 wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
@@ -39,110 +33,28 @@ echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee 
 sudo apt-get update && sudo apt-get install -y elasticsearch
 sudo -i service elasticsearch start
 sudo /bin/systemctl enable elasticsearch.service
-curl -XPUT "localhost:9200/ddosdb"
-curl -XPUT -H "Content-Type: application/json" "localhost:9200/ddosdb/_mappings" --data-binary @ << EOL
-{
-  "ddosdb" : {
-    "mappings" : {
-      "_doc" : {
-        "properties" : {
-          "additional" : {
-            "properties" : {
-              "dns_query" : {
-                "type" : "text",
-                "fields" : {
-                  "keyword" : {
-                    "type" : "keyword",
-                    "ignore_above" : 256
-                  }
-                }
-              },
-              "dns_type" : {
-                "type" : "integer"
-              },
-              "fragmentation" : {
-                "type" : "boolean"
-              },
-              "icmp_type" : {
-                "type" : "text",
-                "fields" : {
-                  "keyword" : {
-                    "type" : "keyword",
-                    "ignore_above" : 256
-                  }
-                }
-              },
-              "tcp_flag" : {
-                "type" : "text",
-                "fields" : {
-                  "keyword" : {
-                    "type" : "keyword",
-                    "ignore_above" : 256
-                  }
-                }
-              }
-            }
-          },
-          "dst_ports" : {
-            "type" : "integer"
-          },
-          "duration_sec" : {
-            "type" : "float"
-          },
-          "file_type" : {
-            "type" : "keyword"
-          },
-          "key" : {
-            "type" : "keyword"
-          },
-          "protocol" : {
-            "type" : "keyword"
-          },
-          "src_ips" : {
-            "properties" : {
-              "as" : {
-                "type" : "text"
-              },
-              "cc" : {
-                "type" : "text"
-              },
-              "ip" : {
-                "type" : "ip"
-              }
-            }
-          },
-          "src_ports" : {
-            "type" : "integer"
-          },
-          "start_time" : {
-            "type" : "text",
-            "fields" : {
-              "keyword" : {
-                "type" : "keyword",
-                "ignore_above" : 256
-              }
-            }
-          },
-          "start_timestamp" : {
-            "type" : "float"
-          }
-        }
-      }
-    }
-  }
-}
-EOL
-
+```
+###Create a ddosdb index
+```bash
+cd src
+sh ddosdb.db
+```
+##postgreSQL
+When asked for a password by one of the commands below, use `ddosdb` or change the line ` 'PASSWORD': 'ddosdb',` in `settings_local.py` later in the Create local settings step.
+```bash
 # PostgreSQL:
 sudo apt-get install -y postgresql postgresql-contrib
 sudo -u postgres createdb ddosdb
 sudo -u postgres createuser -P -s ddosdb
-
-# Django:
+```
+##Django and other modules
+```bash
 sudo apt-get install python3 python3-pip libpq-dev 
-sudo pip3 install demjson nclib django psycopg2 psycopg2-binary elasticsearch requests
+sudo pip3 install demjson nclib django-sslserver psycopg2 psycopg2-binary elasticsearch requests pandas
+```
 
-# Apache:
+##Apache2
+```bash
 sudo apt-get install -y apache2 libapache2-mod-wsgi-py3 libapache2-mod-xsendfile
 sudo mkdir /opt/ddosdb-static
 sudo chown -R ddosdb /opt/ddosdb-static
@@ -150,8 +62,10 @@ sudo mkdir /opt/ddosdb-data
 sudo chmod 777 /opt/ddosdb-data
 sudo chown -R ddosdb /opt/ddosdb-data
 sudo mkdir /opt/ddosdb
-sudo chown -R ddosdb /opt/ddosdb-static
-
+sudo chown -R ddosdb /opt/ddosdb
+```
+###Apache2 virtualhost
+```bash
 sudo bash -c "cat > /etc/apache2/sites-available/000-default.conf" << EOL
 <VirtualHost *:80>
 Alias /static /opt/ddosdb-static/
@@ -173,16 +87,51 @@ WSGIProcessGroup website
 WSGIScriptAlias / /opt/ddosdb/website/wsgi.py
 </VirtualHost>
 EOL
+```
 
-git clone https://github.com/Koenvh1/ddosdb-website.git /opt/ddosdb
+##Prepare the ddosdb project
 
-# In /opt/ddosdb/website/settings_local.example.py
-# Change ALLOWED_HOSTS, DATABASES, ACCESS_REQUEST_EMAIL, RAW_PATH, DEBUG
-# And rename the file to settings_local.py
+###Copy project to /opt/ddosdb
 
+```bash
+cd /opt/ddosdb
+cp -R /home/ddosdb/ddosdb/src/ddosdb/. .
+```
+### Create local settings
+```bash
+bash -c "cat > /opt/ddosdb/website/settings_local.py" << EOL
+# Which hosts are allowed to access the Web interface
+# ALLOWED_HOSTS = ['ddosdb.org', 'localhost', '127.0.0.1']
+# This allows all hosts to connect to the Web interface
+ALLOWED_HOSTS = ['*']
+
+# Raw path to fingerprint and attack vector data
+# pcap and json are stored here
+RAW_PATH = "/opt/ddosdb-data/"
+
+# Location where HTML are stored
+STATIC_ROOT = '/opt/ddosdb-static/'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ddosdb',
+        'USER': 'ddosdb',
+        'PASSWORD': 'ddosdb',
+        'HOST': 'localhost'
+    }
+}
+EOL
+```
+
+###Do the Django migrations
+```bash
 python3 /opt/ddosdb/manage.py collectstatic
 python3 /opt/ddosdb/manage.py migrate
 python3 /opt/ddosdb/manage.py createsuperuser
-
+```
+##Restart Apache
+```bash
 sudo service apache2 restart
 ```
+
