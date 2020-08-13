@@ -17,14 +17,24 @@ from website.settings_local import *
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
+# Used for the Django-debug-toolbar.
+# If you access this django from another computer
+# then add its IP address to this list to enable DDT to be shown
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
+]
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 
 # Application definition
 
+# Comment out the 'sslserver' line for production deployment
 INSTALLED_APPS = [
+    'sslserver',
+    'debug_toolbar',
     'ddosdb.apps.DdosdbConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,6 +47,7 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

@@ -103,7 +103,10 @@ cp -R /home/ddosdb/ddosdb/src/ddosdb/. .
 ```
 ### Create local settings
 ```bash
-bash -c "cat > /opt/ddosdb/website/settings_local.py" << EOL
+echo -n "SECRET_KEY = '" > /opt/ddosdb/website/settings_local.py
+python -c 'import random; print("".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]), end="")' >> /opt/ddosdb/website/settings_local.py
+echo "'" >> /opt/ddosdb/website/settings_local.py
+bash -c "cat >> /opt/ddosdb/website/settings_local.py" << EOL
 # Which hosts are allowed to access the Web interface
 # ALLOWED_HOSTS = ['ddosdb.org', 'localhost', '127.0.0.1']
 # This allows all hosts to connect to the Web interface
@@ -125,6 +128,9 @@ DATABASES = {
         'HOST': 'localhost'
     }
 }
+
+ELASTICSEARCH_HOSTS = ["127.0.0.1:9200"]
+
 EOL
 ```
 

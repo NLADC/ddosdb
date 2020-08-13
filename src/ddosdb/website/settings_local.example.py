@@ -6,10 +6,11 @@ SECRET_KEY = 'm^nfx&3zrbgx1(kuk@dd^4)9atr-^28t5rkyur#hev$&n+#1kn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# Which hosts are allowed
-ALLOWED_HOSTS = ['ddosdb.org', 'localhost', '127.0.0.1']
 
-ADMINS = [("Koen", "k.w.vanhove@student.utwente.nl")]
+# Which hosts are allowed
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+ADMINS = [("Your Name", "Your.Name@your.org")]
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
