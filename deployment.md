@@ -40,7 +40,7 @@ sudo /bin/systemctl enable elasticsearch.service
 ```
 ### Create a ddosdb index
 ```bash
-cd src
+cd housekeeping
 sh ddosdb.db
 ```
 ## postgreSQL
@@ -99,7 +99,7 @@ EOL
 
 ```bash
 cd /opt/ddosdb
-cp -R /home/ddosdb/ddosdb/src/ddosdb/. .
+cp -R /home/ddosdb/ddosdb/ddosdb/. .
 ```
 ### Create local settings
 ```bash
