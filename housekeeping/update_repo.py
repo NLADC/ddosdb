@@ -14,10 +14,10 @@ if len(sys.argv) < 2 :
     print ('Small utility to update a local git repo to the latest (remote) tag')
     print ('Does nothing if the remote repository has no tags\n')
     print ('Usage: ')
-    print (sys.argv[0], '<directory with local repo>' )
+    print (sys.argv[0], '<directory with local repo> [command after update] [cmd options]' )
     print ('\nExample:')
-    print (sys.argv[0], '/home/ddosdb/ddosdb' )
-    quit(1)
+    print (sys.argv[0], '/home/ddosdb/ddosdb cp -R /home/ddosdb/ddosdb/ddosdb/. /opt/ddosdb/' )
+    exit(1)
 
 LOCAL_DIR  = sys.argv[1]
 
@@ -95,5 +95,15 @@ if this_commit != latest_commit:
         ["git", "reset", "--hard", latest_commit],
         cwd = LOCAL_DIR,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    # Execute possible command specified
+    if len(sys.argv) > 1 :
+        print ("Command to execute after update: ", end="")
+        for arg in sys.argv[2:]:
+            print(arg+" ", end="")
+        print()
+        sp = subprocess.run(
+            sys.argv[2:])
+
 else:
     print("We are up to date")
