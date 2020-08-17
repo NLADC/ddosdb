@@ -1,0 +1,1 @@
+1 1 * * * /bin/bash /home/ddosdb/.ddosdb/ddosdb/housekeeping/check4update.sh > /home/ddosdb/.ddosdb/check4update.log 2>&1
