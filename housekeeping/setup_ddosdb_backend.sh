@@ -1,17 +1,19 @@
-# Installation process 
+# Installation process
 
 # basic setup
-su - 
-apt-get update
-apt-get install -y sudo git
-adduser ddosdb 
-echo "ddosdb     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-su - ddosdb
+#su -
+#apt-get update
+#apt-get install -y sudo git
+#adduser ddosdb
+#echo "ddosdb     ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+#su - ddosdb
 
 # download repo
-git clone https://github.com/ddos-clearing-house/ddosdb.git
+#mkdir .ddosdb
+#cd .ddosdb
+#git clone https://github.com/ddos-clearing-house/ddosdb
 
-# Elasticsearch: 
+# Elasticsearch:
 sudo apt-get install -y gnupg default-jre-headless
 wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
 sudo apt-get install -y apt-transport-https
@@ -25,7 +27,7 @@ until $(curl --output /dev/null --silent --head --fail http://localhost:9200); d
     sleep 5
 done
 # config database
-sh ddosdb/src/ddosdb.db
+sh ddosdb.db
 
 # PostgreSQL:
 sudo apt-get install -y postgresql postgresql-contrib
@@ -34,7 +36,7 @@ sudo -u postgres createuser -s ddosdb
 sudo -u postgres psql -c "alter user ddosdb with encrypted password 'ddosdb';"
 
 # Django:
-sudo apt-get install -y python3 python3-pip libpq-dev 
+sudo apt-get install -y python3 python3-pip libpq-dev
 sudo pip3 install demjson nclib django psycopg2 psycopg2-binary elasticsearch requests
 
 # Apache:
@@ -70,16 +72,13 @@ WSGIScriptAlias / /opt/ddosdb/website/wsgi.py
 EOL
 
 #sudo git clone https://github.com/Koenvh1/ddosdb-website.git /opt/ddosdb
-sudo apt-get install -y unzip
-cd ddosdb/src/
-sudo unzip backend_config.zip -d /opt/ddosdb
-sudo chown -R ddosdb /opt/ddosdb
-cd /opt/ddosdb
-mv backend_config/* .
-cd 
+#sudo apt-get install -y unzip
+#sudo chown -R ddosdb /opt/ddosdb
+#cd /opt/ddosdb
+cp -R ~/.ddosdb/ddosdb/ddosdb/. /opt/ddosdb/.
 
 # Edit /opt/ddosdb/website/settings.py
-sudo mv /opt/ddosdb/website/settings_local.example.py /opt/ddosdb/website/settings_local.py
+sudo cp /opt/ddosdb/website/settings_local.example.py /opt/ddosdb/website/settings_local.py
 sudo printf "\nSTATIC_ROOT = \"/opt/ddosdb-static/\"\n\n" >> /opt/ddosdb/website/settings_local.py
 sudo tee -a /opt/ddosdb/website/settings_local.py << EOL
 DATABASES = {
@@ -93,7 +92,7 @@ DATABASES = {
 }
 EOL
 
-sudo nano /opt/ddosdb/website/settings_local.py
+#sudo nano /opt/ddosdb/website/settings_local.py
 
 sudo python3 /opt/ddosdb/manage.py collectstatic
 sudo python3 /opt/ddosdb/manage.py migrate
