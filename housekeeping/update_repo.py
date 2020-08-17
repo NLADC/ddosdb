@@ -35,6 +35,7 @@ print("Checking updates for "+REMOTE_GIT)
 # git ls-remote --tags  https://github.com/ddos-clearing-house/ddosdb
 # lists the tags along with the commit hash (separated by a tab), e.g.
 # 04637330ce55843d8fe7dcc1db92578fb7effa04	refs/tags/v0.1.0
+# git log --pretty=oneline shows all commits 
 sp = subprocess.run(
     ["git", "ls-remote", "--tags", REMOTE_GIT],
     cwd = LOCAL_DIR,
