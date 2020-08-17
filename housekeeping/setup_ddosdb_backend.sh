@@ -37,7 +37,7 @@ sudo -u postgres psql -c "alter user ddosdb with encrypted password 'ddosdb';"
 
 # Django:
 sudo apt-get install -y python3 python3-pip libpq-dev
-sudo pip3 install demjson nclib django psycopg2 psycopg2-binary elasticsearch requests
+sudo pip3 install demjson nclib django psycopg2 psycopg2-binary elasticsearch requests pandas
 
 # Apache:
 sudo apt-get install -y apache2 libapache2-mod-wsgi-py3 libapache2-mod-xsendfile
