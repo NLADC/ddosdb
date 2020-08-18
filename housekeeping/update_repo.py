@@ -119,7 +119,7 @@ if this_commit != vdict[vlatest]:
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     # Execute possible command specified
-    if len(sys.argv) > 1 :
+    if len(sys.argv) > 2 :
         print ("Command to execute after update: ", end="")
         for arg in sys.argv[2:]:
             print(arg+" ", end="")
