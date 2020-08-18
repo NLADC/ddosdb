@@ -99,7 +99,7 @@ if this_commit != vdict[vlatest]:
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Now reset hard
     sp = subprocess.run(
-        ["git", "reset", "--hard", latest_commit],
+        ["git", "reset", "--hard", vdict[vlatest]],
         cwd = LOCAL_DIR,
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
