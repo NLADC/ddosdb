@@ -62,13 +62,28 @@ vlatest = "0.0.0"
 # so we can print what version we're on
 
 for tl in taglines:
+    # commit is the first bit (before the tab '\t')
     cmt = tl.split('\t')[0]
-    v = tl.split('\t')[1].split('/')[-1][1:]
-    vdict[v] = cmt
-    cdict[cmt] = v
-    vlist.append(v)
-    if semver.compare(v, vlatest) == 1:
-        vlatest = v
+    # tag is the last bit (from the last slash / to the end)
+    v = tl.split('\t')[1].split('/')[-1]
+    # if it doesn't start with a digit, assume it is vMajor.Minor.Patch
+    if not v[0].isdigit():
+        v = v[1:]
+    try:
+        version = semver.VersionInfo.parse(v)
+    except ValueError as ve:
+        print("Ignoring tag {} : {}".format(v, ve))
+    else:
+        vdict[v] = cmt
+        cdict[cmt] = v
+        vlist.append(v)
+        if semver.compare(v, vlatest) == 1:
+            vlatest = v
+
+if len(vdict) == 0:
+    # No tags. Nothing to be done then
+    print("No (valid) tags --> no updates needed")
+    exit(0)
 
 # By using semantic version comparison we should now have the latest version
 print("Latest version : {0} ({1})".format(vlatest, vdict[vlatest]))
