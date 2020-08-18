@@ -4,6 +4,10 @@ import os
 import subprocess
 import tempfile
 from datetime import datetime
+import semver
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 now = datetime.now()
 
@@ -35,7 +39,7 @@ print("Checking updates for "+REMOTE_GIT)
 # git ls-remote --tags  https://github.com/ddos-clearing-house/ddosdb
 # lists the tags along with the commit hash (separated by a tab), e.g.
 # 04637330ce55843d8fe7dcc1db92578fb7effa04	refs/tags/v0.1.0
-# git log --pretty=oneline shows all commits 
+# git log --pretty=oneline shows all commits
 sp = subprocess.run(
     ["git", "ls-remote", "--tags", REMOTE_GIT],
     cwd = LOCAL_DIR,
@@ -50,22 +54,24 @@ if len(taglines) < 2:
     print("No tags --> no updates needed")
     exit(0)
 
-tldict = {}
-
+vdict = {}
+cdict = {}
+vlist = []
+vlatest = "0.0.0"
 # Put (commit) and (tag) into a dictonary,
 # so we can print what version we're on
+
 for tl in taglines:
     cmt = tl.split('\t')[0]
-    v = tl.split('\t')[1].split('/')[-1]
-    tldict[cmt] = v
+    v = tl.split('\t')[1].split('/')[-1][1:]
+    vdict[v] = cmt
+    cdict[cmt] = v
+    vlist.append(v)
+    if semver.compare(v, vlatest) == 1:
+        vlatest = v
 
-# Assuming that the last line is the most recent tag...
-tagline_newest = sp.stdout.decode("utf-8")[:-1].split('\n')[-1]
-
-latest_commit  = tagline_newest.split('\t')[0]
-latest_version = tagline_newest.split('\t')[1].split('/')[-1]
-
-print("Latest version : {0} ({1})".format(latest_version, latest_commit))
+# By using semantic version comparison we should now have the latest version
+print("Latest version : {0} ({1})".format(vlatest, vdict[vlatest]))
 
 # git show -s --format=%H
 # Shows the local commit hash
@@ -76,12 +82,12 @@ sp = subprocess.run(
 
 this_commit  = sp.stdout.decode("utf-8")[:-1]
 
-if (this_commit in tldict):
-    print ("This instance  : {0} ({1})".format(tldict[this_commit], this_commit))
+if (this_commit in cdict):
+    print ("This instance  : {0} ({1})".format(cdict[this_commit], this_commit))
 else:
     print("This instance  : <Unknown>")
 
-if this_commit != latest_commit:
+if this_commit != vdict[vlatest]:
     print("Updating to " + latest_version)
     # Do an update 'git pull origin master'
     # then a hard reset to the right commit
