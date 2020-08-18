@@ -88,7 +88,7 @@ else:
     print("This instance  : <Unknown>")
 
 if this_commit != vdict[vlatest]:
-    print("Updating to " + latest_version)
+    print("Updating to " + vlatest)
     # Do an update 'git pull origin master'
     # then a hard reset to the right commit
     # of the latest tag
