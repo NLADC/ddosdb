@@ -49,7 +49,7 @@ sp = subprocess.run(
 # but ignore the trailing \n of the last line to start with
 taglines = sp.stdout.decode("utf-8")[:-1].split('\n')
 
-if len(taglines) < 2:
+if len(taglines) < 1:
     # No tags. Nothing to be done then
     print("No tags --> no updates needed")
     exit(0)
