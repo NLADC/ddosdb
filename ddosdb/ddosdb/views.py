@@ -204,9 +204,9 @@ def query(request):
                 # Remove the start_timestamp attribute (if it exists)
                 x.pop("start_timestamp", None)
 
-                for y in x["src_ips"]:
-                    y.pop("as", None)
-                    y.pop("cc", None)
+#                for y in x["src_ips"]:
+#                    y.pop("as", None)
+#                    y.pop("cc", None)
 
 
                 return x
@@ -318,14 +318,26 @@ def upload_file(request):
         if "key" not in data:
             data["key"] = filename
 
-        data["dst_ports"] = [x for x in data["dst_ports"] if not math.isnan(x)]
-        data["src_ports"] = [x for x in data["src_ports"] if not math.isnan(x)]
+        if "dst_ports" in data:
+            data["dst_ports"] = [x for x in data["dst_ports"] if not math.isnan(x)]
+        if "src_ports" in data:
+            data["src_ports"] = [x for x in data["src_ports"] if not math.isnan(x)]
 
-        data["src_ips_size"] = len(data["src_ips"])
+        if "src_ips" in data:
+            data["src_ips_size"] = len(data["src_ips"])
+#        else:
+#            if "amplifiers" in data:
+#                data["src_ips"]      = data["amplifiers"]
+#                data["src_ips_size"] = len(data["src_ips"])
+#            else:
+#                data["src_ips"]      = []
+#                data["src_ips_size"] = 0
+
 
         # Bear in mind that the data format may change. Hence the order of these steps is important.
         # Enrich with ASN
-        data = (TeamCymru(data)).parse()
+        # data = (TeamCymru(data)).parse()
+        print("Enrichment with AS # disabled")
         # Enrich with something
         # data = (Something(data)).parse()
 

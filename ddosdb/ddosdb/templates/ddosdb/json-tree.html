@@ -3,18 +3,20 @@
  {% if node|get_class == "dict" %}
     {
     <div class="json-block-indent">
-        {% for key, node in node.items %}
+        {% for key, value in node.items %}
           {% if key != "comment" %}
-            {% if node|get_class == "str" %}
-                <strong>{{ key }}</strong>: <span class="json-block-str">"{{ node }}"</span><br>
-            {% elif node|get_class == "int" or node|get_class == "float" %}
-                <strong>{{ key }}</strong>: <span class="json-block-int">{{ node }}</span><br>
-            {% elif node|get_class == "bool" %}
-                <strong>{{ key }}</strong>: <span class="json-block-bool">{{ node }}</span><br>
-            {% elif node|get_class == "list" %}
-                <strong>{{ key }}</strong>: {%include "ddosdb/json-tree.html" %}<br>
-            {% elif node|get_class == "dict" %}
-                <strong>{{ key }}</strong>: {%include "ddosdb/json-tree.html" %}<br>
+            {% if value|get_class == "str" %}
+                <strong>{{ key }}</strong>: <span class="json-block-str">"{{ value }}"</span><br>
+            {% elif value|get_class == "int" or value|get_class == "float" %}
+                <strong>{{ key }}</strong>: <span class="json-block-int">{{ value }}</span><br>
+            {% elif value|get_class == "bool" %}
+                <strong>{{ key }}</strong>: <span class="json-block-bool">{{ value }}</span><br>
+            {% elif value|get_class == "list" %}
+                <strong>{{ key }}</strong>: {%include "ddosdb/json-tree.html" with node=value %}<br>
+            {% elif value|get_class == "dict" %}
+                <strong>{{ key }}</strong>: {%include "ddosdb/json-tree.html" with node=value %}<br>
+            {% else %}
+              <strong>{{ key }}</strong>: <span class="json-block-bool">{{ value }}</span><br>
             {% endif %}
           {% endif %}
         {% endfor %}
@@ -23,17 +25,17 @@
  {% elif node|get_class == "list" %}
     [
     <div class="json-block-indent">
-        {% for node in node|slice:":10" %}
-            {% if node|get_class == "str" %}
-                <span class="json-block-str">"{{ node }}"</span><br>
-            {% elif node|get_class == "int" or node|get_class == "float" %}
-                <span class="json-block-int">{{ node }}</span><br>
-            {% elif node|get_class == "bool" %}
-                <span class="json-block-bool">{{ node }}</span><br>
-            {% elif node|get_class == "list" %}
-                {%include "ddosdb/json-tree.html" %}<br>
-            {% elif node|get_class == "dict" %}
-                {%include "ddosdb/json-tree.html" %}<br>
+        {% for value in node|slice:":10" %}
+            {% if value|get_class == "str" %}
+                <span class="json-block-str">"{{ value }}"</span><br>
+            {% elif value|get_class == "int" or value|get_class == "float" %}
+                <span class="json-block-int">{{ value }}</span><br>
+            {% elif value|get_class == "bool" %}
+                <span class="json-block-bool">{{ value }}</span><br>
+            {% elif value|get_class == "list" %}
+                {%include "ddosdb/json-tree.html" with node=value %}<br>
+            {% elif value|get_class == "dict" %}
+                {%include "ddosdb/json-tree.html" with node=value %}<br>
             {% endif %}
         {% endfor %}
         {% if node|length > 10 %}
