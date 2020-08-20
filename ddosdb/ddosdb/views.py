@@ -325,6 +325,11 @@ def upload_file(request):
 
         if "src_ips" in data:
             data["src_ips_size"] = len(data["src_ips"])
+
+        # add username of submitter as well.
+        # Probably best to have an optional separate field for contact information
+        data["submitter"] = username
+
 #        else:
 #            if "amplifiers" in data:
 #                data["src_ips"]      = data["amplifiers"]
