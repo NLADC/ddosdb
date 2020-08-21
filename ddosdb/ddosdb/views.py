@@ -290,7 +290,14 @@ def attack_trace(request, key):
 
 @csrf_exempt
 def upload_file(request):
+
     if request.method == "POST":
+        if not all (k in request.META for k in ("HTTP_X_USERNAME","HTTP_X_PASSWORD")):
+            response = HttpResponse()
+            response.status_code = 401
+            response.reason_phrase = "Invalid credentials or no permission"
+            return response
+
         username = request.META["HTTP_X_USERNAME"]
         password = request.META["HTTP_X_PASSWORD"]
         filename = request.META["HTTP_X_FILENAME"]
@@ -478,6 +485,13 @@ def overview(request):
 def my_permissions(request):
 
     if request.method == "GET":
+
+        if not all (k in request.META for k in ("HTTP_X_USERNAME","HTTP_X_PASSWORD")):
+            response = HttpResponse()
+            response.status_code = 401
+            response.reason_phrase = "Invalid credentials or no permission"
+            return response
+
         username = request.META["HTTP_X_USERNAME"]
         password = request.META["HTTP_X_PASSWORD"]
 
