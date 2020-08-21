@@ -45,11 +45,11 @@
           {% for hdr,name in headers.items %}
           <td>
             {% if hdr == "multivector_key" %}
-              <a target="blank" href="{% url "query" %}?q=multivector_key:{{ node|get_item:hdr|urlencode }}">
+              <a target="_blank" href="{% url "query" %}?q=multivector_key:{{ node|get_item:hdr|urlencode }}">
                 {{node|get_item:hdr}}
               </a>
             {% elif hdr == "key" %}
-              <a target="blank" href="{% url "query" %}?q=key:{{ node|get_item:hdr|urlencode }}">
+              <a target="_blank" href="{% url "query" %}?q=key:{{ node|get_item:hdr|urlencode }}">
                 {{node|get_item:hdr}}
               </a>
             {% elif hdr == "submitter" %}

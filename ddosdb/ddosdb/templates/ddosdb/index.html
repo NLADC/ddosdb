@@ -10,13 +10,22 @@
             <h2 class="display-4 ddosdb-title"><strong>Collecting</strong> and <strong>Sharing</strong> the most important information of <strong>DDoS attacks</strong></h2>
         </div>
 
-        <div class="row">
+        <div class="container my-5" align="center">
+            <a class="btn btn-lg btn-secondary" target="_blank" href="{% url "overview" %}">Overview</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            OR
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <a class="btn btn-lg btn-secondary" target="_blank" href="{% url "query" %}?q=*">Search</a>
+        </div>
+
+          {% comment %}
             <form class="col-md-12 input-group" method="get" action="{% url 'query' %}">
                 <input type="text" class="form-control border-secondary" id="query" name="q" value="" placeholder="Search" required>
                 <div class="input-group-append">
                     <button type="submit" href="{% url "help" %}" class="btn btn-secondary">Search</button>
                 </div>
             </form>
+          {% endcomment %}
         </div>
     </div>
 </div>

@@ -397,6 +397,8 @@ def upload_file(request):
         return response
 
 
+
+
 @login_required()
 def overview(request):
 
@@ -407,7 +409,7 @@ def overview(request):
         "results": [],
         "q": "",
         "p": 1,
-        "o": "multivector_key",
+        "o": "key",
         "so": "asc",
         "son": "desc",
         "error": "",
@@ -427,7 +429,7 @@ def overview(request):
         #offset = 10 * (context["p"] - 1)
         es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
         context["headers"] = {
-            "multivector_key"   : "multivector",
+#            "multivector_key"   : "multivector",
             "key"               : "key",
             "duration_sec"      : "duration (seconds)",
             "total_packets"     : "# packets",
