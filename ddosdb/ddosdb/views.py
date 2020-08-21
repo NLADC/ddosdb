@@ -483,13 +483,19 @@ def my_permissions(request):
 
         user = authenticate(request, username=username, password=password)
 
-        print("user:{} ".format(user))
+        if user is None:
+            response = HttpResponse()
+            response.status_code = 401
+            response.reason_phrase = "Invalid credentials or no permission"
+            return response
 
         user_perms = user.get_user_permissions()
         group_perms = user.get_group_permissions()
 
+        # make a combined set (a set cannot contain duplicates)
         permissions = user_perms | group_perms
-        print(permissions)
+
+        # Now filter out everything but the ddosdb.* permissions
         ddosdb_permissions = []
         for p in permissions:
             if p.startswith("ddosdb."):
