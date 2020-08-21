@@ -19,6 +19,7 @@ from django.core.validators import validate_email
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import RequestError, NotFoundError
 
@@ -468,3 +469,30 @@ def overview(request):
         context["error"] = "Invalid query: " + str(e)
 
     return HttpResponse(render(request, "ddosdb/overview.html", context))
+
+
+# Authenticate the user, then return a list of permissions
+# Or an error if the user cannot be authenticated of course
+
+#@login_required()
+def my_permissions(request):
+
+    if request.method == "GET":
+        username = request.META["HTTP_X_USERNAME"]
+        password = request.META["HTTP_X_PASSWORD"]
+
+        user = authenticate(request, username=username, password=password)
+
+        print("user:{} ".format(user))
+
+        user_perms = user.get_user_permissions()
+        group_perms = user.get_group_permissions()
+
+        permissions = user_perms | group_perms
+        print(permissions)
+        ddosdb_permissions = []
+        for p in permissions:
+            if p.startswith("ddosdb."):
+                ddosdb_permissions.append(p)
+
+        return JsonResponse({str(user) : ddosdb_permissions}, safe=False)

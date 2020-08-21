@@ -17,4 +17,5 @@ urlpatterns = [
     path('attack-trace/<key>', views.attack_trace, name='attack-trace'),
     path('upload-file', views.upload_file, name='upload-file'),
     path('overview', views.overview, name='overview'),
+    path('my-permissions', views.my_permissions, name='my-permissions'),
 ]
