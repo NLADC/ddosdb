@@ -292,7 +292,7 @@ def attack_trace(request, key):
 def upload_file(request):
 
     if request.method == "POST":
-        if not all (k in request.META for k in ("HTTP_X_USERNAME","HTTP_X_PASSWORD")):
+        if not all (k in request.META for k in ("HTTP_X_USERNAME","HTTP_X_PASSWORD","HTTP_X_FILENAME")):
             response = HttpResponse()
             response.status_code = 401
             response.reason_phrase = "Invalid credentials or no permission"
