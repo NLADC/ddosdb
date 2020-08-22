@@ -4,6 +4,7 @@ import time
 from smtplib import SMTPException
 import demjson
 import requests
+from datetime import datetime
 
 import pprint
 import pandas as pd
@@ -331,12 +332,23 @@ def upload_file(request):
         if "src_ports" in data:
             data["src_ports"] = [x for x in data["src_ports"] if not math.isnan(x)]
 
+        # Enrich it all a bit
         if "src_ips" in data:
             data["src_ips_size"] = len(data["src_ips"])
+
+        if "amplifiers" in data:
+            data["amplifiers_size"] = len(data["amplifiers"])
+
+        data["comment"] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
         # add username of submitter as well.
         # Probably best to have an optional separate field for contact information
         data["submitter"] = username
+
+        # Add the timestamp it was submitted as well.
+        # Usefull for ordering in overview page.
+
+        data["submit_timestamp"] = datetime.utcnow()
 
 #        else:
 #            if "amplifiers" in data:
@@ -363,6 +375,7 @@ def upload_file(request):
         try:
             es.delete(index="ddosdb", doc_type="_doc", id=filename, request_timeout=500)
         except NotFoundError:
+            print("NotFoundError for {}".format(filename))
             pass
         except:
             print("Could not setup a connection to Elasticsearch")
@@ -404,6 +417,14 @@ def overview(request):
 
     pp = pprint.PrettyPrinter(indent=4)
 
+    user: User = request.user
+    context = {
+        "user": user,
+        "permissions": user.get_all_permissions(),
+        "success": "",
+        "error": ""
+    }
+
     start = time.time()
     context = {
         "results": [],
@@ -431,12 +452,16 @@ def overview(request):
         context["headers"] = {
 #            "multivector_key"   : "multivector",
             "key"               : "key",
+            "start_time"        : "start time",
             "duration_sec"      : "duration (seconds)",
-            "total_packets"     : "# packets",
+#            "total_packets"     : "# packets",
+            "amplifiers_size"    : "IP's involved",
             "avg_bps"           : "bits/second",
             "avg_pps"           : "packets/second",
             "total_dst_ports"   : "# ports",
+            "submit_timestamp"  : "submitted at",
             "submitter"         : "submitted by",
+            "comment"           : "comment",
         }
         source = ','.join(list(context["headers"].keys()))
 

@@ -4,6 +4,7 @@
 {% load multiply %}
 {% load humanize %}
 {% load precision %}
+{% load str_todatetime %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,20 +22,23 @@
       <tr>
         {% for hdr,name in headers.items %}
           <th nowrap="nowrap">
-            {% if hdr == o %}
-              <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ son }}&son={{ so }}">
-                <img width="16" height="16" src="{% static "ddosdb/img/" %}{{ so }}.png" alt="sort order is {{ so }}">
-            {% else %}
-              <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ so }}&son={{ son }}">
-                <img width="16" height="16" src="{% static "ddosdb/img/empty_sort.png" %}">
-            {% endif %}
+          {% if hdr == o %}
+            <div title="change to {{ son }} sort order">
+            <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ son }}&son={{ so }}">
+              <img width="16" height="16" src="{% static "ddosdb/img/" %}{{ so }}.png" alt="sort order is {{ so }}">
+          {% else %}
+            <div title="order by '{{name}}' ({{ so }})">
+            <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ so }}&son={{ son }}">
+              <img width="16" height="16" src="{% static "ddosdb/img/empty_sort.png" %}">
+          {% endif %}
               {{ name }}
-              {% if hdr == "submitter" and q != "" %}
-                <a href="{% url "overview" %}?q=&o={{ o }}&so={{ so }}&son={{ son }}">
-                  <img width="16" height="16" src="{% static "ddosdb/img/clear.png" %}">
-                </a>
-              {% endif %}
             </a>
+          {% if hdr == "submitter" and q != "" %}
+            <a href="{% url "overview" %}?q=&o={{ o }}&so={{ so }}&son={{ son }}">
+              <img width="16" height="16" src="{% static "ddosdb/img/clear.png" %}">
+            </a>
+          {% endif %}
+        </div>
           </th>
         {% endfor %}
       </tr>
@@ -49,13 +53,17 @@
                 {{node|get_item:hdr}}
               </a>
             {% elif hdr == "key" %}
-              <a target="_blank" href="{% url "query" %}?q=key:{{ node|get_item:hdr|urlencode }}">
-                {{node|get_item:hdr}}
-              </a>
+              <div title="open detailed view in a new tab">
+                <a target="_blank" href="{% url "query" %}?q=key:{{ node|get_item:hdr|urlencode }}">
+                  {{node|get_item:hdr}}
+                </a>
+              </div>
             {% elif hdr == "submitter" %}
-              <a href="{% url "overview" %}?q=submitter:{{ node|get_item:hdr|urlencode }}&o={{ o }}&so={{ so }}&son={{ son }}">
-                {{node|get_item:hdr}}
-              </a>
+              <div title="click to show only fingerprints submitted by user '{{node|get_item:hdr}}'">
+                <a href="{% url "overview" %}?q=submitter:{{ node|get_item:hdr|urlencode }}&o={{ o }}&so={{ so }}&son={{ son }}">
+                  {{node|get_item:hdr}}
+                </a>
+              </div>
             {% elif hdr == "duration_sec" %}
                 {{node|get_item:hdr|precision:3}}
             {% elif hdr == "avg_bps" %}
@@ -64,6 +72,21 @@
                 {{node|get_item:hdr|precision:0|intcomma}}
             {% elif hdr == "total_packets" %}
                 {{node|get_item:hdr|precision:0|intcomma}}
+            {% elif hdr == "submit_timestamp" %}
+                {{node|get_item:hdr|str_todatetime|date:'Y-m-d H:i:s'}}
+            {% elif hdr == "comment" %}
+              <div title="{{node|get_item:hdr}}">
+                {{node|get_item:hdr|truncatechars:10}}
+                {% if user.is_authenticated %}
+                  {% if user.username == node|get_item:"submitter"  or user.is_superuser %}
+                  <span style="float:right;">
+                    &nbsp;(<a href="{% url "overview" %}">
+                      <img width="16" height="16" src="{% static "ddosdb/img/pencil.png" %}">
+                    </a>)
+                  </span>
+                  {% endif %}
+                {% endif %}
+              </div>
             {% else %}
               {{node|get_item:hdr}}
             {% endif %}
