@@ -321,9 +321,7 @@ def upload_file(request):
 
         # JSON enrichment
         json_content = request.FILES["json"].read()
-        print(json_content)
         data = demjson.decode(json_content)
-
         # Add key if not exists
         if "key" not in data:
             data["key"] = filename
@@ -367,6 +365,7 @@ def upload_file(request):
         print("Enrichment with AS # disabled")
         # Enrich with something
         # data = (Something(data)).parse()
+
 
         # JSON upload
         demjson.encode_to_file(settings.RAW_PATH + filename + ".json", data)
