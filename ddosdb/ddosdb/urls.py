@@ -18,4 +18,5 @@ urlpatterns = [
     path('upload-file', views.upload_file, name='upload-file'),
     path('overview', views.overview, name='overview'),
     path('my-permissions', views.my_permissions, name='my-permissions'),
+    path('edit-comment', views.edit_comment, name='edit-comment'),
 ]

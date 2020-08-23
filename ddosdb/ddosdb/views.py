@@ -5,6 +5,7 @@ from smtplib import SMTPException
 import demjson
 import requests
 from datetime import datetime
+from urllib.parse import urlencode
 
 import pprint
 import pandas as pd
@@ -18,7 +19,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from elasticsearch import Elasticsearch
@@ -320,7 +321,7 @@ def upload_file(request):
 
         # JSON enrichment
         json_content = request.FILES["json"].read()
-
+        print(json_content)
         data = demjson.decode(json_content)
 
         # Add key if not exists
@@ -339,7 +340,8 @@ def upload_file(request):
         if "amplifiers" in data:
             data["amplifiers_size"] = len(data["amplifiers"])
 
-        data["comment"] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+#        data["comment"] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        data["comment"] = ""
 
         # add username of submitter as well.
         # Probably best to have an optional separate field for contact information
@@ -418,15 +420,11 @@ def overview(request):
     pp = pprint.PrettyPrinter(indent=4)
 
     user: User = request.user
-    context = {
-        "user": user,
-        "permissions": user.get_all_permissions(),
-        "success": "",
-        "error": ""
-    }
 
     start = time.time()
     context = {
+        "user": user,
+        "permissions": user.get_all_permissions(),
         "results": [],
         "q": "",
         "p": 1,
@@ -476,7 +474,7 @@ def overview(request):
 
         results = [x["_source"] for x in response["hits"]["hits"]]
 
-#        print(results)
+#        pp.pprint(results)
         # Only do this if there are actual results...
         # and more than one, since one result does not need sorting
         if len(results) > 1 :
@@ -543,3 +541,73 @@ def my_permissions(request):
                 ddosdb_permissions.append(p)
 
         return JsonResponse({str(user) : ddosdb_permissions}, safe=False)
+
+
+@login_required()
+def edit_comment(request):
+
+    pp = pprint.PrettyPrinter(indent=4)
+
+    user: User = request.user
+    context = {
+        "user": user,
+        "permissions": user.get_all_permissions(),
+    }
+    user_perms = user.get_user_permissions()
+    group_perms = user.get_group_permissions()
+
+    # make a combined set (a set cannot contain duplicates)
+    permissions = user_perms | group_perms
+
+    key = ""
+
+
+    if request.method == "GET":
+        # Get the key from the request.
+        if "key" in request.GET:
+            key = request.GET["key"]
+            context["key"] = key
+        else:
+            return redirect('overview')
+
+        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        try:
+            fp = es.search(index="ddosdb", q="key:{}".format(key), size=1)
+        except:
+            print("Could not setup a connection to Elasticsearch")
+            response = HttpResponse()
+            response.status_code = 503
+            response.reason_phrase = "Database unavailable"
+            return response
+
+        results = fp["hits"]["hits"][0]["_source"]
+        context["node"] = results
+        return HttpResponse(render(request, "ddosdb/edit-comment.html", context))
+
+    elif request.method == "POST":
+        key = request.POST["key"]
+
+        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        try:
+            result = es.search(index="ddosdb", q="key:{}".format(key), size=1)
+            fp = result["hits"]["hits"][0]["_source"]
+            fp["comment"] = request.POST["comment"]
+            es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
+        except NotFoundError:
+            print("NotFoundError for {}".format(key))
+            pass
+        except:
+            print("Could not setup a connection to Elasticsearch")
+            response = HttpResponse()
+            response.status_code = 503
+            response.reason_phrase = "Database unavailable"
+            return response
+
+        es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
+
+#        base_url = reverse('edit-comment')
+#        query_string =  urlencode({'key': key})
+#        url = '{}?{}'.format(base_url, query_string)
+#        return redirect(url)
+        time.sleep(1)
+        return redirect("overview")

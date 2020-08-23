@@ -1,0 +1,57 @@
+{% load static %}
+{% load get_class %}
+{% load multiply %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+{% include "ddosdb/header.html" %}
+<body class="bg-light">
+<div class="pb-3 box-shadow pt-3 border-bottom bg-white">
+    <div class="container d-flex flex-column flex-md-row align-items-center">
+        <a class="mr-md-auto" href="{% url "index" %}">
+            <img style="height: 40px" src="{% static "ddosdb/img/logo-new.svg" %}">
+        </a>
+        <nav class="ml-md-auto my-2 my-md-0 mr-md-3 d-block text-nowrap">
+            <a class="p-2 text-dark" href="{% url "account" %}">Account</a>
+            <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <form action="{% url "edit-comment" %}" method="post">
+      {% csrf_token %}
+        <div class="row" id="results">
+            <div class="col-lg-6 col-md-12 my-2">
+                <div class="card">
+                    <div class="card-footer">
+                      <i>Comment for fingerprint {{ key }}</i><br/><br/>
+                      <input id="key" name="key" type="hidden" value="{{ key }}">
+                      <textarea autofocus name="comment" cols="50" rows="10" style="resize:none;border:none">{% if node.comment %}{{ node.comment }}{% endif %}</textarea>
+                      <button type="submit" class="btn btn-dark btn-sm">Add Comment</button>
+                    </div>
+                    <div class="card-footer" id="result-0">
+                        {% include "ddosdb/json-tree.html" %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row mt-1">
+        <div class="col-12">
+            {% if p > 1 %}
+                <a class="btn btn-dark" href="{% url "query" %}?q={{ q|urlencode }}&p={{ p|add:-1 }}">Previous page</a>
+            {% endif %}
+            {% if p|multiply:10 < amount %}
+                <a class="btn btn-dark" href="{% url "query" %}?q={{ q|urlencode }}&p={{ p|add:1 }}">Next page</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <small class="text-muted text-right">Found {{ amount|intword }} results in {{ time }} seconds</small>
+        </div>
+    </div>
+</div>
+{% include "ddosdb/footer.html" %}
+</body>
+</html>
