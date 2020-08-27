@@ -332,11 +332,19 @@ def upload_file(request):
             data["src_ports"] = [x for x in data["src_ports"] if not math.isnan(x)]
 
         # Enrich it all a bit
+        data["amplifiers_size"] = 0
+        data["attackers_size"] = 0
+
         if "src_ips" in data:
             data["src_ips_size"] = len(data["src_ips"])
 
         if "amplifiers" in data:
             data["amplifiers_size"] = len(data["amplifiers"])
+
+        if "attackers" in data:
+            data["attackers_size"] = len(data["attackers"])
+
+        data["ips_involved"] = data["amplifiers_size"] + data["attackers_size"]
 
 #        data["comment"] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
         data["comment"] = ""
@@ -452,7 +460,8 @@ def overview(request):
             "start_time"        : "start time",
             "duration_sec"      : "duration (seconds)",
 #            "total_packets"     : "# packets",
-            "amplifiers_size"    : "IP's involved",
+#            "amplifiers_size"    : "IP's involved",
+            "ips_involved"      : "IP's involved",
             "avg_bps"           : "bits/second",
             "avg_pps"           : "packets/second",
             "total_dst_ports"   : "# ports",
