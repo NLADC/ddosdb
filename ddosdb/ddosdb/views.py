@@ -384,7 +384,6 @@ def upload_file(request):
         try:
             es.delete(index="ddosdb", doc_type="_doc", id=filename, request_timeout=500)
         except NotFoundError:
-            print("NotFoundError for {}".format(filename))
             pass
         except:
             print("Could not setup a connection to Elasticsearch")
@@ -393,7 +392,13 @@ def upload_file(request):
             response.reason_phrase = "Database unavailable"
             return response
 
-        es.index(index="ddosdb", doc_type="_doc", id=filename, body=data, request_timeout=500)
+        try:
+            es.index(index="ddosdb", doc_type="_doc", id=filename, body=data, request_timeout=500)
+        except RequestError as e:
+            response = HttpResponse()
+            response.status_code = 400
+            response.reason_phrase = str(e)
+            return response
 
         # PCAP upload
         pcap_fp = open(settings.RAW_PATH + filename + ".pcap", "wb+")
