@@ -477,11 +477,13 @@ def overview(request):
         source = ','.join(list(context["headers"].keys()))
 
         q = "*"
-        if (context["q"]
-        ):
+        if (context["q"]):
             q = context["q"]
 
         response = es.search(index="ddosdb", q=q, size=10000,  _source=source)
+
+        print(source)
+
 
         context["time"] = time.time() - start
 
@@ -505,6 +507,9 @@ def overview(request):
                 del df[onew]
             else:
                 df.sort_values(by=o, ascending=(context["so"]=="asc"), inplace=True)
+
+            # Make sure some columns are shown as int
+            df = df.astype({"ips_involved": int})
 
             context["results"] = df.to_dict(orient='records')
         else:
