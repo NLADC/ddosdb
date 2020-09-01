@@ -1,2 +1,2 @@
-cp -R -n ./../../ddos_dissector/. ~/bin/.
-cp -f    ./../../ddos_dissector/ddos_dissector.py  ~/bin/ddos_dissector.py
+cp -R -n ./../../ddos_dissector/. ~/ddos_dissector/.
+cp -f    ./../../ddos_dissector/ddos_dissector.py  ~/ddos_dissector/ddos_dissector.py
