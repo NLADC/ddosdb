@@ -41,12 +41,7 @@ You can check if it is running by pointing a browser towards [http://localhost:9
 
 ```
 You will need to create the ddosdb index and upload the mapping. To do this simply run the `ddosdb.db` script in the housekeeping directory. 
-Whenever you want to delete the ddosdb index, for example because you want to start with an empty database again, use the following command:
-
-```
-curl -XDELETE "localhost:9200/ddosdb"
-```
-Simply re-run the `ddosdb.db` script in the housekeeping directory to create a new ddosdb index. 
+Whenever you want to delete the ddosdb index - for example because you want to start with an empty database again - simply re-run the `ddosdb.db` script in the housekeeping directory; since it deletes any existing ddosdb index before creating a new one. 
 
 #### Python
 If you have a functioning Python3 running on your system you can use that. But if you don't, or want to avoid interference with your system version of Python, consider using something like [*pyenv*](https://github.com/pyenv/pyenv) to keep the different Python versions and environments nicely contained and separated. 
