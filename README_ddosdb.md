@@ -1,10 +1,33 @@
+<p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/ddos_dissector/blob/3.0/media/header.png?raw=true"></p>
+
+
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+![Python](https://img.shields.io/badge/python-v3.6+-blue.svg)
+[![Build Status](https://api.travis-ci.com/joaoceron/new_dissector.svg?token=8TMUECLCUVrxas7wXfVY&branch=master)](https://travis-ci.com/github/joaoceron/new_dissector)
+[![GitHub Issues](https://img.shields.io/github/issues/ddos-clearing-house/ddos_dissector)](https://github.com/ddos-clearing-house/ddos_dissector/issues)
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+<img alt="GitHub commits since tagged version" src="https://img.shields.io/github/last-commit/ddos-clearing-house/ddos_dissector">
+
+ <p align="center">
+  <img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/concordia-logo.png?raw=true">
+ <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/No-More-DDoS-2-removebg-preview.png?raw=true"></p>
+
+</p>
+
+
+
 # DDoSDB
+## How to start?
 
-## Getting to know DDoSDB
-If you want to get familiar with the DDoSDB setup and the way it works, probably it is easier to start with [DDoSDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box): A Virtual Machine with an up and running DDoSDB instance to play with. 
+You can use two approaches to run the DDoSDB repository:
 
-For a setting up a production deployment of DDoSDB, see [deployment.md](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md). The [old deployment](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment-old.md) guide/script is also still available.
-## DDoSDB components
+- run [DDoSDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box)
+- install from [scratch](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) (Apache, Elastic Search, Django, etc...)
+
+## Getting to know DDoSDB DDoSDB components
 
 The heart of DDoSDB is a **Django** Webapp. **Elasticsearch** is used for storing the fingerprints, the raw .json files and the *pcap* samples are stored locally on disk.
 
