@@ -290,11 +290,37 @@ def attack_trace(request, key):
         return HttpResponse("File not found")
 
 
+
+def pretty_request(request):
+    headers = ''
+    for header, value in request.META.items():
+        if not header.startswith('HTTP'):
+            continue
+        header = '-'.join([h.capitalize() for h in header[5:].lower().split('_')])
+        headers += '{}: {}\n'.format(header, value)
+
+    return (
+        '{method} HTTP/1.1\n'
+        'Content-Length: {content_length}\n'
+        'Content-Type: {content_type}\n'
+        '{headers}\n\n'
+        '{body}'
+    ).format(
+        method=request.method,
+        content_length=request.META['CONTENT_LENGTH'],
+        content_type=request.META['CONTENT_TYPE'],
+        headers=headers,
+        body=request.body,
+    )
+
+
 @csrf_exempt
 def upload_file(request):
 
     if request.method == "POST":
-        if not all (k in request.META for k in ("HTTP_X_USERNAME","HTTP_X_PASSWORD","HTTP_X_FILENAME")):
+#        print(pretty_request(request))
+#        if not all (k in request.META for k in ("HTTP_X_USERNAME","HTTP_X_PASSWORD","HTTP_X_FILENAME")):
+        if not all (k in request.META for k in ("HTTP_X_USERNAME","HTTP_X_PASSWORD")):
             response = HttpResponse()
             response.status_code = 401
             response.reason_phrase = "Invalid credentials or no permission"
@@ -302,10 +328,12 @@ def upload_file(request):
 
         username = request.META["HTTP_X_USERNAME"]
         password = request.META["HTTP_X_PASSWORD"]
-        filename = request.META["HTTP_X_FILENAME"]
+        filename = None
+        if "HTTP_X_FILENAME" in request.META:
+            filename = request.META["HTTP_X_FILENAME"]
         user = authenticate(request, username=username, password=password)
 
-        print("user:{} - filename:{}".format(username, filename))
+#        print("user:{} - filename:{}".format(username, filename))
 
         if user is None or not user.has_perm("ddosdb.upload_fingerprint"):
             response = HttpResponse()
@@ -313,106 +341,115 @@ def upload_file(request):
             response.reason_phrase = "Invalid credentials or no permission to upload fingerprints"
             return response
 
-        try:
-            os.remove(settings.RAW_PATH + filename + ".json")
-            os.remove(settings.RAW_PATH + filename + ".pcap")
-        except IOError:
-            pass
 
-        # JSON enrichment
-        json_content = request.FILES["json"].read()
-        data = demjson.decode(json_content)
-        # Add key if not exists
-        if "key" not in data:
-            data["key"] = filename
+        if "json" in request.FILES:
+            # JSON enrichment
+            json_content = request.FILES["json"].read()
+            data = demjson.decode(json_content)
+            # Add key if not exists
+    #        if "key" not in data:
+    #            data["key"] = filename
 
-        if "dst_ports" in data:
-            data["dst_ports"] = [x for x in data["dst_ports"] if not math.isnan(x)]
-        if "src_ports" in data:
-            data["src_ports"] = [x for x in data["src_ports"] if not math.isnan(x)]
+            if "dst_ports" in data:
+                data["dst_ports"] = [x for x in data["dst_ports"] if not math.isnan(x)]
+            if "src_ports" in data:
+                data["src_ports"] = [x for x in data["src_ports"] if not math.isnan(x)]
 
-        # Enrich it all a bit
-        data["amplifiers_size"] = 0
-        data["attackers_size"] = 0
+            # Enrich it all a bit
+            data["amplifiers_size"] = 0
+            data["attackers_size"] = 0
 
-        if "src_ips" in data:
-            data["src_ips_size"] = len(data["src_ips"])
+            if "src_ips" in data:
+                data["src_ips_size"] = len(data["src_ips"])
 
-        if "amplifiers" in data:
-            data["amplifiers_size"] = len(data["amplifiers"])
+            if "amplifiers" in data:
+                data["amplifiers_size"] = len(data["amplifiers"])
 
-        if "attackers" in data:
-            data["attackers_size"] = len(data["attackers"])
+            if "attackers" in data:
+                data["attackers_size"] = len(data["attackers"])
 
-        data["ips_involved"] = data["amplifiers_size"] + data["attackers_size"]
+            data["ips_involved"] = data["amplifiers_size"] + data["attackers_size"]
 
-#        data["comment"] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-        data["comment"] = ""
+            data["comment"] = ""
 
-        # add username of submitter as well.
-        # Probably best to have an optional separate field for contact information
-        data["submitter"] = username
+            # add username of submitter as well.
+            # Probably best to have an optional separate field for contact information
+            data["submitter"] = username
 
-        # Add the timestamp it was submitted as well.
-        # Usefull for ordering in overview page.
+            # Add the timestamp it was submitted as well.
+            # Useful for ordering in overview page.
 
-        data["submit_timestamp"] = datetime.utcnow()
+            data["submit_timestamp"] = datetime.utcnow()
 
-#        else:
-#            if "amplifiers" in data:
-#                data["src_ips"]      = data["amplifiers"]
-#                data["src_ips_size"] = len(data["src_ips"])
-#            else:
-#                data["src_ips"]      = []
-#                data["src_ips_size"] = 0
+            # Assume normally all fingerprints can be shared.
+            # Add some edit function for this later...
+            data["shareable"] = False
 
+    #        else:
+    #            if "amplifiers" in data:
+    #                data["src_ips"]      = data["amplifiers"]
+    #                data["src_ips_size"] = len(data["src_ips"])
+    #            else:
+    #                data["src_ips"]      = []
+    #                data["src_ips_size"] = 0
 
-        # Bear in mind that the data format may change. Hence the order of these steps is important.
-        # Enrich with ASN
-        # data = (TeamCymru(data)).parse()
-        print("Enrichment with AS # disabled")
-        # Enrich with something
-        # data = (Something(data)).parse()
+            # Bear in mind that the data format may change. Hence the order of these steps is important.
+            # Enrich with ASN
+            # data = (TeamCymru(data)).parse()
+            print("Enrichment with AS # disabled")
+            # Enrich with something
+            # data = (Something(data)).parse()
 
+            if filename is None:
+                filename = data["key"]
 
-        # JSON upload
-        demjson.encode_to_file(settings.RAW_PATH + filename + ".json", data)
+            try:
+                os.remove(settings.RAW_PATH + filename + ".json")
+            except IOError:
+                pass
+            # Save JSON upload to file (not really needed to be honest)
+            demjson.encode_to_file(settings.RAW_PATH + filename + ".json", data)
+            # JSON database insert
+            es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
 
-        # JSON database insert
-        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+            try:
+                es.delete(index="ddosdb", doc_type="_doc", id=filename, request_timeout=500)
+            except NotFoundError:
+                pass
+            except:
+                print("Could not setup a connection to Elasticsearch")
+                response = HttpResponse()
+                response.status_code = 503
+                response.reason_phrase = "Database unavailable"
+                return response
 
-        try:
-            es.delete(index="ddosdb", doc_type="_doc", id=filename, request_timeout=500)
-        except NotFoundError:
-            pass
-        except:
-            print("Could not setup a connection to Elasticsearch")
-            response = HttpResponse()
-            response.status_code = 503
-            response.reason_phrase = "Database unavailable"
-            return response
+            try:
+                es.index(index="ddosdb", doc_type="_doc", id=filename, body=data, request_timeout=500)
+            except RequestError as e:
+                response = HttpResponse()
+                response.status_code = 400
+                response.reason_phrase = str(e)
+                return response
 
-        try:
-            es.index(index="ddosdb", doc_type="_doc", id=filename, body=data, request_timeout=500)
-        except RequestError as e:
-            response = HttpResponse()
-            response.status_code = 400
-            response.reason_phrase = str(e)
-            return response
+        if "pcap" in request.FILES:
+            try:
+                os.remove(settings.RAW_PATH + filename + ".pcap")
+            except IOError:
+                pass
 
-        # PCAP upload
-        pcap_fp = open(settings.RAW_PATH + filename + ".pcap", "wb+")
-        pcap_file = request.FILES["pcap"]
-        for chunk in pcap_file.chunks():
-            pcap_fp.write(chunk)
+            # PCAP upload
+            pcap_fp = open(settings.RAW_PATH + filename + ".pcap", "wb+")
+            pcap_file = request.FILES["pcap"]
+            for chunk in pcap_file.chunks():
+                pcap_fp.write(chunk)
 
-        pcap_fp.close()
+            pcap_fp.close()
 
-        # Register record
-        file_upload = FileUpload()
-        file_upload.user = user
-        file_upload.filename = filename
-        file_upload.save()
+            # Register record
+            file_upload = FileUpload()
+            file_upload.user = user
+            file_upload.filename = filename
+            file_upload.save()
 
         response = HttpResponse()
         response.status_code = 201
@@ -462,13 +499,14 @@ def overview(request):
         context["headers"] = {
 #            "multivector_key"   : "multivector",
             "key"               : "key",
+            "shareable"         : "Shared",
             "start_time"        : "start time",
             "duration_sec"      : "duration (seconds)",
-#            "total_packets"     : "# packets",
+            "total_packets"     : "# packets",
 #            "amplifiers_size"    : "IP's involved",
             "ips_involved"      : "IP's involved",
             "avg_bps"           : "bits/second",
-            "avg_pps"           : "packets/second",
+#            "avg_pps"           : "packets/second",
             "total_dst_ports"   : "# ports",
             "submit_timestamp"  : "submitted at",
             "submitter"         : "submitted by",
@@ -482,8 +520,7 @@ def overview(request):
 
         response = es.search(index="ddosdb", q=q, size=10000,  _source=source)
 
-        print(source)
-
+#        print(source)
 
         context["time"] = time.time() - start
 

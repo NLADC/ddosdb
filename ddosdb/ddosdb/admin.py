@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django import forms
 
-from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile
-
+from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile, RemoteDdosDb
 
 class QueryAdmin(admin.ModelAdmin):
     list_display = ("user", "query", "timestamp")
@@ -19,7 +19,7 @@ def allow_access(modeladmin, request, queryset):
                       """
             Dear {first_name} {last_name},
 
-            Thank you for your interest. You have been granted access to DDoSDB. 
+            Thank you for your interest. You have been granted access to DDoSDB.
 
             It is now possible to log in to https://ddosdb.org with the following credentials:
             Username: {email}
@@ -84,6 +84,26 @@ class CustomUserAdmin(UserAdmin):
             return list()
         return super(CustomUserAdmin, self).get_inline_instances(request, obj)
 
+#class MyModelAdmin(admin.ModelAdmin):
+#    formfield_overrides = {
+#        models.TextField: {'widget': RichTextEditorWidget},
+#    }
+
+
+class RemoteDdosDbForm(forms.ModelForm):
+    class Meta:
+        model = RemoteDdosDb
+        fields = []
+# Uncommenting code below will give
+#        widgets = {
+#        'password': forms.PasswordInput(),
+#    }
+
+class RemoteDdosDbAdmin(admin.ModelAdmin):
+    list_display = ("name", "active", "api_url", "username")
+    fields = (('name', 'active'), 'api_url', 'username', 'password')
+    form = RemoteDdosDbForm
+
 
 # Register your models here.
 admin.site.register(Query, QueryAdmin)
@@ -92,3 +112,4 @@ admin.site.register(Blame, BlameAdmin)
 admin.site.register(FileUpload, FileUploadAdmin)
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(RemoteDdosDb, RemoteDdosDbAdmin)

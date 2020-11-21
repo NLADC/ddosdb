@@ -6,6 +6,7 @@ from django.dispatch import receiver
 
 from website import settings
 
+from encrypted_fields import fields
 
 class Query(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -72,6 +73,25 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
+class RemoteDdosDb(models.Model):
+    class Meta:
+        verbose_name_plural = " Remote DDoS-DBs"
+
+    name = models.CharField('Remote DDoS-DB',max_length = 32,
+        help_text="""A friendly name for the remote repository""")
+    api_url = models.URLField('Remote DDoS-DB URL',
+        help_text="""The full URL for the remote sync API""")
+    username = models.CharField('Remote Identity',max_length = 255)
+#    password = models.CharField(max_length=255)
+    password = fields.EncryptedCharField(max_length=255)
+    active   = models.BooleanField(default = False,
+        help_text="""Activate to sync local fingerprints with this DDoS-DB""")
+
+    def __str__(self):
+        postfix = ' (inactive)'
+        if (self.active):
+            postfix = ''
+        return self.name+postfix
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
