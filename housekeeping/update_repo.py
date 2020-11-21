@@ -101,6 +101,7 @@ if (this_commit in cdict):
     print ("This instance  : {0} ({1})".format(cdict[this_commit], this_commit))
 else:
     print("This instance  : <Unknown>")
+    this_commit == "0.0"
 
 if this_commit != vdict[vlatest]:
     print("Updating to " + vlatest)
