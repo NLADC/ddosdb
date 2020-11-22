@@ -257,36 +257,6 @@ def compare(request):
     return HttpResponse(render(request, "ddosdb/compare.html", context))
 
 
-@login_required()
-def fingerprint(request, key):
-    file = settings.RAW_PATH + key + ".json"
-    if os.path.isfile(file):
-        response = HttpResponse(content_type="application/json")
-        response["X-Sendfile"] = file
-        response["Content-Disposition"] = "attachment; filename=" + key + ".json"
-        return response
-    else:
-        return HttpResponse("File not found")
-
-
-@login_required()
-def attack_trace(request, key):
-    file = ""
-    for file_path in os.listdir(settings.RAW_PATH):
-        filename, file_extension = os.path.splitext(file_path)
-        if filename == key and not file_extension == ".json":
-            file = file_path
-            break
-
-    if file != "":
-        response = HttpResponse(content_type="application/octet-stream")
-        response["X-Sendfile"] = settings.RAW_PATH + file
-        response["Content-Disposition"] = "attachment; filename=" + file
-        return response
-    else:
-        return HttpResponse("File not found")
-
-
 def pretty_request(request):
     headers = ''
     for header, value in request.META.items():
@@ -550,7 +520,78 @@ def overview(request):
     return HttpResponse(render(request, "ddosdb/overview.html", context))
 
 
-def auth_user_get_perms(request):
+
+# Authenticate the user, then return a list of permissions
+# Or an error if the user cannot be authenticated
+
+@login_required()
+def edit_comment(request):
+    pp = pprint.PrettyPrinter(indent=4)
+
+    user: User = request.user
+    context = {
+        "user": user,
+        "permissions": user.get_all_permissions(),
+    }
+    user_perms = user.get_user_permissions()
+    group_perms = user.get_group_permissions()
+
+    # make a combined set (a set cannot contain duplicates)
+    permissions = user_perms | group_perms
+
+    key = ""
+
+    if request.method == "GET":
+        # Get the key from the request.
+        if "key" in request.GET:
+            key = request.GET["key"]
+            context["key"] = key
+        else:
+            return redirect('overview')
+
+        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        try:
+            fp = es.search(index="ddosdb", q="key:{}".format(key), size=1)
+        except:
+            print("Could not setup a connection to Elasticsearch")
+            response = HttpResponse()
+            response.status_code = 503
+            response.reason_phrase = "Database unavailable"
+            return response
+
+        results = fp["hits"]["hits"][0]["_source"]
+        context["node"] = results
+        return HttpResponse(render(request, "ddosdb/edit-comment.html", context))
+
+    elif request.method == "POST":
+        key = request.POST["key"]
+
+        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        try:
+            result = es.search(index="ddosdb", q="key:{}".format(key), size=1)
+            fp = result["hits"]["hits"][0]["_source"]
+            fp["comment"] = request.POST["comment"]
+            es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
+        except NotFoundError:
+            print("NotFoundError for {}".format(key))
+            pass
+        except:
+            print("Could not setup a connection to Elasticsearch")
+            response = HttpResponse()
+            response.status_code = 503
+            response.reason_phrase = "Database unavailable"
+            return response
+
+        es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
+
+        #        base_url = reverse('edit-comment')
+        #        query_string =  urlencode({'key': key})
+        #        url = '{}?{}'.format(base_url, query_string)
+        #        return redirect(url)
+        time.sleep(1)
+        return redirect("overview")
+
+def _auth_user_get_perms(request):
     user_and_perms = {
         "user": None,
         "permissions": []
@@ -586,15 +627,11 @@ def auth_user_get_perms(request):
 
     return user_and_perms
 
-
-# Authenticate the user, then return a list of permissions
-# Or an error if the user cannot be authenticated
-
 @csrf_exempt
 def my_permissions(request):
     if request.method == "GET":
 
-        user_perms = auth_user_get_perms(request)
+        user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None:
             response = HttpResponse()
@@ -619,7 +656,7 @@ def fingerprints(request):
     """Uses Basic authentication and checks for \"ddosdb.add_fingerprint\" permissions"""
     if request.method == "GET":
 
-        user_perms = auth_user_get_perms(request)
+        user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None or "ddosdb.view_fingerprint" not in user_perms["permissions"]:
             response = HttpResponse()
@@ -698,7 +735,7 @@ def unknown_fingerprints(request):
     if request.method == "POST":
 
         print(pretty_request(request))
-        user_perms = auth_user_get_perms(request)
+        user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None or "ddosdb.view_fingerprint" not in user_perms["permissions"]:
             response = HttpResponse()
@@ -741,70 +778,74 @@ def unknown_fingerprints(request):
         return response
 
 
-@login_required()
-def edit_comment(request):
-    pp = pprint.PrettyPrinter(indent=4)
 
-    user: User = request.user
-    context = {
-        "user": user,
-        "permissions": user.get_all_permissions(),
-    }
-    user_perms = user.get_user_permissions()
-    group_perms = user.get_group_permissions()
-
-    # make a combined set (a set cannot contain duplicates)
-    permissions = user_perms | group_perms
-
-    key = ""
-
+@csrf_exempt
+def fingerprint(request,key):
     if request.method == "GET":
-        # Get the key from the request.
-        if "key" in request.GET:
-            key = request.GET["key"]
-            context["key"] = key
-        else:
-            return redirect('overview')
 
-        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-        try:
-            fp = es.search(index="ddosdb", q="key:{}".format(key), size=1)
-        except:
-            print("Could not setup a connection to Elasticsearch")
+        # print(pretty_request(request))
+        user_perms = _auth_user_get_perms(request)
+
+        if user_perms["user"] is None or "ddosdb.view_fingerprint" not in user_perms["permissions"]:
             response = HttpResponse()
-            response.status_code = 503
-            response.reason_phrase = "Database unavailable"
+            response.status_code = 401
+            response.reason_phrase = "Invalid credentials or no permission"
             return response
 
-        results = fp["hits"]["hits"][0]["_source"]
-        context["node"] = results
-        return HttpResponse(render(request, "ddosdb/edit-comment.html", context))
-
-    elif request.method == "POST":
-        key = request.POST["key"]
-
-        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
         try:
-            result = es.search(index="ddosdb", q="key:{}".format(key), size=1)
-            fp = result["hits"]["hits"][0]["_source"]
-            fp["comment"] = request.POST["comment"]
-            es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
-        except NotFoundError:
-            print("NotFoundError for {}".format(key))
-            pass
-        except:
-            print("Could not setup a connection to Elasticsearch")
+            # offset = 10 * (context["p"] - 1)
+            es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+            q = "key:"+key
+            response = es.search(index="ddosdb", q=q, size=10000, _source="")
+            if response["hits"]["total"] == 1:
+               return JsonResponse(response["hits"]["hits"][0]["_source"], safe=False)
+            else:
+                response = HttpResponse()
+                response.status_code = 404
+                response.reason_phrase = "Fingerprint {} not found".format(key)
+                return response
+
+        except (SyntaxError, RequestError) as e:
+            print("Invalid query: " + str(e))
             response = HttpResponse()
-            response.status_code = 503
-            response.reason_phrase = "Database unavailable"
+            response.status_code = 500
+            response.reason_phrase = "Error with ElasticSearch"
             return response
+    else:
+        response = HttpResponse()
+        response.status_code = 405
+        response.reason_phrase = "Use GET method only for this call"
+        return response
 
-        es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
 
-        #        base_url = reverse('edit-comment')
-        #        query_string =  urlencode({'key': key})
-        #        url = '{}?{}'.format(base_url, query_string)
-        #        return redirect(url)
-        time.sleep(1)
-        return redirect("overview")
+# @login_required()
+# def fingerprint(request, key):
+#     file = settings.RAW_PATH + key + ".json"
+#     if os.path.isfile(file):
+#         response = HttpResponse(content_type="application/json")
+#         response["X-Sendfile"] = file
+#         response["Content-Disposition"] = "attachment; filename=" + key + ".json"
+#         return response
+#     else:
+#         return HttpResponse("File not found")
+
+
+@login_required()
+def attack_trace(request, key):
+    file = ""
+    for file_path in os.listdir(settings.RAW_PATH):
+        filename, file_extension = os.path.splitext(file_path)
+        if filename == key and not file_extension == ".json":
+            file = file_path
+            break
+
+    if file != "":
+        response = HttpResponse(content_type="application/octet-stream")
+        response["X-Sendfile"] = settings.RAW_PATH + file
+        response["Content-Disposition"] = "attachment; filename=" + file
+        return response
+    else:
+        return HttpResponse("File not found")
+
+
 
