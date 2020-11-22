@@ -1,6 +1,5 @@
-import django.contrib.auth.views
+#import django.contrib.auth.views
 from django.urls import path
-
 from . import views
 
 urlpatterns = [
@@ -18,5 +17,7 @@ urlpatterns = [
     path('upload-file', views.upload_file, name='upload-file'),
     path('overview', views.overview, name='overview'),
     path('my-permissions', views.my_permissions, name='my-permissions'),
+    path('fingerprints', views.fingerprints, name='fingerprints'),
+    path('unknown-fingerprints', views.unknown_fingerprints, name='unknown-fingerprints'),
     path('edit-comment', views.edit_comment, name='edit-comment'),
 ]
