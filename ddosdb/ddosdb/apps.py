@@ -5,7 +5,7 @@ from django.apps import AppConfig
 class DdosdbConfig(AppConfig):
     name = 'ddosdb'
 
-    def ready(self):
+#    def ready(self):
         # importing model classes
         # from .models import MyModel  # or...
         # MyModel = self.get_model('MyModel')
