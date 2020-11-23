@@ -817,19 +817,6 @@ def fingerprint(request,key):
         response.reason_phrase = "Use GET method only for this call"
         return response
 
-
-# @login_required()
-# def fingerprint(request, key):
-#     file = settings.RAW_PATH + key + ".json"
-#     if os.path.isfile(file):
-#         response = HttpResponse(content_type="application/json")
-#         response["X-Sendfile"] = file
-#         response["Content-Disposition"] = "attachment; filename=" + key + ".json"
-#         return response
-#     else:
-#         return HttpResponse("File not found")
-
-
 @login_required()
 def attack_trace(request, key):
     file = ""

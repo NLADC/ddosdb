@@ -74,7 +74,7 @@ If you have a functioning Python3 running on your system you can use that. But i
 When you have a functioning Python3, you can then install the required python packages:
 
 ```bash
-pip install django-sslserver pandas nclib elasticsearch demjson requests django-debug-toolbar psycopg2-binary
+pip install django-sslserver pandas nclib elasticsearch demjson requests django-debug-toolbar django-searchable-encrypted-fields psycopg2-binary
 ```
 Strictly speaking you don't need the last package (psycopg2-binary) - since it is for PostgreSQL support - but you might as well install it for when you want to use PostgreSQL in a production setting.
  
