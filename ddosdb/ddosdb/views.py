@@ -21,6 +21,9 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+
+from django.core.exceptions import PermissionDenied
+
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import RequestError, NotFoundError
 
@@ -310,7 +313,7 @@ def upload_file(request):
             # JSON enrichment
             json_content = request.FILES["json"].read()
             data = demjson.decode(json_content)
-            print(data)
+            # print(data)
             # Add key if not exists
             #        if "key" not in data:
             #            data["key"] = filename
@@ -348,7 +351,7 @@ def upload_file(request):
 
             # Assume normally all fingerprints can be shared.
             # Add some edit function for this later...
-            data["shareable"] = True
+            data["shareable"] = False
 
             #        else:
             #            if "amplifiers" in data:
@@ -461,7 +464,7 @@ def overview(request):
         context["headers"] = {
             #            "multivector_key"   : "multivector",
             "key": "key",
-            "shareable": "Shared",
+            "shareable": "Shareable",
             "start_time": "start time",
             "duration_sec": "duration (seconds)",
             "total_packets": "# packets",
@@ -520,9 +523,66 @@ def overview(request):
     return HttpResponse(render(request, "ddosdb/overview.html", context))
 
 
+@login_required()
+def toggle_shareable(request):
+    pp = pprint.PrettyPrinter(indent=4)
 
-# Authenticate the user, then return a list of permissions
-# Or an error if the user cannot be authenticated
+    user: User = request.user
+
+    # Get the key from the request.
+    if "key" in request.GET:
+        key = request.GET["key"]
+    else:
+        return redirect('overview')
+
+    es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+    try:
+        result = es.search(index="ddosdb", q="key:{}".format(key), size=1)
+        fp = result["hits"]["hits"][0]["_source"]
+    except NotFoundError:
+        print("NotFoundError for {}".format(key))
+        pass
+    except:
+        print("Could not setup a connection to Elasticsearch")
+        response = HttpResponse()
+        response.status_code = 503
+        response.reason_phrase = "Database unavailable"
+        return response
+    if fp["submitter"] == user.username or user.is_superuser:
+        if "shareable" in fp:
+            share = fp["shareable"]
+            if share is None or share is False:
+                share = True
+            else:
+                share = False
+            fp["shareable"] = share
+        else:
+            fp["shareable"] = False
+
+        pp.pprint(fp)
+        es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
+        es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
+    else:
+        raise PermissionDenied()
+
+    time.sleep(1)
+    extra = []
+    if "q" in request.GET:
+        extra.append("q=" + request.GET["q"])
+    else:
+        extra.append("q=")
+    if "o" in request.GET:
+        extra.append("o=" + request.GET["o"])
+    if "so" in request.GET:
+        extra.append("so=" + request.GET["so"])
+    if "son" in request.GET:
+        extra.append("son=" + request.GET["son"])
+
+    extrastr = ""
+    if len(extra) > 0:
+        extrastr = "?" + "&".join(extra)
+    return redirect("/overview{}".format(extrastr))
+
 
 @login_required()
 def edit_comment(request):
@@ -533,11 +593,9 @@ def edit_comment(request):
         "user": user,
         "permissions": user.get_all_permissions(),
     }
-    user_perms = user.get_user_permissions()
-    group_perms = user.get_group_permissions()
 
-    # make a combined set (a set cannot contain duplicates)
-    permissions = user_perms | group_perms
+    print()
+    print(context["permissions"])
 
     key = ""
 
@@ -560,8 +618,12 @@ def edit_comment(request):
             return response
 
         results = fp["hits"]["hits"][0]["_source"]
-        context["node"] = results
-        return HttpResponse(render(request, "ddosdb/edit-comment.html", context))
+
+        if results["submitter"] == user.username or user.is_superuser:
+            context["node"] = results
+            return HttpResponse(render(request, "ddosdb/edit-comment.html", context))
+        else:
+            raise PermissionDenied()
 
     elif request.method == "POST":
         key = request.POST["key"]
@@ -581,13 +643,11 @@ def edit_comment(request):
             response.status_code = 503
             response.reason_phrase = "Database unavailable"
             return response
+        if result["submitter"] == user.username or user.is_superuser:
+            es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
+        else:
+            raise PermissionDenied()
 
-        es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
-
-        #        base_url = reverse('edit-comment')
-        #        query_string =  urlencode({'key': key})
-        #        url = '{}?{}'.format(base_url, query_string)
-        #        return redirect(url)
         time.sleep(1)
         return redirect("overview")
 
@@ -776,7 +836,6 @@ def unknown_fingerprints(request):
         response.status_code = 405
         response.reason_phrase = "Use POST method only for this call"
         return response
-
 
 
 @csrf_exempt

@@ -64,6 +64,20 @@
                   {{node|get_item:hdr}}
                 </a>
               </div>
+            {% elif hdr == "shareable" %}
+              <div title="click to show only fingerprints submitted by user '{{node|get_item:hdr}}'">
+                {% if user.is_authenticated %}
+                  {% if user.username == node|get_item:"submitter"  or user.is_superuser %}
+                  <span style="float:right;">
+                    <a href="{% url "toggle-shareable" %}?key={{node|get_item:"key"}}&o={{ o }}&so={{ so }}&son={{ son }}">
+                      {{node|get_item:hdr}}
+                    </a>
+                  </span>
+                  {% else %}
+                    {{node|get_item:hdr}}
+                  {% endif %}
+                {% endif %}
+              </div>
             {% elif hdr == "duration_sec" %}
                 {{node|get_item:hdr|precision:3}}
             {% elif hdr == "avg_bps" %}
