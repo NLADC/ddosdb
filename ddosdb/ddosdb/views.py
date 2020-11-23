@@ -559,7 +559,6 @@ def toggle_shareable(request):
         else:
             fp["shareable"] = False
 
-        pp.pprint(fp)
         es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
         es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
     else:
