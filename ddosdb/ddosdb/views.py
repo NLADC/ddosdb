@@ -809,7 +809,7 @@ def unknown_fingerprints(request):
     """This is a REST method accepting only POST calls with JSON body content (application/json)"""
     if request.method == "POST":
 
-        print(pretty_request(request))
+        # print(pretty_request(request))
         user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None or "ddosdb.view_fingerprint" not in user_perms["permissions"]:
