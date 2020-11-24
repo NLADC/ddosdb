@@ -28,7 +28,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import RequestError, NotFoundError
 
 #from ddosdb.enrichment.team_cymru import TeamCymru
-from ddosdb.models import Query, AccessRequest, Blame, FileUpload
+from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb
 
 
 def index(request):
@@ -656,7 +656,7 @@ def _auth_user_get_perms(request):
         "permissions": []
     }
 
-    print(pretty_request(request))
+    # print(pretty_request(request))
 
     if not "HTTP_AUTHORIZATION" in request.META:
         return user_and_perms
@@ -710,22 +710,25 @@ def my_permissions(request):
 def fingerprints(request):
     """REST API Call"""
     """GET method will return list of keys for all fingerprints present in the database"""
+    """can add query parameters to it if needed, e.g.:"""
+    """curl -u username:password http://localhost:8000/fingerprints\?q=shareable:true"""
     """Uses Basic authentication and checks for \"ddosdb.view_fingerprint\" permissions"""
     """POST method will store all fingerprints present in the body"""
+    """It will remove the shareable property (i.e. set it to False), to by default prevent it from transfering further """
     """Uses Basic authentication and checks for \"ddosdb.add_fingerprint\" permissions"""
     if request.method == "GET":
+
+        q = "*"
+        if "q" in request.GET:
+            q = request.GET["q"]
 
         user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None or "ddosdb.view_fingerprint" not in user_perms["permissions"]:
-            response = HttpResponse()
-            response.status_code = 401
-            response.reason_phrase = "Invalid credentials or no permission"
-            return response
+            raise PermissionDenied()
         try:
             # offset = 10 * (context["p"] - 1)
             es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-            q = "*"
             response = es.search(index="ddosdb", q=q, size=10000, _source="key")
             results = [x["_source"]["key"] for x in response["hits"]["hits"]]
             return JsonResponse(results, safe=False)
@@ -735,6 +738,7 @@ def fingerprints(request):
             response.status_code = 500
             response.reason_phrase = "Error with ElasticSearch"
             return response
+
     elif request.method == "POST":
         user_perms = auth_user_get_perms(request)
 
@@ -755,6 +759,12 @@ def fingerprints(request):
         es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
 
         for fp in fps:
+            # Replace name in fingerprint with the name of the user submitting it
+            # so as not to transfer usernames over different DBs
+            fp["submitter"] = user_perms["user"].username
+            # Set shareable to false to prevent it being shared further on by default
+            fp["shareable"] = False
+
             try:
                 es.delete(index="ddosdb", doc_type="_doc", id=fp["key"], request_timeout=500)
             except NotFoundError:
@@ -768,6 +778,12 @@ def fingerprints(request):
 
             try:
                 es.index(index="ddosdb", doc_type="_doc", id=fp["key"], body=fp, request_timeout=500)
+                # Register record
+                file_upload = FileUpload()
+                file_upload.user = user_perms["user"]
+                file_upload.filename = fp["key"]
+                file_upload.save()
+
             except RequestError as e:
                 response = HttpResponse()
                 response.status_code = 400
@@ -797,10 +813,7 @@ def unknown_fingerprints(request):
         user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None or "ddosdb.view_fingerprint" not in user_perms["permissions"]:
-            response = HttpResponse()
-            response.status_code = 401
-            response.reason_phrase = "Invalid credentials or no permission"
-            return response
+            raise PermissionDenied()
 
         if request.META['CONTENT_TYPE'] != "application/json":
             response = HttpResponse()
@@ -845,10 +858,7 @@ def fingerprint(request,key):
         user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None or "ddosdb.view_fingerprint" not in user_perms["permissions"]:
-            response = HttpResponse()
-            response.status_code = 401
-            response.reason_phrase = "Invalid credentials or no permission"
-            return response
+            raise PermissionDenied()
 
         try:
             # offset = 10 * (context["p"] - 1)
@@ -856,7 +866,12 @@ def fingerprint(request,key):
             q = "key:"+key
             response = es.search(index="ddosdb", q=q, size=10000, _source="")
             if response["hits"]["total"] == 1:
-               return JsonResponse(response["hits"]["hits"][0]["_source"], safe=False)
+                fp = response["hits"]["hits"][0]["_source"]
+                # Remove shareable property when retrieving a single fingerprint
+                # since we do not want to transfer that to other databases.
+                # if "shareable" in fp:
+                fp.pop("shareable", None)
+                return JsonResponse(fp, safe=False)
             else:
                 response = HttpResponse()
                 response.status_code = 404
@@ -892,5 +907,25 @@ def attack_trace(request, key):
     else:
         return HttpResponse("File not found")
 
+@csrf_exempt
+def remote_dbs(request):
+    if request.method == "GET":
 
+        user_perms = _auth_user_get_perms(request)
 
+        if user_perms["user"] is None or not user_perms["user"].is_superuser:
+            raise PermissionDenied()
+
+        remotedbs = RemoteDdosDb.objects.filter(active=True)
+        rdbs = []
+        for rdb in remotedbs:
+            rdbs.append({"name": rdb.name,
+                         "api_url": rdb.api_url,
+                         "username": rdb.username,
+                         "password": rdb.password})
+        return JsonResponse(rdbs, safe=False)
+    else:
+        response = HttpResponse()
+        response.status_code = 405
+        response.reason_phrase = "Only GET supported"
+        return response

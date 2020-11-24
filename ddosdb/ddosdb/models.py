@@ -73,6 +73,7 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class RemoteDdosDb(models.Model):
     class Meta:
         verbose_name_plural = " Remote DDoS-DBs"
