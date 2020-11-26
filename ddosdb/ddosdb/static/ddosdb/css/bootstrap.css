@@ -1524,6 +1524,7 @@ pre code {
 .table td {
   padding: 0.75rem;
   vertical-align: top;
+  text-align: right;
   border-top: 1px solid #dee2e6;
 }
 
@@ -1574,6 +1575,18 @@ pre code {
   background-color: rgba(0, 0, 0, 0.075);
 }
 
+.table-hover thead th,
+.table-hover thead td {
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.table-hover tbody th,
+.table-hover tbody td {
+  padding-right: 0.5rem;
+  text-align: right;
+}
+
 .table-primary,
 .table-primary > th,
 .table-primary > td {
@@ -1582,11 +1595,13 @@ pre code {
 
 .table-hover .table-primary:hover {
   background-color: #9fcdff;
+  text-align: right;
 }
 
 .table-hover .table-primary:hover > td,
 .table-hover .table-primary:hover > th {
   background-color: #9fcdff;
+  text-align: right;
 }
 
 .table-secondary,
@@ -1602,6 +1617,7 @@ pre code {
 .table-hover .table-secondary:hover > td,
 .table-hover .table-secondary:hover > th {
   background-color: #c8cbcf;
+  text-align: right;
 }
 
 .table-success,

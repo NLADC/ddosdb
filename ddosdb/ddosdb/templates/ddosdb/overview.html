@@ -17,7 +17,15 @@
     <h1 align="center" class="display-4 ddosdb-subtitle">Overview of all fingerprints ({{ results|length }})</h1>
   {% endif %}
 <div>
-  <table class="table" id="overview-table">
+  {% if remotedbs %}
+    <h2 align="center">Number of active remote DBs: {{ remotedbs|length }}</h2>
+    {% for node in remotedbs %}
+    <h3 align="center">{{node}}</h3>
+    {% endfor %}
+  {% endif %}
+</div>
+<div>
+  <table class="table-hover" id="overview-table" align="center">
     <thead>
       <tr>
         {% for hdr,name in headers.items %}

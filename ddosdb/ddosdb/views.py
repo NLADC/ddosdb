@@ -260,7 +260,7 @@ def compare(request):
     return HttpResponse(render(request, "ddosdb/compare.html", context))
 
 
-def pretty_request(request):
+def _pretty_request(request):
     headers = ''
     for header, value in request.META.items():
         if not header.startswith('HTTP'):
@@ -485,8 +485,6 @@ def overview(request):
 
         response = es.search(index="ddosdb", q=q, size=10000, _source=source)
 
-        #        print(source)
-
         context["time"] = time.time() - start
 
         results = [x["_source"] for x in response["hits"]["hits"]]
@@ -519,6 +517,11 @@ def overview(request):
 
     except (SyntaxError, RequestError) as e:
         context["error"] = "Invalid query: " + str(e)
+
+    # Do something special in overview page if user is a super user
+    if user.is_superuser:
+        remotedbs = [{"name":"SIDN", "url":"http://127.0.0,1"}, {"name":"NBIP", "url":"http://127.0.0.1"}]
+        context["remotedbs"] = remotedbs
 
     return HttpResponse(render(request, "ddosdb/overview.html", context))
 

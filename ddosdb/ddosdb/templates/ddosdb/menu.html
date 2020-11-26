@@ -17,5 +17,10 @@
   </nav>
   {% if not request.user.is_authenticated %}
     <a class="btn btn-secondary" href="{% url 'request-access' %}">Request access</a>
+  {% elif request.user.is_superuser %}
+  {% comment %}
+    <a class="btn btn-secondary" target="_blank" href="{% url 'admin:remoteddosdb_changelist' %}">Remote Sync</a>
+  {% endcomment %}
+    <a class="btn btn-secondary" target="_blank" href="/admin/ddosdb/remoteddosdb/">Remote Sync</a>
   {% endif %}
 </div>
