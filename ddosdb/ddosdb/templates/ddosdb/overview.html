@@ -18,10 +18,19 @@
   {% endif %}
 <div>
   {% if remotedbs %}
-    <h2 align="center">Number of active remote DBs: {{ remotedbs|length }}</h2>
+  <p align="center">Number of active remote DBs: {{ remotedbs|length }} <br/>
     {% for node in remotedbs %}
-    <h3 align="center">{{node}}</h3>
+        {{node|get_item:'name'}} ({{node|get_item:'url'}})
     {% endfor %}
+    <br/>
+      Fingerprints to upload: |
+      {% for node in results %}
+        {% if node|get_item:'shareable' == True %}
+          {{node|get_item:'key'}} |
+        {% endif %}
+      {% endfor %}
+    </p>
+    <
   {% endif %}
 </div>
 <div>

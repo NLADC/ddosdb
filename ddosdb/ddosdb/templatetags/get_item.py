@@ -4,5 +4,5 @@ register = template.Library()
 
 
 @register.filter(name='get_item')
-def multiply(value, arg):
+def get_item(value, arg):
     return value.get(arg)
