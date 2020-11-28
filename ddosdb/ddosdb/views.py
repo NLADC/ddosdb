@@ -6,7 +6,7 @@ import demjson
 import requests
 import base64
 from datetime import datetime
-
+import collections
 import pprint
 import pandas as pd
 
@@ -464,7 +464,7 @@ def overview(request):
         context["headers"] = {
             #            "multivector_key"   : "multivector",
             "key": "key",
-            "shareable": "Shareable",
+            "shareable": "Sync",
             "start_time": "start time",
             "duration_sec": "duration (seconds)",
             "total_packets": "# packets",
@@ -515,15 +515,76 @@ def overview(request):
         else:
             context["results"] = results
 
+        # Count the number of shareable fingerprints
+        context["syncfps"] = collections.Counter([d['shareable'] for d in results])[True]
+
     except (SyntaxError, RequestError) as e:
         context["error"] = "Invalid query: " + str(e)
 
     # Do something special in overview page if user is a super user
     if user.is_superuser:
-        remotedbs = [{"name":"SIDN", "url":"http://127.0.0,1"}, {"name":"NBIP", "url":"http://127.0.0.1"}]
-        context["remotedbs"] = remotedbs
+        remotedbs = RemoteDdosDb.objects.filter(active=True)
+        rdbs = []
+        for remotedb in remotedbs:
+            rdbs.append({"name": remotedb.name})
+        context["remotedbs"] = rdbs
 
     return HttpResponse(render(request, "ddosdb/overview.html", context))
+
+
+@login_required()
+def remote_sync(request):
+    pp = pprint.PrettyPrinter(indent=4)
+    user: User = request.user
+
+    if not user.is_superuser:
+        raise PermissionDenied()
+
+    context = {
+        "user": user,
+    }
+
+    # Get all the shareable fingerprints
+    try:
+        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+
+        q = "shareable:true"
+
+        response = es.search(index="ddosdb", q=q, size=10000)
+        fingerprints = [x["_source"] for x in response["hits"]["hits"]]
+        fp_keys = [fp['key'] for fp in fingerprints]
+
+    except (SyntaxError, RequestError) as e:
+        context["error"] = "Invalid query: " + str(e)
+    except:
+        print("Could not setup a connection to Elasticsearch")
+        response = HttpResponse()
+        response.status_code = 503
+        response.reason_phrase = "Database unavailable"
+        return response
+
+    results = []
+    remotedbs = RemoteDdosDb.objects.filter(active=True)
+    rdbs = []
+    for rdb in remotedbs:
+        unk_fps = []
+        r = requests.post("{}/unknown-fingerprints".format(rdb.url), auth=(rdb.username, rdb.password), json=fp_keys)
+        if r.status_code == 200:
+            pp.pprint(r.json())
+            unk_fps = r.json()
+            if len(unk_fps) > 0:
+                fps_to_sync = list(filter(lambda fp: fp['key'] in unk_fps, fingerprints))
+                pp.pprint(fps_to_sync)
+
+                r = requests.post("{}/fingerprints".format(rdb.url),
+                                  auth=(rdb.username, rdb.password),
+                                  json=fps_to_sync)
+        rdbs.append({"name"   : rdb.name,
+                     "status" : "{0} ({1})".format(r.status_code, r.reason),
+                     "unk_fps": unk_fps})
+
+    context["result"] = rdbs
+    return HttpResponse(render(request, "ddosdb/remotesync.html", context))
 
 
 @login_required()
@@ -743,7 +804,7 @@ def fingerprints(request):
             return response
 
     elif request.method == "POST":
-        user_perms = auth_user_get_perms(request)
+        user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None or "ddosdb.add_fingerprint" not in user_perms["permissions"]:
             response = HttpResponse()

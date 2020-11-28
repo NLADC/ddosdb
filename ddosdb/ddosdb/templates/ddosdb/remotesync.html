@@ -1,0 +1,33 @@
+{% load static %}
+{% load get_class %}
+{% load get_item %}
+{% load multiply %}
+{% load humanize %}
+{% load precision %}
+{% load str_todatetime %}
+
+<!DOCTYPE html>
+<html lang="en">
+{% include 'ddosdb/header.html' %}
+<body class="bg-light">
+{% include 'ddosdb/menu.html' %}
+
+<h1 align="center" class="display-4 ddosdb-subtitle">Remote DDoS-DB Sync results</h1>
+
+  {% if result %}
+  <br/>
+  <p align="center">
+    {% for node in result %}
+      {{node|get_item:'name'}} : {{node|get_item:'status'}} :
+      {% for fp in node|get_item:'unk_fps' %}
+        {{ fp }},
+      {% endfor %}
+      <br/>
+    {% endfor %}
+  {% endif %}
+
+<div class="col-sm-12">
+  {% include "ddosdb/footer.html" %}
+</div>
+</body>
+</html>

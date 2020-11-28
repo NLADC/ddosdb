@@ -80,7 +80,7 @@ class RemoteDdosDb(models.Model):
 
     name = models.CharField('Remote DDoS-DB',max_length = 32,
         help_text="""A friendly name for the remote repository""")
-    api_url = models.URLField('Remote DDoS-DB URL',
+    url = models.URLField('Remote DDoS-DB URL',
         help_text="""The full URL for the remote sync API""")
     username = models.CharField('Remote Identity',max_length = 255)
 #    password = models.CharField(max_length=255)
