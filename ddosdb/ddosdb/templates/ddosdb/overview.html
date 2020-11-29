@@ -20,6 +20,7 @@
   <table class="table-hover" id="overview-table" align="center">
     <thead>
       <tr>
+        <th nowrap="nowrap"></th>
         {% for hdr,name in headers.items %}
           <th nowrap="nowrap">
           {% if hdr == o %}
@@ -46,6 +47,17 @@
     <tbody>
       {% for node in results %}
         <tr>
+          <td>
+          {% if user.username == node|get_item:"submitter"  or user.is_superuser %}
+              {% if o %}
+            <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}">
+              {% else %}
+            <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o=key&so={{ so }}&son={{ son }}">
+              {% endif %}
+              <img width="16" height="16" src="{% static "ddosdb/img/trash.png" %}">
+            </a>
+          {% endif %}
+          </td>
           {% for hdr,name in headers.items %}
           <td>
             {% if hdr == "multivector_key" %}

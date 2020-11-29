@@ -14,6 +14,7 @@ urlpatterns = [
     path('compare', views.compare, name='compare'),
     path('upload-file', views.upload_file, name='upload-file'),
     path('overview', views.overview, name='overview'),
+    path('delete', views.delete, name='delete'),
     path('remote-sync', views.remote_sync, name='remote-sync'),
     path('edit-comment', views.edit_comment, name='edit-comment'),
     path('toggle-shareable', views.toggle_shareable, name='toggle-shareable'),

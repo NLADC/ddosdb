@@ -533,6 +533,69 @@ def overview(request):
 
 
 @login_required()
+def delete(request):
+    pp = pprint.PrettyPrinter(indent=4)
+
+    user: User = request.user
+
+    start = time.time()
+    context = {
+        "user": user,
+        "permissions": user.get_all_permissions(),
+        "results": [],
+        "q": "",
+        "p": 1,
+        "o": "key",
+        "so": "asc",
+        "son": "desc",
+        "error": "",
+        "time": 0
+    }
+
+    if "q" in request.GET:
+        context["q"] = request.GET["q"]
+    if "o" in request.GET:
+        context["o"] = request.GET["o"]
+    if "so" in request.GET:
+        context["so"] = request.GET["so"]
+    if "son" in request.GET:
+        context["son"] = request.GET["son"]
+
+    if "key" in request.GET:
+        if "ddosdb.delete_fingerprint" in user.get_all_permissions():
+            try:
+                es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+                es.delete(index="ddosdb", doc_type="_doc", id=request.GET["key"], request_timeout=500)
+            except NotFoundError:
+                pass
+            except:
+                print("Could not setup a connection to Elasticsearch")
+                response = HttpResponse()
+                response.status_code = 503
+                response.reason_phrase = "Database unavailable"
+                return response
+
+    extra = []
+    if "q" in request.GET:
+        extra.append("q=" + request.GET["q"])
+    else:
+        extra.append("q=")
+    if "o" in request.GET:
+        extra.append("o=" + request.GET["o"])
+    if "so" in request.GET:
+        extra.append("so=" + request.GET["so"])
+    if "son" in request.GET:
+        extra.append("son=" + request.GET["son"])
+
+    extrastr = ""
+    if len(extra) > 0:
+        extrastr = "?" + "&".join(extra)
+    time.sleep(1)
+    return redirect("/overview{}".format(extrastr))
+
+
+
+@login_required()
 def remote_sync(request):
     pp = pprint.PrettyPrinter(indent=4)
     user: User = request.user
