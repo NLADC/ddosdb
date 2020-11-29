@@ -568,23 +568,36 @@ def remote_sync(request):
     rdbs = []
     for rdb in remotedbs:
         unk_fps = []
-        r = requests.post("{}/unknown-fingerprints".format(rdb.url), auth=(rdb.username, rdb.password), json=fp_keys)
-        if r.status_code == 200:
-            pp.pprint(r.json())
-            unk_fps = r.json()
-            if len(unk_fps) > 0:
-                fps_to_sync = list(filter(lambda fp: fp['key'] in unk_fps, fingerprints))
-                pp.pprint(fps_to_sync)
+        try:
+            r = requests.post("{}/unknown-fingerprints".format(rdb.url),
+                              auth=(rdb.username, rdb.password),
+                              json=fp_keys,
+                              timeout=10)
+            if r.status_code == 200:
+                pp.pprint(r.json())
+                unk_fps = r.json()
+                if len(unk_fps) > 0:
+                    fps_to_sync = list(filter(lambda fp: fp['key'] in unk_fps, fingerprints))
+                    pp.pprint(fps_to_sync)
 
-                r = requests.post("{}/fingerprints".format(rdb.url),
-                                  auth=(rdb.username, rdb.password),
-                                  json=fps_to_sync)
-        rdbs.append({"name"         : rdb.name,
-                     "status"       : r.status_code,
-                     "status_reason": r.reason,
-                     "unk_fps"      : unk_fps,
-                     "unk_fps_nr"   : len(unk_fps),
-                     })
+                    r = requests.post("{}/fingerprints".format(rdb.url),
+                                      auth=(rdb.username, rdb.password),
+                                      json=fps_to_sync)
+            rdbs.append({"name": rdb.name,
+                         "status": r.status_code,
+                         "status_reason": r.reason,
+                         "unk_fps": unk_fps,
+                         "unk_fps_nr": len(unk_fps),
+                         })
+        except:
+            rdbs.append({"name": rdb.name,
+                         "status": 555,
+                         "status_reason": "Connection failed",
+                         "unk_fps": [],
+                         "unk_fps_nr": 0,
+                         })
+            continue
+
 
     context["result"] = rdbs
     return HttpResponse(render(request, "ddosdb/remotesync.html", context))
