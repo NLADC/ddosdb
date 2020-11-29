@@ -579,9 +579,12 @@ def remote_sync(request):
                 r = requests.post("{}/fingerprints".format(rdb.url),
                                   auth=(rdb.username, rdb.password),
                                   json=fps_to_sync)
-        rdbs.append({"name"   : rdb.name,
-                     "status" : "{0} ({1})".format(r.status_code, r.reason),
-                     "unk_fps": unk_fps})
+        rdbs.append({"name"         : rdb.name,
+                     "status"       : r.status_code,
+                     "status_reason": r.reason,
+                     "unk_fps"      : unk_fps,
+                     "unk_fps_nr"   : len(unk_fps),
+                     })
 
     context["result"] = rdbs
     return HttpResponse(render(request, "ddosdb/remotesync.html", context))

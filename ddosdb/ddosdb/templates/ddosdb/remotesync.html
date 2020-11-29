@@ -14,17 +14,44 @@
 
 <h1 align="center" class="display-4 ddosdb-subtitle">Remote DDoS-DB Sync results</h1>
 
-  {% if result %}
-  <br/>
-  <p align="center">
-    {% for node in result %}
-      {{node|get_item:'name'}} : {{node|get_item:'status'}} :
-      {% for fp in node|get_item:'unk_fps' %}
-        {{ fp }},
+{% if result %}
+<div>
+  <table class="table-hover" id="overview-table" align="center">
+    <thead>
+      <tr>
+        <th nowrap="nowrap">Remote DDoS-DB</th>
+        <th nowrap="nowrap">Status</th>
+        <th nowrap="nowrap">Description</th>
+        <th nowrap="nowrap">Fingerprints synced</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for node in result %}
+        <tr>
+          <td>{{node|get_item:'name'}}</td>
+          <td>
+            {% if node|get_item:'status' == 200 or node|get_item:'status' == 201 %}
+              <img width="16" height="16" src="{% static "ddosdb/img/green_check.svg" %}">
+            {% else %}
+              <img width="16" height="16" src="{% static "ddosdb/img/red_cross.svg" %}">
+            {% endif %}
+          </td>
+          <td>{{node|get_item:'status_reason'}} ({{node|get_item:'status'}})</td>
+          <td>
+          {% if node|get_item:'unk_fps_nr' == 0 %}
+            {{node|get_item:'unk_fps_nr'}}
+          {% else %}
+            {% for fp in node|get_item:'unk_fps' %}
+              {{ fp }}<br/>
+            {% endfor %}
+          {% endif %}
+          </td>
+        </tr>
       {% endfor %}
-      <br/>
-    {% endfor %}
-  {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
 
 <div class="col-sm-12">
   {% include "ddosdb/footer.html" %}

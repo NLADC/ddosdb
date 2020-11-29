@@ -70,9 +70,9 @@
                   {% if user.username == node|get_item:"submitter"  or user.is_superuser %}
                     <a href="{% url "toggle-shareable" %}?q={{ q }}&key={{node|get_item:"key"}}&o={{ o }}&so={{ so }}&son={{ son }}">
                     {% if node|get_item:hdr == True %}
-                        <img align="middle" width="16" height="16" src="{% static "ddosdb/img/green_check.svg" %}">
+                        <img width="16" height="16" src="{% static "ddosdb/img/green_check.svg" %}">
                     {% else %}
-                        <img align="middle" width="16" height="16" src="{% static "ddosdb/img/red_cross.svg" %}">
+                        <img width="16" height="16" src="{% static "ddosdb/img/red_cross.svg" %}">
                     {% endif %}
                     </a>
                   {% else %}
