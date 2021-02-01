@@ -31,7 +31,11 @@ You can use two approaches to run the DDoSDB repository:
 
 The heart of DDoSDB is a **Django** Webapp. **Elasticsearch** is used for storing the fingerprints, the raw .json files and the *pcap* samples are stored locally on disk.
 
-If you don't know what Django is, but would like to understand how the DDoSDB website is setup, then please checkout the excellent [documentation](https://docs.djangoproject.com/en/) and familiarise yourself a bit with Django by following the [tutorial](https://docs.djangoproject.com/en/3.1/intro/tutorial01/). 
+If you don't know what Django is, but would like to understand how the DDoSDB website is setup, then please checkout the excellent [documentation](https://docs.djangoproject.com/en/) and familiarise yourself a bit with Django by following the [tutorial](https://docs.djangoproject.com/en/3.1/intro/tutorial01/).
+
+## Acknowledge
+
+The DDoS clearing house can be used by any community of organizations that wishes to collaboratively defend themselves against DDoS attacks. The development of the clearing house was partly funded by the European Union’s Horizon 2020 Research and Innovation program under Grant Agreement No 830927. It will be used by the Dutch National Anti-DDoS Coalition, a self-funded public-private initiative to collaboratively protect Dutch organizations and the wider Internet community from DDoS attacks. Websites: https://www.concordia-h2020.eu/ and https://www.nomoreddos.org/en/.
 
 ### Running a DDoSDB for development
 While for a production deployment you'll need a decent (wsgi capable) webserver - such as *Apache* or *Nginx* - as a front-end, an SQL database - PostgreSQL or MySQL - for user management and logging, and of course a production capable *Elasticsearch*; the requirements for a development or test setup are a lot less demanding. 
