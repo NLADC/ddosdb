@@ -16,7 +16,8 @@ printf "\n"
 printf "superuser e-mail address:"
 read email
 
-if [[ -z "$email" ]]; then
+if [ -z "$email" ]
+then
    printf '%s\n' "No e-mail address entered, defaulting to ddosdb@ddosdb.local"
    email="ddosdb@ddosdb.local"
 fi
