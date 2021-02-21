@@ -19,8 +19,8 @@ services:
         hard: 65536
     cap_add:
       - IPC_LOCK
-#    volumes:
-#      - /home/ddosdb/.ddosdb/elasticsearch/elasticsearch-data:/usr/share/elasticsearch/data
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
 
@@ -53,12 +53,12 @@ services:
     volumes:
       - static_volume:/home/ddosdb/ddosdb-static
     ports:
-      - 1337:8081
+      - 80:80
     depends_on:
       - ddosdb
 
 volumes:
   elasticsearch-data:
-    driver: local
+#    driver: local
   postgres_data:
   static_volume:
