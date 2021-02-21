@@ -1,0 +1,64 @@
+version: '3.7'
+
+services:
+
+  # Elasticsearch Docker Images: https://www.docker.elastic.co/
+  # version newest 7.8.0
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.11
+#    container_name: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+#    volumes:
+#      - /home/ddosdb/.ddosdb/elasticsearch/elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=ddosdb
+      - POSTGRES_PASSWORD=ddosdb
+      - POSTGRES_DB=ddosdb
+
+  ddosdb:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: gunicorn website.wsgi:application --bind 0.0.0.0:8000
+    env_file:
+      - ./env.dev
+    volumes:
+      - static_volume:/home/ddosdb/ddosdb-static
+    expose:
+     - 8000
+    depends_on:
+      - db
+      - elasticsearch
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/ddosdb/ddosdb-static
+    ports:
+      - 1337:8081
+    depends_on:
+      - ddosdb
+
+volumes:
+  elasticsearch-data:
+    driver: local
+  postgres_data:
+  static_volume:

@@ -1,0 +1,10 @@
+django-sslserver
+pandas
+nclib
+elasticsearch
+demjson
+requests
+django-debug-toolbar
+django-searchable-encrypted-fields
+psycopg2-binary
+gunicorn
