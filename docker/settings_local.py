@@ -19,7 +19,7 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 #ALLOWED_HOSTS = ['*']
 # Raw path to fingerprint and attack vector data
 # pcap and json are stored here
-RAW_PATH = "/opt/ddosdb-data/"
+RAW_PATH = "/home/ddosdb/ddosdb-data/"
 
 # Which email should be used for access requests
 ACCESS_REQUEST_EMAIL = ""

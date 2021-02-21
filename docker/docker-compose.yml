@@ -41,7 +41,8 @@ services:
     env_file:
       - ./env.dev
     volumes:
-      - static_volume:/home/ddosdb/ddosdb-static
+      - static_volume:/home/ddosdb/ddosdb-static/
+      - data_volume:/home/ddosdb/ddosdb-data/
     expose:
      - 8000
     depends_on:
@@ -51,7 +52,8 @@ services:
   nginx:
     build: ./nginx
     volumes:
-      - static_volume:/home/ddosdb/ddosdb-static
+      - static_volume:/home/ddosdb/ddosdb-static/
+      - data_volume:/home/ddosdb/ddosdb-data/
     ports:
       - 80:80
     depends_on:
@@ -62,3 +64,4 @@ volumes:
 #    driver: local
   postgres_data:
   static_volume:
+  data_volume:

@@ -1,11 +1,4 @@
-# docker build -t temp:v1 .
-# docker run -it --rm -p 127.0.0.1:8081:80/tcp temp:v1
 # docker exec -it 5e57902b199b /bin/bash
-# docker-compose up --build --remove-orphans
-# docker-compose exec web python manage.py flush --no-input
-# docker-compose exec ddosdb python /opt/ddosdb/manage.py migrate --noinput
-# docker-compose exec ddosdb python /opt/ddosdb/manage.py createsuperuser --noinput
-#FROM python:3.8.3-alpine
 FROM python:latest
 
 # set environment variables
@@ -32,6 +25,7 @@ COPY docker/settings_local.py /home/ddosdb/website/
 COPY docker/entrypoint.sh /home/ddosdb/
 
 RUN mkdir /home/ddosdb/ddosdb-static
+RUN mkdir /home/ddosdb/ddosdb-data/
 
 # chown all the files to the ddosdb user
 RUN chown -R ddosdb:ddosdb $HOME
