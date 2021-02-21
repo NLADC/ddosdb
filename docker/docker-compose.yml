@@ -39,7 +39,7 @@ services:
       dockerfile: docker/Dockerfile
     command: gunicorn website.wsgi:application --bind 0.0.0.0:8000
     env_file:
-      - ./env.dev
+      - ./environment.prod
     volumes:
       - static_volume:/home/ddosdb/ddosdb-static/
       - data_volume:/home/ddosdb/ddosdb-data/
