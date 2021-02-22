@@ -197,7 +197,7 @@ def query(request):
             context["time"] = time.time() - start
 
             results = [x["_source"] for x in response["hits"]["hits"]]
-            context["amount"] = response["hits"]["total"]
+            context["amount"] = response["hits"]["total"]["value"]
             context["pages"] = range(1, int(math.ceil(context["amount"] / 10)) + 1)
 
             #            for x in results:
@@ -469,7 +469,8 @@ def overview(request):
             "duration_sec": "duration (seconds)",
             "total_packets": "# packets",
             #            "amplifiers_size"    : "IP's involved",
-            "ips_involved": "IP's involved",
+#            "ips_involved": "IP's involved",
+            "total_ips": "IP's involved",
             "avg_bps": "bits/second",
             #            "avg_pps"           : "packets/second",
             "total_dst_ports": "# ports",
@@ -509,7 +510,8 @@ def overview(request):
                 df.sort_values(by=o, ascending=(context["so"] == "asc"), inplace=True)
 
             # Make sure some columns are shown as int
-            df = df.astype({"ips_involved": int})
+#            df = df.astype({"ips_involved": int})
+            df = df.astype({"total_ips": int})
 
             context["results"] = df.to_dict(orient='records')
         else:
@@ -736,9 +738,6 @@ def edit_comment(request):
         "permissions": user.get_all_permissions(),
     }
 
-    print()
-    print(context["permissions"])
-
     key = ""
 
     if request.method == "GET":
@@ -775,7 +774,7 @@ def edit_comment(request):
             result = es.search(index="ddosdb", q="key:{}".format(key), size=1)
             fp = result["hits"]["hits"][0]["_source"]
             fp["comment"] = request.POST["comment"]
-            es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
+#            es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
         except NotFoundError:
             print("NotFoundError for {}".format(key))
             pass
@@ -785,7 +784,7 @@ def edit_comment(request):
             response.status_code = 503
             response.reason_phrase = "Database unavailable"
             return response
-        if result["submitter"] == user.username or user.is_superuser:
+        if fp["submitter"] == user.username or user.is_superuser:
             es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
         else:
             raise PermissionDenied()
