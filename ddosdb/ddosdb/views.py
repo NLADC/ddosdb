@@ -510,8 +510,10 @@ def overview(request):
                 df.sort_values(by=o, ascending=(context["so"] == "asc"), inplace=True)
 
             # Make sure some columns are shown as int
-#            df = df.astype({"ips_involved": int})
-            df = df.astype({"total_ips": int})
+            if "total_ips" in df.columns:
+                df = df.astype({"total_ips": int})
+            if "ips_involved" in df.columns:
+                df = df.astype({"ips_involved": int})
 
             context["results"] = df.to_dict(orient='records')
         else:
