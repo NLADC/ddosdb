@@ -2,6 +2,10 @@
 
 curl -XDELETE "localhost:9200/ddosdb"
 
+curl -XPUT -H "Content-Type: application/json" "localhost:9200/ddosdb"
+
+exit 0
+
 curl -XPUT -H "Content-Type: application/json" "localhost:9200/ddosdb" --data '
 {
     "mappings": {
