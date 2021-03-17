@@ -1,3 +1,24 @@
+
+<p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/ddos_dissector/blob/3.0/media/header.png?raw=true"></p>
+
+
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+![Python](https://img.shields.io/badge/python-v3.6+-blue.svg)
+[![Build Status](https://api.travis-ci.com/joaoceron/new_dissector.svg?token=8TMUECLCUVrxas7wXfVY&branch=master)](https://travis-ci.com/github/joaoceron/new_dissector)
+[![GitHub Issues](https://img.shields.io/github/issues/ddos-clearing-house/ddos_dissector)](https://github.com/ddos-clearing-house/ddos_dissector/issues)
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+<img alt="GitHub commits since tagged version" src="https://img.shields.io/github/last-commit/ddos-clearing-house/ddos_dissector">
+
+ <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/concordia-logo.png?raw=true"></p>
+ <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/No-More-DDoS-2-removebg-preview.png?raw=true"></p>
+
+
+
+# DDoSDB
+
 # Deploying DDoSDB for production
 
 - [Prerequisites](#prerequisites)
@@ -13,13 +34,15 @@
     - [Create local settings](#create-local-settings)
     - [Do the Django migrations](#do-the-django-migrations)
 - [Restart Apache](#restart-apache)
+- [Acknowledgements](#ackmowledgements)
 
 
 
 ## Prerequisites
 
 We assume (and this is tested on) a debian based setup, although probably any ubuntu based distro will do.
-We further assume a user called _ddosdb_ with sudo privileges.
+We further assume a user called _ddosdb_ with sudo privileges. 
+You may have to customize the process if you opted to use a different flavour of Linux since default installation locations etc. can vary between distributions.
 
 ## Clone the repository
 
@@ -144,3 +167,7 @@ python3 /opt/ddosdb/manage.py createsuperuser
 ```bash
 sudo service apache2 restart
 ```
+
+## Acknowledgements
+
+The development of the clearing house was partly funded by the European Union’s Horizon 2020 Research and Innovation program under Grant Agreement No 830927. It will be used by the Dutch National Anti-DDoS Coalition, a self-funded public-private initiative to collaboratively protect Dutch organizations and the wider Internet community from DDoS attacks. Websites: https://www.concordia-h2020.eu/ and https://www.nomoreddos.org/en/

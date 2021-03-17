@@ -11,33 +11,15 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 <img alt="GitHub commits since tagged version" src="https://img.shields.io/github/last-commit/ddos-clearing-house/ddos_dissector">
 
- <p align="center">
-  <img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/concordia-logo.png?raw=true">
+ <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/concordia-logo.png?raw=true"></p>
  <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/No-More-DDoS-2-removebg-preview.png?raw=true"></p>
 
-</p>
 
 
 
 # DDoSDB
-## How to start?
 
-You can use two approaches to run the DDoSDB repository:
-
-- run [DDoSDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box)
-- install from [scratch](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) (Apache, Elastic Search, Django, etc...)
-
-## Getting to know DDoSDB DDoSDB components
-
-The heart of DDoSDB is a **Django** Webapp. **Elasticsearch** is used for storing the fingerprints, the raw .json files and the *pcap* samples are stored locally on disk.
-
-If you don't know what Django is, but would like to understand how the DDoSDB website is setup, then please checkout the excellent [documentation](https://docs.djangoproject.com/en/) and familiarise yourself a bit with Django by following the [tutorial](https://docs.djangoproject.com/en/3.1/intro/tutorial01/).
-
-## Acknowledge
-
-The DDoS clearing house can be used by any community of organizations that wishes to collaboratively defend themselves against DDoS attacks. The development of the clearing house was partly funded by the European Union’s Horizon 2020 Research and Innovation program under Grant Agreement No 830927. It will be used by the Dutch National Anti-DDoS Coalition, a self-funded public-private initiative to collaboratively protect Dutch organizations and the wider Internet community from DDoS attacks. Websites: https://www.concordia-h2020.eu/ and https://www.nomoreddos.org/en/.
-
-### Running a DDoSDB for development
+## Running a DDoSDB for development
 While for a production deployment you'll need a decent (wsgi capable) webserver - such as *Apache* or *Nginx* - as a front-end, an SQL database - PostgreSQL or MySQL - for user management and logging, and of course a production capable *Elasticsearch*; the requirements for a development or test setup are a lot less demanding. 
 
 #### Web server
@@ -124,6 +106,6 @@ If everything seems to be running you can upload fingerprints to the database us
 
 Once you have a number of (example) fingerprints in the ddosdb, you can get an overview of all entries on the [overview page](https://localhost:8000/overview). 
 
-## Acknowledge
+## Acknowledgements
 
 The development of the clearing house was partly funded by the European Union’s Horizon 2020 Research and Innovation program under Grant Agreement No 830927. It will be used by the Dutch National Anti-DDoS Coalition, a self-funded public-private initiative to collaboratively protect Dutch organizations and the wider Internet community from DDoS attacks. Websites: https://www.concordia-h2020.eu/ and https://www.nomoreddos.org/en/
