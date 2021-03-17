@@ -98,7 +98,7 @@ docker-compose up --build --remove-orphans -d
 However, this may result in unpredictable behaviour or crashes when the updates are major.
 So using the first approach is recommended. 
 
-##View logging from the container
+## View logging from the container
 
 In some cases it may be desirable to see logging from the various services from within the container.
 
