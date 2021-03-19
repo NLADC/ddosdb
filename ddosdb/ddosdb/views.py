@@ -336,6 +336,9 @@ def upload_file(request):
             if "attackers" in data:
                 data["attackers_size"] = len(data["attackers"])
 
+            if "tags" in data:
+                data["tags"] = sorted(data["tags"])
+
             data["ips_involved"] = data["amplifiers_size"] + data["attackers_size"]
 
             data["comment"] = ""
@@ -466,14 +469,16 @@ def overview(request):
             "key": "key",
             "shareable": "Sync",
             "start_time": "start time",
-            "duration_sec": "duration (seconds)",
+            "tags": "tags",
+            "file_type": "capture",
+            #            "duration_sec": "duration (seconds)",
             "total_packets": "# packets",
             #            "amplifiers_size"    : "IP's involved",
 #            "ips_involved": "IP's involved",
             "total_ips": "IP's involved",
             "avg_bps": "bits/second",
             #            "avg_pps"           : "packets/second",
-            "total_dst_ports": "# ports",
+#            "total_dst_ports": "# ports",
             "submit_timestamp": "submitted at",
             "submitter": "submitted by",
             "comment": "comment",
@@ -486,15 +491,18 @@ def overview(request):
 
         response = es.search(index="ddosdb", q=q, size=10000, _source=source)
 
+        # pp.pprint(response)
+
         context["time"] = time.time() - start
 
         results = [x["_source"] for x in response["hits"]["hits"]]
 
-        #        pp.pprint(results)
+        pp.pprint(results)
         # Only do this if there are actual results...
         # and more than one, since one result does not need sorting
         if len(results) > 1:
             df = pd.DataFrame.from_dict(results)
+            pp.pprint(df)
             o = [context["o"]][0]
 
             # Do a special sort if the column to sort by is 'submitter'

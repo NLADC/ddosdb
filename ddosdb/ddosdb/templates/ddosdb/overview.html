@@ -5,6 +5,7 @@
 {% load humanize %}
 {% load precision %}
 {% load str_todatetime %}
+{% load short_list %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -105,6 +106,10 @@
                 {{node|get_item:hdr|precision:0|intcomma}}
             {% elif hdr == "submit_timestamp" %}
                 {{node|get_item:hdr|str_todatetime|date:'Y-m-d H:i:s'}}
+            {% elif hdr == "tags" %}
+              <div title="{{node|get_item:hdr|short_list:1}}">
+                {{node|get_item:hdr|short_list:0}}
+              </div>
             {% elif hdr == "comment" %}
               <div title="{{node|get_item:hdr}}">
                 {{node|get_item:hdr|truncatechars:10}}
