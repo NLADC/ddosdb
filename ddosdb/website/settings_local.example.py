@@ -57,3 +57,6 @@ RAW_PATH = "storage/"
 
 # Hosts that Elasticsearch runs on
 ELASTICSEARCH_HOSTS = ["127.0.0.1:9200"]
+
+# MongoDB URI
+MONGODB="mongodb://127.0.0.1:27017"

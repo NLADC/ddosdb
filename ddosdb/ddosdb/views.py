@@ -9,6 +9,7 @@ from datetime import datetime
 import collections
 import pprint
 import pandas as pd
+from pymongo import MongoClient
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -26,6 +27,8 @@ from django.core.exceptions import PermissionDenied
 
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import RequestError, NotFoundError
+
+
 
 #from ddosdb.enrichment.team_cymru import TeamCymru
 from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb
@@ -402,6 +405,13 @@ def upload_file(request):
                 response.reason_phrase = str(e)
                 return response
 
+            # mdb_client = MongoClient(settings.MONGODB)
+            # mdb = mdb_client['ddosdb']
+            # mdb_fps = mdb['fingerprints']
+            # mdb_fps.insert(data)
+            mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
+            mdb.insert(data)
+
         if "pcap" in request.FILES:
             try:
                 os.remove(settings.RAW_PATH + filename + ".pcap")
@@ -464,6 +474,8 @@ def overview(request):
     try:
         # offset = 10 * (context["p"] - 1)
         es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
+
         context["headers"] = {
             #            "multivector_key"   : "multivector",
             "key": "key",
@@ -490,19 +502,23 @@ def overview(request):
             q = context["q"]
 
         response = es.search(index="ddosdb", q=q, size=10000, _source=source)
-
         # pp.pprint(response)
 
+        mdb_resp = list(mdb.find())
+ #       pp.pprint(mdb_resp)
+#        pp.pprint(mdb_resp[0])
+
         context["time"] = time.time() - start
+        print(context["time"])
 
         results = [x["_source"] for x in response["hits"]["hits"]]
 
-        pp.pprint(results)
+#        pp.pprint(results)
         # Only do this if there are actual results...
         # and more than one, since one result does not need sorting
         if len(results) > 1:
             df = pd.DataFrame.from_dict(results)
-            pp.pprint(df)
+            # pp.pprint(df)
             o = [context["o"]][0]
 
             # Do a special sort if the column to sort by is 'submitter'
