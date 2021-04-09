@@ -9,7 +9,7 @@ from datetime import datetime
 import collections
 import pprint
 import pandas as pd
-from pymongo import MongoClient
+#from pymongo import MongoClient
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -409,8 +409,8 @@ def upload_file(request):
             # mdb = mdb_client['ddosdb']
             # mdb_fps = mdb['fingerprints']
             # mdb_fps.insert(data)
-            mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
-            mdb.insert(data)
+            # mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
+            # mdb.insert(data)
 
         if "pcap" in request.FILES:
             try:
@@ -474,7 +474,7 @@ def overview(request):
     try:
         # offset = 10 * (context["p"] - 1)
         es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-        mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
+        # mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
 
         context["headers"] = {
             #            "multivector_key"   : "multivector",
@@ -504,7 +504,7 @@ def overview(request):
         response = es.search(index="ddosdb", q=q, size=10000, _source=source)
         # pp.pprint(response)
 
-        mdb_resp = list(mdb.find())
+        # mdb_resp = list(mdb.find())
  #       pp.pprint(mdb_resp)
 #        pp.pprint(mdb_resp[0])
 
