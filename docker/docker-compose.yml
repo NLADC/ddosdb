@@ -13,8 +13,10 @@ services:
     volumes:
       - mongodb-data:/data/db
       - ./mongo-entrypoint/:/docker-entrypoint-initdb.d/
-    ports:
-      - 127.0.0.1:27017:27017
+#    ports:
+#      - 127.0.0.1:27017:27017
+    expose:
+      - 27017
     restart: unless-stopped
 
   mongo-express:
