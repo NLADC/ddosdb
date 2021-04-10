@@ -9,7 +9,10 @@ from datetime import datetime
 import collections
 import pprint
 import pandas as pd
-#from pymongo import MongoClient
+from distutils.util import strtobool
+from pymongo import MongoClient
+from pymongo.errors import ServerSelectionTimeoutError
+from pymongo import ReturnDocument
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -25,14 +28,60 @@ from django.http import JsonResponse
 
 from django.core.exceptions import PermissionDenied
 
-from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import RequestError, NotFoundError
-
-
 
 #from ddosdb.enrichment.team_cymru import TeamCymru
 from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb
 
+
+def _mdb():
+    return MongoClient("mongodb://"+settings.MONGODB, serverSelectionTimeoutMS=100).ddosdb.fingerprints
+
+
+def _insert(data):
+    _mdb().insert(data)
+
+
+def _search(query=None, fields=None):
+    result = list(_mdb().find(query, fields))
+    return result
+
+
+def _search_one(query=None, fields=None):
+    result = _mdb().find_one(query, fields)
+    return result
+
+
+def _update(query=None, fields=None):
+    result = _mdb().find_one_and_update(query, fields)
+    return result
+
+
+def _delete(query=None):
+    result = _mdb().delete_many(query)
+    return result
+
+
+def _pretty_request(request):
+    headers = ''
+    for header, value in request.META.items():
+        if not header.startswith('HTTP'):
+            continue
+        header = '-'.join([h.capitalize() for h in header[5:].lower().split('_')])
+        headers += '{}: {}\n'.format(header, value)
+
+    return (
+        '{method} HTTP/1.1\n'
+        'Content-Length: {content_length}\n'
+        'Content-Type: {content_type}\n'
+        '{headers}\n\n'
+        '{body}'
+    ).format(
+        method=request.method,
+        content_length=request.META['CONTENT_LENGTH'],
+        content_type=request.META['CONTENT_TYPE'],
+        headers=headers,
+        body=request.body,
+    )
 
 def index(request):
     context = {}
@@ -166,7 +215,100 @@ def signout(request):
 
 
 @login_required()
+def details(request):
+    pp = pprint.PrettyPrinter(indent=4)
+
+    start = time.time()
+    context = {
+        "results": [],
+        "time": 0,
+        "error": ""
+    }
+
+    if "key" in request.GET:
+        key = request.GET["key"]
+        context["key"] = key
+
+        try:
+            results = _search({'key': key}, {'_id': 0})
+            context["results"] = results
+        except Exception as e:
+            context["error"] = "Invalid query: " + str(e)
+
+        return HttpResponse(render(request, "ddosdb/details.html", context))
+    else:
+        return redirect("/overview")
+
+
+@login_required()
 def query(request):
+    pp = pprint.PrettyPrinter(indent=4)
+
+    start = time.time()
+    context = {
+        "results": [],
+        "comments": {},
+        "q": "",
+        "p": 1,
+        "o": "_score",
+        "pages": range(1, 1),
+        "amount": 0,
+        "error": "",
+        "time": 0
+    }
+
+    if "q" in request.GET:
+        if "p" in request.GET:
+            context["p"] = int(request.GET["p"])
+        if "o" in request.GET:
+            context["o"] = request.GET["o"]
+
+        q = context["q"] = request.GET["q"]
+
+        try:
+            results = _search({'key': q}, {'_id': 0})
+            pp.pprint(results)
+            context["results"] = results
+        #     es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        #     response = es.search(index="ddosdb", q=q, from_=offset, size=10, sort=context["o"])
+        #     context["time"] = time.time() - start
+        #
+        #     results = [x["_source"] for x in response["hits"]["hits"]]
+        #     context["amount"] = response["hits"]["total"]["value"]
+        #     context["pages"] = range(1, int(math.ceil(context["amount"] / 10)) + 1)
+        #
+        #     #            for x in results:
+        #     #                if "comments" in x:
+        #     #                    context["comments"][x["key"]] = x.pop("comments", None)
+        #
+        #     def clean_result(x):
+        #         # Remove the start_timestamp attribute (if it exists)
+        #         x.pop("start_timestamp", None)
+        #
+        #         #                for y in x["src_ips"]:
+        #         #                    y.pop("as", None)
+        #         #                    y.pop("cc", None)
+        #
+        #         return x
+        #
+        #     results = map(clean_result, results)
+        #     results = list(results)
+        #
+        #     if request.user.has_perm("ddosdb.view_blame"):
+        #         for result in results:
+        #             try:
+        #                 result["blame"] = Blame.objects.get(key=result["key"]).to_dict()
+        #             except ObjectDoesNotExist:
+        #                 pass
+        #
+        #     context["results"] = results
+        except Exception as e:
+            context["error"] = "Invalid query: " + str(e)
+
+    return HttpResponse(render(request, "ddosdb/query.html", context))
+
+@login_required()
+def query_old(request):
     start = time.time()
     context = {
         "results": [],
@@ -234,56 +376,33 @@ def query(request):
     return HttpResponse(render(request, "ddosdb/query.html", context))
 
 
-@login_required()
-def compare(request):
-    items = {}
-    similarities = {}
-    es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-
-    for key in request.GET.getlist("key"):
-        items[key] = es.get(index="ddosdb", doc_type="_doc", id=key)["_source"]
-
-    # for x in es.search(index="ddosdb", q="pcap", size=50)["hits"]["hits"]:
-    #     items[x["_id"]] = x["_source"]
-
-    for key in items:
-        similarities[key] = {}
-        my_set = set([x["ip"] for x in items[key]["src_ips"]])
-        for other_key in items:
-            other_set = set([x["ip"] for x in items[other_key]["src_ips"]])
-            similarities[key][other_key] = {
-                "percentage": len(my_set.intersection(other_set)) / len(other_set),
-                "fraction": str(len(my_set.intersection(other_set))) + "/" + str(len(other_set))
-            }
-
-    context = {
-        "similarities": similarities,
-        "items": items
-    }
-    return HttpResponse(render(request, "ddosdb/compare.html", context))
-
-
-def _pretty_request(request):
-    headers = ''
-    for header, value in request.META.items():
-        if not header.startswith('HTTP'):
-            continue
-        header = '-'.join([h.capitalize() for h in header[5:].lower().split('_')])
-        headers += '{}: {}\n'.format(header, value)
-
-    return (
-        '{method} HTTP/1.1\n'
-        'Content-Length: {content_length}\n'
-        'Content-Type: {content_type}\n'
-        '{headers}\n\n'
-        '{body}'
-    ).format(
-        method=request.method,
-        content_length=request.META['CONTENT_LENGTH'],
-        content_type=request.META['CONTENT_TYPE'],
-        headers=headers,
-        body=request.body,
-    )
+# @login_required()
+# def compare(request):
+#     items = {}
+#     similarities = {}
+#     es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+#
+#     for key in request.GET.getlist("key"):
+#         items[key] = es.get(index="ddosdb", doc_type="_doc", id=key)["_source"]
+#
+#     # for x in es.search(index="ddosdb", q="pcap", size=50)["hits"]["hits"]:
+#     #     items[x["_id"]] = x["_source"]
+#
+#     for key in items:
+#         similarities[key] = {}
+#         my_set = set([x["ip"] for x in items[key]["src_ips"]])
+#         for other_key in items:
+#             other_set = set([x["ip"] for x in items[other_key]["src_ips"]])
+#             similarities[key][other_key] = {
+#                 "percentage": len(my_set.intersection(other_set)) / len(other_set),
+#                 "fraction": str(len(my_set.intersection(other_set))) + "/" + str(len(other_set))
+#             }
+#
+#     context = {
+#         "similarities": similarities,
+#         "items": items
+#     }
+#     return HttpResponse(render(request, "ddosdb/compare.html", context))
 
 
 @csrf_exempt
@@ -384,33 +503,16 @@ def upload_file(request):
             # Save JSON upload to file (not really needed to be honest)
             demjson.encode_to_file(settings.RAW_PATH + filename + ".json", data)
             # JSON database insert
-            es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
 
             try:
-                es.delete(index="ddosdb", doc_type="_doc", id=filename, request_timeout=500)
-            except NotFoundError:
-                pass
-            except:
-                print("Could not setup a connection to Elasticsearch")
+                _delete({'key': data['key']})
+                _insert(data)
+            except ServerSelectionTimeoutError:
+                print("ServerSelectionTimeoutError: could not reach MongoDB")
                 response = HttpResponse()
-                response.status_code = 503
-                response.reason_phrase = "Database unavailable"
+                response.status_code = 500
+                response.reason_phrase = "Error reaching MongoDB"
                 return response
-
-            try:
-                es.index(index="ddosdb", doc_type="_doc", id=filename, body=data, request_timeout=500)
-            except RequestError as e:
-                response = HttpResponse()
-                response.status_code = 400
-                response.reason_phrase = str(e)
-                return response
-
-            # mdb_client = MongoClient(settings.MONGODB)
-            # mdb = mdb_client['ddosdb']
-            # mdb_fps = mdb['fingerprints']
-            # mdb_fps.insert(data)
-            # mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
-            # mdb.insert(data)
 
         if "pcap" in request.FILES:
             try:
@@ -473,8 +575,6 @@ def overview(request):
 
     try:
         # offset = 10 * (context["p"] - 1)
-        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-        # mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
 
         context["headers"] = {
             #            "multivector_key"   : "multivector",
@@ -495,23 +595,22 @@ def overview(request):
             "submitter": "submitted by",
             "comment": "comment",
         }
-        source = ','.join(list(context["headers"].keys()))
+
+        # Only retrieve the fields that we display
+        fields = dict.fromkeys(list(context["headers"].keys()), 1)
 
         q = "*"
         if (context["q"]):
             q = context["q"]
 
-        response = es.search(index="ddosdb", q=q, size=10000, _source=source)
-        # pp.pprint(response)
-
-        # mdb_resp = list(mdb.find())
- #       pp.pprint(mdb_resp)
-#        pp.pprint(mdb_resp[0])
+        mdb_resp = _search(fields=fields)
+        # pp.pprint(mdb_resp)
 
         context["time"] = time.time() - start
         print(context["time"])
 
-        results = [x["_source"] for x in response["hits"]["hits"]]
+#        results = [x["_source"] for x in response["hits"]["hits"]]
+        results = mdb_resp
 
 #        pp.pprint(results)
         # Only do this if there are actual results...
@@ -523,7 +622,7 @@ def overview(request):
 
             # Do a special sort if the column to sort by is 'submitter'
             # Since people can put e-mail addresses in starting with upper/lower case
-            # Change if statement to the following if you want to sort case insensitive
+            # Change the if statement to the following if you want to sort case insensitive
             # on any column with string values: if df.dtypes[o] == np.object:
             if o == "submitter":
                 onew = o + "_tmp"
@@ -546,8 +645,8 @@ def overview(request):
         # Count the number of shareable fingerprints
         context["syncfps"] = collections.Counter([d['shareable'] for d in results])[True]
 
-    except (SyntaxError, RequestError) as e:
-        context["error"] = "Invalid query: " + str(e)
+    except ServerSelectionTimeoutError as e:
+        context["error"] = " ServerSelectionTimeoutError "
 
     # Do something special in overview page if user is a super user
     if user.is_superuser:
@@ -591,17 +690,7 @@ def delete(request):
 
     if "key" in request.GET:
         if "ddosdb.delete_fingerprint" in user.get_all_permissions():
-            try:
-                es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-                es.delete(index="ddosdb", doc_type="_doc", id=request.GET["key"], request_timeout=500)
-            except NotFoundError:
-                pass
-            except:
-                print("Could not setup a connection to Elasticsearch")
-                response = HttpResponse()
-                response.status_code = 503
-                response.reason_phrase = "Database unavailable"
-                return response
+           _delete({"key": request.GET["key"]})
 
     extra = []
     if "q" in request.GET:
@@ -618,9 +707,7 @@ def delete(request):
     extrastr = ""
     if len(extra) > 0:
         extrastr = "?" + "&".join(extra)
-    time.sleep(1)
     return redirect("/overview{}".format(extrastr))
-
 
 
 @login_required()
@@ -706,36 +793,25 @@ def toggle_shareable(request):
     else:
         return redirect('overview')
 
-    es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+    shareable = False
+
+    if "shareable" in request.GET:
+        shareable = not strtobool(request.GET["shareable"])
+
     try:
-        result = es.search(index="ddosdb", q="key:{}".format(key), size=1)
-        fp = result["hits"]["hits"][0]["_source"]
-    except NotFoundError:
-        print("NotFoundError for {}".format(key))
-        pass
-    except:
-        print("Could not setup a connection to Elasticsearch")
+        fp = _search_one({"key": key}, {"shareable" : 1, "key" : 1, "submitter" : 1})
+        if fp["submitter"] == user.username or user.is_superuser:
+            _update({'key': key}, {'$set': {"shareable": shareable}})
+        else:
+            raise PermissionDenied()
+    except Exception as e:
+        print(e)
         response = HttpResponse()
         response.status_code = 503
         response.reason_phrase = "Database unavailable"
         return response
-    if fp["submitter"] == user.username or user.is_superuser:
-        if "shareable" in fp:
-            share = fp["shareable"]
-            if share is None or share is False:
-                share = True
-            else:
-                share = False
-            fp["shareable"] = share
-        else:
-            fp["shareable"] = False
 
-        es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
-        es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
-    else:
-        raise PermissionDenied()
 
-    time.sleep(1)
     extra = []
     if "q" in request.GET:
         extra.append("q=" + request.GET["q"])
@@ -774,20 +850,20 @@ def edit_comment(request):
         else:
             return redirect('overview')
 
-        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
+
         try:
-            fp = es.search(index="ddosdb", q="key:{}".format(key), size=1)
+            fp = mdb.find_one({"key": key})
+            pp.pprint(fp)
         except:
-            print("Could not setup a connection to Elasticsearch")
+            print("Could not setup a connection to MongoDB")
             response = HttpResponse()
             response.status_code = 503
             response.reason_phrase = "Database unavailable"
             return response
 
-        results = fp["hits"]["hits"][0]["_source"]
-
-        if results["submitter"] == user.username or user.is_superuser:
-            context["node"] = results
+        if fp["submitter"] == user.username or user.is_superuser:
+            context["node"] = fp
             return HttpResponse(render(request, "ddosdb/edit-comment.html", context))
         else:
             raise PermissionDenied()
@@ -795,27 +871,21 @@ def edit_comment(request):
     elif request.method == "POST":
         key = request.POST["key"]
 
-        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-        try:
-            result = es.search(index="ddosdb", q="key:{}".format(key), size=1)
-            fp = result["hits"]["hits"][0]["_source"]
-            fp["comment"] = request.POST["comment"]
-#            es.delete(index="ddosdb", doc_type="_doc", id=key, request_timeout=500)
-        except NotFoundError:
-            print("NotFoundError for {}".format(key))
-            pass
-        except:
-            print("Could not setup a connection to Elasticsearch")
-            response = HttpResponse()
-            response.status_code = 503
-            response.reason_phrase = "Database unavailable"
-            return response
+        mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
+
+        fp = mdb.find_one({"key": key}, {"comment" : 1, "key" : 1, "submitter" : 1})
         if fp["submitter"] == user.username or user.is_superuser:
-            es.index(index="ddosdb", doc_type="_doc", id=key, body=fp, request_timeout=500)
+            try:
+                mdb.find_one_and_update({'key': key}, {'$set': {"comment": request.POST["comment"]}})
+            except Exception as e:
+                print(e)
+                print("Could not setup a connection to Elasticsearch")
+                response = HttpResponse()
+                response.status_code = 503
+                response.reason_phrase = "Database unavailable"
+                return response
         else:
             raise PermissionDenied()
-
-        time.sleep(1)
         return redirect("overview")
 
 def _auth_user_get_perms(request):
@@ -884,6 +954,8 @@ def fingerprints(request):
     """POST method will store all fingerprints present in the body"""
     """It will remove the shareable property (i.e. set it to False), to by default prevent it from transfering further """
     """Uses Basic authentication and checks for \"ddosdb.add_fingerprint\" permissions"""
+
+    # curl -X POST -H "Content-Type: application/json" -u user:password -d @test.json http://localhost:8000/fingerprints
     if request.method == "GET":
 
         q = "*"
@@ -896,15 +968,20 @@ def fingerprints(request):
             raise PermissionDenied()
         try:
             # offset = 10 * (context["p"] - 1)
-            es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-            response = es.search(index="ddosdb", q=q, size=10000, _source="key")
-            results = [x["_source"]["key"] for x in response["hits"]["hits"]]
+            # es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+            # response = es.search(index="ddosdb", q=q, size=10000, _source="key")
+            # results = [x["_source"]["key"] for x in response["hits"]["hits"]]
+            fps = _search(fields={'key': 1})
+            print(fps)
+            results = []
+            for fp in fps:
+                results.append(fp['key'])
             return JsonResponse(results, safe=False)
         except (SyntaxError, RequestError) as e:
             print("Invalid query: " + str(e))
             response = HttpResponse()
             response.status_code = 500
-            response.reason_phrase = "Error with ElasticSearch"
+            response.reason_phrase = "Error with MongoDB"
             return response
 
     elif request.method == "POST":
@@ -922,37 +999,40 @@ def fingerprints(request):
             response.reason_phrase = "Wrong content type"
             return response
 
-        fps = demjson.decode(request.body)
-        # JSON database insert
-        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        def insert(fp):
+            # es.index(index="ddosdb", doc_type="_doc", id=fp["key"], body=fp, request_timeout=500)
+            # Register record
+            _delete({'key': fp['key']})
+            _insert(fp)
+            file_upload = FileUpload()
+            file_upload.user = user_perms["user"]
+            file_upload.filename = fp["key"]
+            file_upload.save()
 
-        for fp in fps:
+        fps = demjson.decode(request.body)
+        if type(fps) is list:
+            for fp in fps:
+                # Replace name in fingerprint with the name of the user submitting it
+                # so as not to transfer usernames over different DBs
+                fp["submitter"] = user_perms["user"].username
+                # Set shareable to false to prevent it being shared further on by default
+                fp["shareable"] = False
+                try:
+                    insert(fp)
+                except Exception as e:
+                    response = HttpResponse()
+                    response.status_code = 400
+                    response.reason_phrase = str(e)
+                    return response
+        else:
             # Replace name in fingerprint with the name of the user submitting it
             # so as not to transfer usernames over different DBs
-            fp["submitter"] = user_perms["user"].username
+            fps["submitter"] = user_perms["user"].username
             # Set shareable to false to prevent it being shared further on by default
-            fp["shareable"] = False
-
+            fps["shareable"] = False
             try:
-                es.delete(index="ddosdb", doc_type="_doc", id=fp["key"], request_timeout=500)
-            except NotFoundError:
-                pass
-            except:
-                print("Could not setup a connection to Elasticsearch")
-                response = HttpResponse()
-                response.status_code = 503
-                response.reason_phrase = "Database unavailable"
-                return response
-
-            try:
-                es.index(index="ddosdb", doc_type="_doc", id=fp["key"], body=fp, request_timeout=500)
-                # Register record
-                file_upload = FileUpload()
-                file_upload.user = user_perms["user"]
-                file_upload.filename = fp["key"]
-                file_upload.save()
-
-            except RequestError as e:
+                insert(fps)
+            except Exception as e:
                 response = HttpResponse()
                 response.status_code = 400
                 response.reason_phrase = str(e)

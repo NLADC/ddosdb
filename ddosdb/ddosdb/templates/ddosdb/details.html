@@ -1,0 +1,54 @@
+{% load static %}
+{% load get_class %}
+{% load multiply %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<title>DDoSDB - Detailed View</title>
+{% include "ddosdb/header.html" %}
+<body class="bg-light">
+<div class="pb-3 box-shadow pt-3 border-bottom bg-white">
+    <div class="container d-flex flex-column flex-md-row align-items-center">
+        <a class="mr-md-auto" href="{% url "index" %}">
+            <img style="height: 40px" src="{% static "ddosdb/img/logo-new.svg" %}">
+        </a>
+        <nav class="ml-md-auto my-2 my-md-0 mr-md-3 d-block text-nowrap">
+            <a class="p-2 text-dark" href="{% url "account" %}">Account</a>
+            <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>
+        </nav>
+    </div>
+</div>
+
+<h1 align="center" class="display-4 ddosdb-subtitle">Details of fingerprint {{ key }}</h1>
+
+<div class="container">
+    <div class="row py-1">
+        {% if not error == "" %}
+            <div class="col-md-12 alert alert-danger" role="alert">
+                {{ error }} - <a href="{% url "help" %}">Need help?</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row" id="results">
+    {% for node in results %}
+        <div class="col-lg-6 col-md-12 my-2">
+            <div class="card">
+                <div class="card-body json-block" id="result-{{ forloop.counter0 }}">
+                    {% include "ddosdb/json-tree.html" %}
+                </div>
+                {% if node.comment %}
+                  <div class="card-footer">
+                    {{ node.comment|linebreaks }}
+                  </div>
+                {% endif %}
+
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+
+</div>
+{% include "ddosdb/footer.html" %}
+</body>
+</html>

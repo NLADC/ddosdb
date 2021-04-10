@@ -1,7 +1,7 @@
 django-sslserver
 pandas
 nclib
-elasticsearch
+pymongo
 demjson
 requests
 django-debug-toolbar

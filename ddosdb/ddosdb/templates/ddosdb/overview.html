@@ -63,12 +63,19 @@
           {% for hdr,name in headers.items %}
           <td>
             {% if hdr == "multivector_key" %}
+            {% comment %}
               <a target="_blank" href="{% url "query" %}?q=multivector_key:{{ node|get_item:hdr|urlencode }}">
+            {% endcomment %}
                 {{node|get_item:hdr}}
+            {% comment %}
               </a>
+            {% endcomment %}
             {% elif hdr == "key" %}
               <div title="open detailed view in a new tab">
+                {% comment %}
                 <a target="_blank" href="{% url "query" %}?q=key:{{ node|get_item:hdr|urlencode }}">
+                {% endcomment %}
+                <a target="_blank" href="{% url "details" %}?key={{ node|get_item:hdr|urlencode }}">
                   {{node|get_item:hdr}}
                 </a>
               </div>
@@ -82,7 +89,7 @@
               <div title="click to toggle shareable status">
                 {% if user.is_authenticated %}
                   {% if user.username == node|get_item:"submitter"  or user.is_superuser %}
-                    <a href="{% url "toggle-shareable" %}?q={{ q }}&key={{node|get_item:"key"}}&o={{ o }}&so={{ so }}&son={{ son }}">
+                    <a href="{% url "toggle-shareable" %}?q={{ q }}&key={{node|get_item:"key"}}&o={{ o }}&so={{ so }}&son={{ son }}&shareable={{node|get_item:hdr}}">
                     {% if node|get_item:hdr == True %}
                         <img width="16" height="16" src="{% static "ddosdb/img/green_check.svg" %}">
                     {% else %}

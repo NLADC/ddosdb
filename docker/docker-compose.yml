@@ -2,29 +2,38 @@ version: '3.7'
 
 services:
 
-  # Elasticsearch Docker Images: https://www.docker.elastic.co/
-  # version newest 7.8.0
-  elasticsearch:
-#    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.11
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
-#    container_name: elasticsearch
+  mongodb:
+    image: mongo
+#    container_name: mongo
     environment:
-      - xpack.security.enabled=false
-      - discovery.type=single-node
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    cap_add:
-      - IPC_LOCK
+      - PUID=1000
+      - PGID=1000
+      # - MONGO_INITDB_ROOT_USERNAME=admin
+      # - MONGO_INITDB_ROOT_PASSWORD=adminadmin
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - mongodb-data:/data/db
+      - ./mongo-entrypoint/:/docker-entrypoint-initdb.d/
     ports:
-      - 127.0.0.1:9200:9200
-    restart: always
+      - 127.0.0.1:27017:27017
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express
+#    container_name: mongo-express
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      # - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      # - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      # - ME_CONFIG_MONGODB_ADMINPASSWORD=adminadmin
+      - ME_CONFIG_BASICAUTH_USERNAME=ddosdb
+      - ME_CONFIG_BASICAUTH_PASSWORD=ddosdbddosdb
+    volumes:
+      - mongodb-data
+    ports:
+      - 127.0.0.1:8081:8081
+    depends_on:
+      - mongodb
+    restart: unless-stopped
 
   db:
     image: postgres:12.0-alpine
@@ -34,7 +43,7 @@ services:
       - POSTGRES_USER=ddosdb
       - POSTGRES_PASSWORD=ddosdb
       - POSTGRES_DB=ddosdb
-    restart: always
+    restart: unless-stopped
 
   ddosdb:
     build:
@@ -50,8 +59,8 @@ services:
      - 8000
     depends_on:
       - db
-      - elasticsearch
-    restart: always
+      - mongodb
+    restart: unless-stopped
 
   nginx:
     build: ./nginx
@@ -62,10 +71,10 @@ services:
       - 80:80
     depends_on:
       - ddosdb
-    restart: always
+    restart: unless-stopped
 
 volumes:
-  elasticsearch-data:
+  mongodb-data:
 #    driver: local
   postgres_data:
   static_volume:

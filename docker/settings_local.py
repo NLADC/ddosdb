@@ -55,8 +55,10 @@ DATABASES = {
     }
 }
 
-ELASTICSEARCH_HOSTS = ["elasticsearch:9200"]
+#ELASTICSEARCH_HOSTS = ["elasticsearch:9200"]
 
 # Location where HTML are stored
 STATIC_ROOT = '/home/ddosdb/ddosdb-static/'
 
+# MongoDB URI
+MONGODB="mongodb:27017"

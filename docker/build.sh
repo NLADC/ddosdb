@@ -66,8 +66,8 @@ printf "\n${COL} Creating Django superuser${NC}\n\n"
 docker-compose exec ddosdb python manage.py createsuperuser --noinput
 
 # Create the ddosdb index in Elasticsearch
-printf "\n${COL} Initializing Elasticsearch${NC}\n\n"
-./ddosdb.db
+#printf "\n${COL} Initializing Elasticsearch${NC}\n\n"
+#./ddosdb.db
 
 printf "\n\n${COL}** Finished **\n\n"
 printf "Stop ddosdb by executing 'docker-compose down' in this directory\n"

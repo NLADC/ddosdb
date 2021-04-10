@@ -44,6 +44,9 @@
             </div>
         </div>
     </form>
+
+    {% comment %}
+
     <form action="{% url "compare" %}" method="get">
         <div class="row" id="results">
             {% for node in results %}
@@ -72,6 +75,28 @@
         </div>
         <button type="submit" class="btn btn-dark btn-sm">Compare source IPs</button>
     </form>
+
+    {% endcomment %}
+
+    <div class="row" id="results">
+    {% for node in results %}
+        <div class="col-lg-6 col-md-12 my-2">
+            <div class="card">
+                <div class="card-body json-block" id="result-{{ forloop.counter0 }}">
+                    {% include "ddosdb/json-tree.html" %}
+                </div>
+                {% if node.comment %}
+                  <div class="card-footer">
+                    {{ node.comment|linebreaks }}
+                  </div>
+                {% endif %}
+
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+
+
     <div class="row mt-1">
         <div class="col-12">
             {% if p > 1 %}
