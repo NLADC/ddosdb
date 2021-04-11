@@ -472,7 +472,8 @@ def upload_file(request):
             # Add the timestamp it was submitted as well.
             # Useful for ordering in overview page.
 
-            data["submit_timestamp"] = datetime.utcnow()
+            data["submit_timestamp"] = datetime.utcnow().isoformat()
+            # 2021-04-11T01:38:32.950389
 
             # Assume normally all fingerprints can be shared.
             # Add some edit function for this later...
@@ -604,7 +605,7 @@ def overview(request):
             q = context["q"]
 
         mdb_resp = _search(fields=fields)
-        # pp.pprint(mdb_resp)
+        pp.pprint(mdb_resp)
 
         context["time"] = time.time() - start
         print(context["time"])
