@@ -471,7 +471,13 @@ def upload_file(request):
 
             # Add the timestamp it was submitted as well.
             # Useful for ordering in overview page.
-
+            # Different databases (elasticsearch, MongoDB) treat this differently
+            # Elasticsearch happily swallows this:
+            # data["submit_timestamp"] = datetime.utcnow()
+            # Whereas with MongoDB this leads toan IsoFormat object of some kind,
+            # which doesn't display properly (leads to 'epoch = 0' 1970 displau)
+            # So for MongoDB this works:
+            # data["submit_timestamp"] = datetime.utcnow().isoformat()
             data["submit_timestamp"] = datetime.utcnow().isoformat()
             # 2021-04-11T01:38:32.950389
 
