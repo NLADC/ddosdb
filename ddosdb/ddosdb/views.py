@@ -724,18 +724,19 @@ def remote_sync(request):
 
     # Get all the shareable fingerprints
     try:
-        es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        # es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
+        #
+        # q = "shareable:true"
+        #
+        # response = es.search(index="ddosdb", q=q, size=10000)
+        # fingerprints = [x["_source"] for x in response["hits"]["hits"]]
+        # fp_keys = [fp['key'] for fp in fingerprints]
+        response = _search({'shareable': True}, {'_id': 0})
+        fp_keys = [fp['key'] for fp in response]
+        print(fp_keys)
 
-        q = "shareable:true"
-
-        response = es.search(index="ddosdb", q=q, size=10000)
-        fingerprints = [x["_source"] for x in response["hits"]["hits"]]
-        fp_keys = [fp['key'] for fp in fingerprints]
-
-    except (SyntaxError, RequestError) as e:
-        context["error"] = "Invalid query: " + str(e)
-    except:
-        print("Could not setup a connection to Elasticsearch")
+    except ServerSelectionTimeoutError as e:
+        print("Could not setup a connection to MongoDB")
         response = HttpResponse()
         response.status_code = 503
         response.reason_phrase = "Database unavailable"
@@ -743,8 +744,10 @@ def remote_sync(request):
 
     results = []
     remotedbs = RemoteDdosDb.objects.filter(active=True)
+    print(remotedbs)
     rdbs = []
     for rdb in remotedbs:
+        print(rdb)
         unk_fps = []
         try:
             r = requests.post("{}/unknown-fingerprints".format(rdb.url),
@@ -767,7 +770,8 @@ def remote_sync(request):
                          "unk_fps": unk_fps,
                          "unk_fps_nr": len(unk_fps),
                          })
-        except:
+        except Exception as e:
+            print(e)
             rdbs.append({"name": rdb.name,
                          "status": 555,
                          "status_reason": "Connection failed",
@@ -977,8 +981,8 @@ def fingerprints(request):
             for fp in fps:
                 results.append(fp['key'])
             return JsonResponse(results, safe=False)
-        except (SyntaxError, RequestError) as e:
-            print("Invalid query: " + str(e))
+        except ServerSelectionTimeoutError as e:
+            print("MongoDB unreachable")
             response = HttpResponse()
             response.status_code = 500
             response.reason_phrase = "Error with MongoDB"
@@ -1070,26 +1074,27 @@ def unknown_fingerprints(request):
             return response
 
         data = demjson.decode(request.body)
-
         unk_fps = []
 
         try:
-            # offset = 10 * (context["p"] - 1)
-            es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-            q = "*"
-            response = es.search(index="ddosdb", q=q, size=10000, _source="key")
-            known_fps = [x["_source"]["key"] for x in response["hits"]["hits"]]
+            fps = _search(fields={'key': 1, '_id': 0})
+            known_fps = []
+            for fp in fps:
+                known_fps.append(fp['key'])
+            print(known_fps)
+            print(data)
             for fp in data:
+                print("Fingerprint {} is {}".format(fp, fp in known_fps))
                 if not fp in known_fps:
                     unk_fps.append(fp)
 
             return JsonResponse(unk_fps, safe=False)
 
-        except (SyntaxError, RequestError) as e:
-            print("Invalid query: " + str(e))
+        except ServerSelectionTimeoutError as e:
+            print("MongoDB unreachable")
             response = HttpResponse()
             response.status_code = 500
-            response.reason_phrase = "Error with ElasticSearch"
+            response.reason_phrase = "Error reaching MongoDB"
             return response
     else:
         response = HttpResponse()
@@ -1099,7 +1104,7 @@ def unknown_fingerprints(request):
 
 
 @csrf_exempt
-def fingerprint(request,key):
+def fingerprint(request, key):
     if request.method == "GET":
 
         # print(pretty_request(request))
@@ -1109,28 +1114,21 @@ def fingerprint(request,key):
             raise PermissionDenied()
 
         try:
-            # offset = 10 * (context["p"] - 1)
-            es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-            q = "key:"+key
-            response = es.search(index="ddosdb", q=q, size=10000, _source="")
-            if response["hits"]["total"] == 1:
-                fp = response["hits"]["hits"][0]["_source"]
-                # Remove shareable property when retrieving a single fingerprint
-                # since we do not want to transfer that to other databases.
-                # if "shareable" in fp:
-                fp.pop("shareable", None)
-                return JsonResponse(fp, safe=False)
+            fps = _search({'key': key}, {'_id': 0})
+            print(fps)
+            if len(fps) > 0:
+                return JsonResponse(fps, safe=False)
             else:
                 response = HttpResponse()
                 response.status_code = 404
                 response.reason_phrase = "Fingerprint {} not found".format(key)
                 return response
 
-        except (SyntaxError, RequestError) as e:
-            print("Invalid query: " + str(e))
+        except ServerSelectionTimeoutError as e:
+            print("MongoDB unreachable")
             response = HttpResponse()
             response.status_code = 500
-            response.reason_phrase = "Error with ElasticSearch"
+            response.reason_phrase = "Error with MongoDB"
             return response
     else:
         response = HttpResponse()
