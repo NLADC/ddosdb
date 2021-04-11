@@ -15,6 +15,15 @@
 {#    <p class="mb-1">© 2018 J.J.C. Santanna</p> #}
 {% endcomment %}
 
+
+  {% if time %}
+<div class="row">
+  <div class="col-12">
+      <small class="text-muted text-right" align="middle"> {{ time }} seconds</small>
+  </div>
+</div>
+  {% endif %}
+
   <ul class="list-inline">
         <!--
         <li class="list-inline-item"><a class="text-dark" href="#">Documentation</a></li>

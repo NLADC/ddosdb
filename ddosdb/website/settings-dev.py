@@ -17,6 +17,8 @@ from website.settings_local import *
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+DEBUG = True
+
 # Used for the Django-debug-toolbar.
 # If you access this django from another computer
 # then add its IP address to this list to enable DDT to be shown

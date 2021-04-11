@@ -27,14 +27,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 from django.core.exceptions import PermissionDenied
-
-
 #from ddosdb.enrichment.team_cymru import TeamCymru
 from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb
 
+from ddosdb.database import Database
+#__mdb__ = MongoClient("mongodb://"+settings.MONGODB, serverSelectionTimeoutMS=100).ddosdb.fingerprints
+
+Database.initialize()
 
 def _mdb():
-    return MongoClient("mongodb://"+settings.MONGODB, serverSelectionTimeoutMS=100).ddosdb.fingerprints
+    return Database.getDB()
 
 
 def _insert(data):
@@ -580,6 +582,8 @@ def overview(request):
     if "son" in request.GET:
         context["son"] = request.GET["son"]
 
+    _search()
+
     try:
         # offset = 10 * (context["p"] - 1)
 
@@ -611,7 +615,7 @@ def overview(request):
             q = context["q"]
 
         mdb_resp = _search(fields=fields)
-        pp.pprint(mdb_resp)
+#        pp.pprint(mdb_resp)
 
         context["time"] = time.time() - start
         print(context["time"])
@@ -654,6 +658,7 @@ def overview(request):
 
     except ServerSelectionTimeoutError as e:
         context["error"] = " ServerSelectionTimeoutError "
+        print(e)
 
     # Do something special in overview page if user is a super user
     if user.is_superuser:
