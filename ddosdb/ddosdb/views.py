@@ -596,7 +596,7 @@ def overview(request):
             "key": "key",
             "shareable": "Sync",
             "start_time": "start time",
-            "tags": "tags",
+            # "tags": "tags",
             "file_type": "capture",
             #            "duration_sec": "duration (seconds)",
             "total_packets": "# packets",
