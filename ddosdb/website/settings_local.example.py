@@ -55,8 +55,5 @@ RECAPTCHA_PRIVATE_KEY = ""
 # (Running the django development server)
 RAW_PATH = "storage/"
 
-# Hosts that Elasticsearch runs on
-ELASTICSEARCH_HOSTS = ["127.0.0.1:9200"]
-
-# MongoDB URI
+# MongoDB host/port
 MONGODB="127.0.0.1:27017"

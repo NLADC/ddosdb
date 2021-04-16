@@ -11,7 +11,7 @@ services:
       # - MONGO_INITDB_ROOT_USERNAME=admin
       # - MONGO_INITDB_ROOT_PASSWORD=adminadmin
     volumes:
-      - mongodb-data:/data/db
+      - mongodb-dev-data:/data/db
       - ./mongo-entrypoint/:/docker-entrypoint-initdb.d/
     ports:
       - 127.0.0.1:27017:27017
@@ -28,7 +28,7 @@ services:
       - ME_CONFIG_BASICAUTH_USERNAME=ddosdb
       - ME_CONFIG_BASICAUTH_PASSWORD=ddosdbddosdb
     volumes:
-      - mongodb-data
+      - mongodb-dev-data
     ports:
       - 127.0.0.1:8081:8081
     depends_on:
@@ -36,4 +36,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  mongodb-data:
+  mongodb-dev-data:

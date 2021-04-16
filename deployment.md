@@ -19,8 +19,9 @@
 
 # DDoSDB
 
-# Deploying DDoSDB for production
-
+# ~~Deploying DDoSDB for production~~ (DEPRECATED!)
+## Use docker deployment instead
+#
 - [Prerequisites](#prerequisites)
 - [Clone the repository](#clone-the-repository)
 - [Elasticsearch](#elasticsearch)

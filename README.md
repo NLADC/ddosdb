@@ -17,7 +17,7 @@
 
 ## Getting to know DDoSDB components
 
-The heart of DDoSDB is a **Django** Webapp. **Elasticsearch** is used for storing the fingerprints, the raw .json files and the *pcap* samples are stored locally on disk.
+The heart of DDoSDB is a **Django** Webapp. **MongoDB** is used for storing the fingerprints, the raw .json files and the *pcap* samples are stored locally on disk.
 
 If you don't know what Django is, but would like to understand how DDoSDB is setup, then please checkout the excellent [documentation](https://docs.djangoproject.com/en/) and familiarise yourself a bit with Django by following the [tutorial](https://docs.djangoproject.com/en/3.1/intro/tutorial01/).
 
@@ -27,8 +27,8 @@ You can use three approaches to running a DDoSDB repository:
 
 - run a fully [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version.
 - run [DDoSDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box)
-- install from [scratch](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) (Apache, Elastic Search, Django, etc...)
-
+- ~~install from [scratch](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) (Apache, Elastic Search, Django, etc...)~~ (deprecated)
+ 
 For development purposes it may be easier to work with Django directly in a [development setup](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_ddosdb.md).
 
 ## Acknowledgements

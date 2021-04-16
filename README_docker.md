@@ -43,7 +43,7 @@ Start the build script
 ```
 ./build.sh
 ```
-The script will ask you for the username, password and e-mail address to use for the superuser.
+The script will ask you for the username, password and e-mail address to use for the superuser. The username and password are also used for the Mongo Express interface.
 
 It will then start downloading and configuring all the images it needs for the whole DDoSDB setup, this can take some time.
 
@@ -59,16 +59,18 @@ To reset ddosdb to factory settings:
  Run 'docker-compose down -v' to delete the data 
  Followed by './build.sh' to rebuild & restart 
 ```
-This means DDoSDB is running daemonized.
+This means DDoSDB is running daemonized (in the background).
 
 You can check if all containers are up by executing `docker ps`, the output should be something like this:
 
 ```
-CONTAINER ID   IMAGE                                                 COMMAND                  CREATED         STATUS         PORTS                                NAMES
-a0de6eafa390   docker_nginx                                          "/docker-entrypoint.…"   6 seconds ago   Up 6 seconds   0.0.0.0:80->80/tcp                   docker_nginx_1
-e13aacec74c4   docker_ddosdb                                         "/home/ddosdb/entryp…"   7 seconds ago   Up 6 seconds   8000/tcp                             docker_ddosdb_1
-dda6e48f43d5   docker.elastic.co/elasticsearch/elasticsearch:7.8.0   "/tini -- /usr/local…"   7 seconds ago   Up 7 seconds   127.0.0.1:9200->9200/tcp, 9300/tcp   docker_elasticsearch_1
-d005eec417c8   postgres:12.0-alpine                                  "docker-entrypoint.s…"   7 seconds ago   Up 7 seconds   5432/tcp                             docker_db_1
+CONTAINER ID   IMAGE                  COMMAND                  CREATED          STATUS          PORTS                               NAMES
+b293c7bf798a   docker_nginx           "/docker-entrypoint.…"   14 seconds ago   Up 10 seconds   0.0.0.0:80->80/tcp, :::80->80/tcp   docker_nginx_1
+3f47b83621bc   docker_ddosdb          "/home/ddosdb/entryp…"   20 seconds ago   Up 14 seconds   8000/tcp                            docker_ddosdb_1
+6e5544942fd2   mongo-express          "tini -- /docker-ent…"   20 seconds ago   Up 7 seconds    127.0.0.1:8081->8081/tcp            docker_mongo-express_1
+d4257ab77228   mongo                  "docker-entrypoint.s…"   24 seconds ago   Up 20 seconds   27017/tcp                           docker_mongodb_1
+b9f859a82f6f   postgres:12.0-alpine   "docker-entrypoint.s…"   24 seconds ago   Up 21 seconds   5432/tcp                            docker_db_1
+
 ```
 
 ## Starting, stopping and updating the containers
