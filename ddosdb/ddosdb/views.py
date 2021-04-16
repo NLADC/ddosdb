@@ -268,9 +268,13 @@ def query(request):
         q = context["q"] = request.GET["q"]
 
         try:
-            results = _search({'key': q}, {'_id': 0})
+            # results = _search({'key': q}, {'_id': 0})
+#            results = _search( query=None, fields={'_id': 0})
+            pp.pprint("Query: {}".format(q))
+            results = _search({"$text": {"$search": q}})
             pp.pprint(results)
             context["results"] = results
+            context["amount"] = len(results)
         #     es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
         #     response = es.search(index="ddosdb", q=q, from_=offset, size=10, sort=context["o"])
         #     context["time"] = time.time() - start
@@ -511,8 +515,8 @@ def upload_file(request):
                 pass
             # Save JSON upload to file (not really needed to be honest)
             demjson.encode_to_file(settings.RAW_PATH + filename + ".json", data)
-            # JSON database insert
 
+            # JSON database insert
             try:
                 _delete({'key': data['key']})
                 _insert(data)
@@ -1033,6 +1037,11 @@ def fingerprints(request):
                 fp["submitter"] = user_perms["user"].username
                 # Set shareable to false to prevent it being shared further on by default
                 fp["shareable"] = False
+                # Set submit timestamp
+                fp["submit_timestamp"] = datetime.utcnow().isoformat()
+                if not 'comment' in fp:
+                    fp['comment'] = ""
+
                 try:
                     insert(fp)
                 except Exception as e:
@@ -1046,6 +1055,10 @@ def fingerprints(request):
             fps["submitter"] = user_perms["user"].username
             # Set shareable to false to prevent it being shared further on by default
             fps["shareable"] = False
+            # Set submit timestamp
+            fps["submit_timestamp"] = datetime.utcnow().isoformat()
+            if not 'comment' in fps:
+                fps['comment'] = ""
             try:
                 insert(fps)
             except Exception as e:
