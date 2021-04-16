@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-COPY docker/requirements.txt /tmp/
+COPY requirements.txt /tmp/
 RUN pip install --requirement /tmp/requirements.txt
 
 #COPY docker/ddosdb.conf /etc/nginx/conf.d/
