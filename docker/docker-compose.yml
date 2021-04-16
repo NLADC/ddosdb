@@ -24,11 +24,8 @@ services:
 #    container_name: mongo-express
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb
-      # - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-      # - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-      # - ME_CONFIG_MONGODB_ADMINPASSWORD=adminadmin
-      - ME_CONFIG_BASICAUTH_USERNAME=ddosdb
-      - ME_CONFIG_BASICAUTH_PASSWORD=ddosdbddosdb
+    env_file:
+      - ./environment.prod
     volumes:
       - mongodb-data
     ports:
