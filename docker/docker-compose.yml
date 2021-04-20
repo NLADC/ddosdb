@@ -70,6 +70,7 @@ services:
       - data_volume:/home/ddosdb/ddosdb-data/
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - ddosdb
     restart: unless-stopped
