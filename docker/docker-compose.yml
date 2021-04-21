@@ -68,6 +68,7 @@ services:
     volumes:
       - static_volume:/home/ddosdb/ddosdb-static/
       - data_volume:/home/ddosdb/ddosdb-data/
+      - letsencrypt_volume:/etc/letsencrypt/
     ports:
       - 80:80
       - 443:443
@@ -87,3 +88,4 @@ volumes:
   postgres_data:
   static_volume:
   data_volume:
+  letsencrypt_volume:
