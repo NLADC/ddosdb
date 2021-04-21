@@ -52,9 +52,12 @@ printf "DJANGO_SUPERUSER_USERNAME=%s\n" $username >> environment.prod
 printf "DJANGO_SUPERUSER_PASSWORD=%s\n" $password >> environment.prod
 printf "DJANGO_SUPERUSER_EMAIL=%s\n" $email >> environment.prod
 
-
 printf "ME_CONFIG_BASICAUTH_USERNAME=%s\n" $username >> environment.prod
 printf "ME_CONFIG_BASICAUTH_PASSWORD=%s\n" $password >> environment.prod
+
+# Generate self-signed certificate for localhost
+printf "\nGenerating self-signed certificate for localhost\n"
+openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=EU/ST=N\/A/L=N\/A/O=Concordia/OU=DDoS Clearing House/CN=localhost" -keyout ./ddosdb-localhost.key  -out ./ddosdb-localhost.crt
 
 printf "\n${COL} Building volumes, images, and containers${NC}\n\n"
 docker-compose up --build --remove-orphans -d

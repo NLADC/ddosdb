@@ -1,1 +1,3 @@
 environment.prod
+*.crt
+*.key
