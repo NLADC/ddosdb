@@ -10,5 +10,3 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY ddosdb-localhost.crt /etc/ssl/certs/.
 COPY ddosdb-localhost.key /etc/ssl/private/.
-
-# command: /bin/bash -c "envsubst '\$VAR1 \$VAR2' < /etc/nginx/conf.d/mysite.template > /etc/nginx/conf.d/default.conf

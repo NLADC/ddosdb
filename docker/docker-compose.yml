@@ -4,7 +4,7 @@ services:
 
   mongodb:
     image: mongo
-#    container_name: mongo
+    container_name: ddosdb_mongo
     environment:
       - PUID=1000
       - PGID=1000
@@ -21,7 +21,7 @@ services:
 
   mongo-express:
     image: mongo-express
-#    container_name: mongo-express
+    container_name: ddosdb_mongo_express
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb
     env_file:
@@ -36,6 +36,7 @@ services:
 
   db:
     image: postgres:12.0-alpine
+    container_name: ddosdb_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
@@ -47,6 +48,7 @@ services:
     restart: unless-stopped
 
   ddosdb:
+    container_name: ddosdb_ddosdb
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -65,10 +67,12 @@ services:
 
   nginx:
     build: ./nginx
+    container_name: ddosdb_nginx
     volumes:
       - static_volume:/home/ddosdb/ddosdb-static/
       - data_volume:/home/ddosdb/ddosdb-data/
       - letsencrypt_volume:/etc/letsencrypt/
+      - nginx_etc:/etc/nginx/
     ports:
       - 80:80
       - 443:443
@@ -89,3 +93,4 @@ volumes:
   static_volume:
   data_volume:
   letsencrypt_volume:
+  nginx_etc:
