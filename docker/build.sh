@@ -1,12 +1,12 @@
 #!/bin/sh
 
-COL='\033[1;35m'
+COL='\033[0;37m'
 RED='\033[1;31m'
 NC='\033[0m' # No Color
 
-cp env.dev environment.prod
-printf "SECRET_KEY = \'%s\'\n" $(./secret_key.py) >> environment.prod
-printf "FIELD_ENCRYPTION_KEYS = \"[\'%s\']\"\n" $(./field_encryption_keys.py) >> environment.prod
+cp django/env.dev temp/environment.prod
+printf "SECRET_KEY = \'%s\'\n" $(./lib/secret_key.py) >> temp/environment.prod
+printf "FIELD_ENCRYPTION_KEYS = \"[\'%s\']\"\n" $(./lib/field_encryption_keys.py) >> temp/environment.prod
 
 while
   printf "${COL}superuser username:${NC}"
@@ -48,16 +48,16 @@ then
    email="ddosdb@ddosdb.local"
 fi
 
-printf "DJANGO_SUPERUSER_USERNAME=%s\n" $username >> environment.prod
-printf "DJANGO_SUPERUSER_PASSWORD=%s\n" $password >> environment.prod
-printf "DJANGO_SUPERUSER_EMAIL=%s\n" $email >> environment.prod
+printf "DJANGO_SUPERUSER_USERNAME=%s\n" $username >> temp/environment.prod
+printf "DJANGO_SUPERUSER_PASSWORD=%s\n" $password >> temp/environment.prod
+printf "DJANGO_SUPERUSER_EMAIL=%s\n" $email >> temp/environment.prod
 
-printf "ME_CONFIG_BASICAUTH_USERNAME=%s\n" $username >> environment.prod
-printf "ME_CONFIG_BASICAUTH_PASSWORD=%s\n" $password >> environment.prod
+printf "ME_CONFIG_BASICAUTH_USERNAME=%s\n" $username >> temp/environment.prod
+printf "ME_CONFIG_BASICAUTH_PASSWORD=%s\n" $password >> temp/environment.prod
 
 # Generate self-signed certificate for localhost
 printf "\nGenerating self-signed certificate for localhost\n"
-openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=EU/ST=N\/A/L=N\/A/O=Concordia/OU=DDoS Clearing House/CN=localhost" -keyout ./nginx/ddosdb-localhost.key  -out ./nginx/ddosdb-localhost.crt
+openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=EU/ST=N\/A/L=N\/A/O=Concordia/OU=DDoS Clearing House/CN=localhost" -keyout ./temp/ddosdb-localhost.key  -out ./temp/ddosdb-localhost.crt
 
 printf "\n${COL} Building volumes, images, and containers${NC}\n\n"
 docker-compose up --build --remove-orphans -d
@@ -72,13 +72,10 @@ docker-compose exec ddosdb python manage.py migrate --noinput
 printf "\n${COL} Creating Django superuser${NC}\n\n"
 docker-compose exec ddosdb python manage.py createsuperuser --noinput
 
-# Create the ddosdb index in Elasticsearch
-#printf "\n${COL} Initializing Elasticsearch${NC}\n\n"
-#./ddosdb.db
-
 printf "\n\n${COL}** Finished **\n\n"
 printf "Stop ddosdb by executing 'docker-compose down' in this directory\n"
 printf " 'docker-compose up' will restart ddosdb\n"
+printf " 'docker-compose up --build' will rebuild and restart\n"
 printf "\nTo reset ddosdb to factory settings: \n"
 printf " Run 'docker-compose down -v' to delete the data \n"
 printf " Followed by './build.sh' to rebuild & restart ${NC}\n\n"

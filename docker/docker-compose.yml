@@ -8,13 +8,9 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      # - MONGO_INITDB_ROOT_USERNAME=admin
-      # - MONGO_INITDB_ROOT_PASSWORD=adminadmin
     volumes:
       - mongodb-data:/data/db
-      - ./mongo-entrypoint/:/docker-entrypoint-initdb.d/
-#    ports:
-#      - 127.0.0.1:27017:27017
+#      - ./mongo-entrypoint/:/docker-entrypoint-initdb.d/
     expose:
       - 27017
     restart: unless-stopped
@@ -25,7 +21,7 @@ services:
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb
     env_file:
-      - ./environment.prod
+      - ./temp/environment.prod
     volumes:
       - mongodb-data
     ports:
@@ -54,7 +50,7 @@ services:
       dockerfile: docker/Dockerfile
     command: gunicorn website.wsgi:application --bind 0.0.0.0:8000
     env_file:
-      - ./environment.prod
+      - ./temp/environment.prod
     volumes:
       - static_volume:/home/ddosdb/ddosdb-static/
       - data_volume:/home/ddosdb/ddosdb-data/
@@ -66,7 +62,9 @@ services:
     restart: unless-stopped
 
   nginx:
-    build: ./nginx
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
     container_name: ddosdb_nginx
     volumes:
       - static_volume:/home/ddosdb/ddosdb-static/
@@ -80,15 +78,8 @@ services:
       - ddosdb
     restart: unless-stopped
 
-#  certbot:
-#    image: certbot/certbot
-#    restart: unless-stopped
-#    depends_on:
-#      - nginx
-
 volumes:
   mongodb-data:
-#    driver: local
   postgres_data:
   static_volume:
   data_volume:

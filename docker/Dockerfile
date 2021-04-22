@@ -7,22 +7,18 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-COPY requirements.txt /tmp/
-RUN pip install --requirement /tmp/requirements.txt
+COPY requirements.txt docker/temp/
+RUN pip install --requirement docker/temp/requirements.txt
 
-#COPY docker/ddosdb.conf /etc/nginx/conf.d/
-#COPY docker/index.html /usr/share/nginx/html/
-#RUN mkdir -p /home/ddosdb
-#RUN addgroup -S ddosdb && adduser -S ddosdb -G ddosdb
 RUN adduser --system --group ddosdb
 # create the appropriate directories
 ENV HOME=/home/ddosdb
 
 COPY ddosdb /home/ddosdb/
-COPY docker/settings_local.py /home/ddosdb/website/
+COPY docker/django/settings_local.py /home/ddosdb/website/
 
 # copy entrypoint.sh
-COPY docker/entrypoint.sh /home/ddosdb/
+COPY docker/django/entrypoint.sh /home/ddosdb/
 
 RUN mkdir /home/ddosdb/ddosdb-static
 RUN mkdir /home/ddosdb/ddosdb-data/

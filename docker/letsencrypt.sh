@@ -1,14 +1,14 @@
 #!/bin/sh
 
-COL='\033[1;35m'
+COL='\033[0;37m'
 RED='\033[1;31m'
 NC='\033[0m' # No Color
 
-printf "%s\n " \
+printf "${COL}%s\n ${NC}"  " " \
   "This will set up the local ddosdb for production use by getting a let's encrypt certificate for the domain you specify " \
-  "Let's Encrypt does a check at that domain using http, so make sure " \
-  "that port 80 (http) and 443 (https) are reachable from the internet " \
-  "and that the domain you specify points to this machine! "
+  "Let's Encrypt does a check at that domain using http, so make sure that port 80 (http) and 443 (https) are reachable " \
+  "from the internet and that the domain you specify points to this machine!" \
+  " "
 
 while
   printf "${COL}Fully qualified domain name for this dddosdb:${NC}"
@@ -17,11 +17,11 @@ while
 do :; done
 
 export DDOSDB_FQDN=$fqdn
-echo $DDOSDB_FQDN
 
-printf "${COL}e-mail address Let's Encrypt can send warnings too [none]:${NC}"
+printf "${COL}\n e-mail address Let's Encrypt can send warnings to [none]:${NC}"
 read le_email
 
+printf "${COL}\n Instructing certbot to get a new certificate for $DDOSDB_FQDN\n\n${NC}"
 
 # See if we can generate the certificate using certbot in the nginx container
 if [ -z "$le_email" ]
@@ -29,12 +29,12 @@ then
 #  printf "no mail\n"
   docker exec ddosdb_nginx \
     certbot certonly --test-cert --webroot -w /etc/letsencrypt/www/ -n --agree-tos \
-    --no-eff-email --rsa-key-size 4096 -d $DDOSDB_FQDN
+    --no-eff-email --register-unsafely-without-email --rsa-key-size 4096 -d $DDOSDB_FQDN
 else
 #  printf "mail $le_email \n"
   docker exec ddosdb_nginx \
     certbot certonly --test-cert --webroot -w /etc/letsencrypt/www/ -n --agree-tos \
-    --email $le_email --rsa-key-size 4096 -d $DDOSDB_FQDN
+    --email $le_email --no-eff-email --rsa-key-size 4096 -d $DDOSDB_FQDN
 fi
 
 if [ $? -ne 0 ]
@@ -45,8 +45,12 @@ then
 #  printf " Everything went swimmingly\n"
 fi
 
+printf "${COL}\n Creating nginx configuration for $DDOSDB_FQDN\n${NC}"
+
 # Create new conf for nginx based on the FQDN
 envsubst \$DDOSDB_FQDN <nginx/nginx-conf.template >temp/$DDOSDB_FQDN.conf
+
+printf "${COL}\n Copying to nginx container and verifying \n\n${NC}"
 
 # Copy the conf file into the container
 docker cp temp/$DDOSDB_FQDN.conf ddosdb_nginx:/etc/nginx/conf.d/.
@@ -72,6 +76,10 @@ then
 #  printf " Everything went swimmingly\n"
 fi
 
+printf "${COL}\n Everything OK. Restarting nginx container to let the changes take effect\n\n${NC}"
+
 # Finally send SIGHUP to NGINX to reload
 # (In this case simply restart container)
 docker restart ddosdb_nginx
+
+printf "${COL}\n All done. You should now be able to reach ddosdb at https://$DDOSDB_FQDN\n\n${NC}"

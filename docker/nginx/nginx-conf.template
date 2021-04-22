@@ -17,6 +17,11 @@ server {
 
     server_name $DDOSDB_FQDN;
 
+    location ^~ /.well-known/ {
+	    default_type "text/plain";
+	    root /etc/letsencrypt/www;
+    }
+
     ssl_certificate /etc/letsencrypt/live/$DDOSDB_FQDN/cert.pem;
     ssl_certificate_key /etc/letsencrypt/live/$DDOSDB_FQDN/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
