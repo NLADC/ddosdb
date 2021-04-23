@@ -63,7 +63,7 @@ then
 else
 #  printf "mail $le_email \n"
   docker exec ddosdb_nginx \
-    certbot certonly --test-cert --webroot -w /etc/letsencrypt/www/ -n --agree-tos \
+    certbot certonly $testcert --webroot -w /etc/letsencrypt/www/ -n --agree-tos \
     --email $le_email --no-eff-email --rsa-key-size 4096 -d $DDOSDB_FQDN
 fi
 

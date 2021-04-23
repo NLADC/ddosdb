@@ -12,7 +12,7 @@ COPY nginx/42-crond-start.sh /docker-entrypoint.d/.
 
 # Periodic check for Let's Encrypt certificate renewal.
 # Does nothing if no LE certificates are present
-COPY nginx/certbot-renew /etc/periodic/15min/.
+COPY nginx/certbot-renew /etc/periodic/daily/.
 
 COPY temp/ddosdb-localhost.crt /etc/ssl/certs/.
 COPY temp/ddosdb-localhost.key /etc/ssl/private/.
