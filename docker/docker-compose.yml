@@ -70,7 +70,7 @@ services:
       - static_volume:/home/ddosdb/ddosdb-static/
       - data_volume:/home/ddosdb/ddosdb-data/
       - letsencrypt_volume:/etc/letsencrypt/
-      - nginx_etc:/etc/nginx/
+      - nginx_etc:/etc/nginx/conf.d/
     ports:
       - 80:80
       - 443:443

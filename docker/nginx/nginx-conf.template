@@ -1,7 +1,3 @@
-#upstream ddosdb {
-#    server ddosdb:8000;
-#}
-
 server {
 
     listen 80;
@@ -17,28 +13,10 @@ server {
 
     server_name $DDOSDB_FQDN;
 
-    location ^~ /.well-known/ {
-	    default_type "text/plain";
-	    root /etc/letsencrypt/www;
-    }
+    include snippets/well-known.conf;
 
     ssl_certificate /etc/letsencrypt/live/$DDOSDB_FQDN/cert.pem;
     ssl_certificate_key /etc/letsencrypt/live/$DDOSDB_FQDN/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_session_cache shared:le_nginx_SSL:10m;
-    ssl_session_timeout 1440m;
-    ssl_session_tickets off;
-    ssl_prefer_server_ciphers off;
-    ssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA";
-
-    location / {
-        proxy_pass http://ddosdb;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
-        proxy_redirect off;
-    }
-
-    location /static/ {
-        alias /home/ddosdb/ddosdb-static/;
-    }
+    include snippets/ssl-settings.conf;
+    include snippets/ddosdb-locations.conf;
 }
