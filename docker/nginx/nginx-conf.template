@@ -12,11 +12,13 @@ server {
     listen [::]:443 ssl;
 
     server_name $DDOSDB_FQDN;
-
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header Content-Security-Policy "default-src 'self';frame-src 'self';frame-ancestors 'self';";
     include snippets/well-known.conf;
 
-    ssl_certificate /etc/letsencrypt/live/$DDOSDB_FQDN/cert.pem;
+    ssl_certificate /etc/letsencrypt/live/$DDOSDB_FQDN/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/$DDOSDB_FQDN/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/$DDOSDB_FQDN/fullchain.pem;
     include snippets/ssl-settings.conf;
     include snippets/ddosdb-locations.conf;
 }
