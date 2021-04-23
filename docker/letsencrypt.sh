@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 COL='\033[0;37m'
 RED='\033[1;31m'
@@ -18,10 +18,40 @@ do :; done
 
 export DDOSDB_FQDN=$fqdn
 
-printf "${COL}\n e-mail address Let's Encrypt can send warnings to [none]:${NC}"
+
+printf "${COL}%s\n ${NC}"  " " \
+  "For production use you need to specify a valid e-mail address, which Let's Encrypt can use for sending notification e-mails " \
+  "about impending expirations or revocation of certificates. It is also used for account recovery. " \
+  "" \
+  "If you leave the e-mail address empty at the next question then automatically only test certificates will be requested. " \
+  "Otherwise you can choose whether you want production or test certificates (the latter being the default). " \
+  " "
+
+printf "${COL}\n e-mail address for Let's Encrypt notifications [none]:${NC}"
 read le_email
 
-printf "${COL}\n Instructing certbot to get a new certificate for $DDOSDB_FQDN\n\n${NC}"
+testcert="--test-cert"
+
+if [ -n "$le_email" ]
+then
+  printf "${COL}\n Request production certificates? [N/y]:${NC}"
+  read prodcert
+  if [ "$prodcert" == 'y' ]
+  then
+    testcert=""
+    printf "${COL}\n You chose production certificates!${NC}"
+  else
+    printf "${COL}\n You chose test certificates!${NC}"
+  fi
+fi
+
+CERT="test"
+if [ -z "$testcert" ]
+then
+  CERT="production"
+fi
+
+printf "${COL}\n Instructing certbot to get a new (${NC}$CERT${COL}) certificate for ${NC}$DDOSDB_FQDN\n\n"
 
 # See if we can generate the certificate using certbot in the nginx container
 if [ -z "$le_email" ]

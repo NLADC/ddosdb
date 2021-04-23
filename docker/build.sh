@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 COL='\033[0;37m'
 RED='\033[1;31m'

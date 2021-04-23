@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# To be placed in the appropriate /etc/periodic/... directory
+# 15min, hourly, daily, weekly, monthly
+# For testing we'll use hourly, for production daily will suffice.
+
+# Note that file names in /etc/periodic/.. for run-parts cannot contain . characters
+# Then it won't execute. run-parts --test <DIR> will list the scripts that will run
+
+# --break-my-certs is for test certificates only!
+certbot renew -n --no-self-upgrade --break-my-certs --post-hook "nginx -s reload"
+
