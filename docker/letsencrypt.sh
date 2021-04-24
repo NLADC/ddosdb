@@ -36,7 +36,7 @@ if [ -n "$le_email" ]
 then
   printf "${COL}\n Request production certificates? [N/y]:${NC}"
   read prodcert
-  if [ "$prodcert" == 'y' ]
+  if [ x"$prodcert" = x"y" ]
   then
     testcert=""
     printf "${COL}\n You chose production certificates!${NC}"
