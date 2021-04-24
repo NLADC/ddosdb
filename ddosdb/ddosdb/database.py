@@ -1,6 +1,9 @@
 from django.conf import settings
 import pymongo
 import pprint
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Database(object):
    URI =  "mongodb://"+settings.MONGODB

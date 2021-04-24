@@ -25,4 +25,5 @@ urlpatterns = [
     path('fingerprint/<key>', views.fingerprint, name='fingerprint'),
     path('remote-dbs', views.remote_dbs, name='remote-dbs'),
     path('attack-trace/<key>', views.attack_trace, name='attack-trace'),
+    path('csp-report', views.csp_report, name='csp-report'),
 ]

@@ -37,21 +37,6 @@
             </div>
         </div>
     </form>
-    <div class="row mt-1">
-        <div class="col-12">
-            {% if p > 1 %}
-                <a class="btn btn-dark" href="{% url "query" %}?q={{ q|urlencode }}&p={{ p|add:-1 }}">Previous page</a>
-            {% endif %}
-            {% if p|multiply:10 < amount %}
-                <a class="btn btn-dark" href="{% url "query" %}?q={{ q|urlencode }}&p={{ p|add:1 }}">Next page</a>
-            {% endif %}
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12">
-            <small class="text-muted text-right">Found {{ amount|intword }} results in {{ time }} seconds</small>
-        </div>
-    </div>
 </div>
 {% include "ddosdb/footer.html" %}
 </body>

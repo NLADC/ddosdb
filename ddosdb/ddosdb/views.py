@@ -13,6 +13,7 @@ from distutils.util import strtobool
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from pymongo import ReturnDocument
+import logging
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -34,6 +35,8 @@ from ddosdb.database import Database
 #__mdb__ = MongoClient("mongodb://"+settings.MONGODB, serverSelectionTimeoutMS=100).ddosdb.fingerprints
 
 Database.initialize()
+
+logger = logging.getLogger(__name__)
 
 def _mdb():
     return Database.getDB()
@@ -64,6 +67,7 @@ def _delete(query=None):
 
 
 def _pretty_request(request):
+    logger.debug("_pretty_request ({})".format(request.method))
     headers = ''
     for header, value in request.META.items():
         if not header.startswith('HTTP'):
@@ -86,21 +90,27 @@ def _pretty_request(request):
     )
 
 def index(request):
-    context = {}
+    logger.debug("index ({})".format(request.method))
+
+    context = {"time": 0}
     return HttpResponse(render(request, "ddosdb/index.html", context))
 
 
 def about(request):
+    logger.debug("about ({})".format(request.method))
     context = {}
     return HttpResponse(render(request, "ddosdb/about.html", context))
 
 
 def help_page(request):
+    logger.debug("help_page ({})".format(request.method))
     context = {}
     return HttpResponse(render(request, "ddosdb/help.html", context))
 
 
 def signin(request):
+    logger.debug("signin ({})".format(request.method))
+
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -120,6 +130,8 @@ def signin(request):
 
 
 def request_access(request):
+    logger.debug("request_access ({})".format(request.method))
+
     context = {
         "error": False,
         "success": False
@@ -167,6 +179,8 @@ def request_access(request):
 
 @login_required()
 def account(request):
+    logger.debug("account ({})".format(request.method))
+
     user: User = request.user
     context = {
         "user": user,
@@ -212,12 +226,16 @@ def account(request):
 
 @login_required()
 def signout(request):
+    logger.debug("signout ({})".format(request.method))
+
     logout(request)
     return redirect("index")
 
 
 @login_required()
 def details(request):
+    logger.debug("details ({})".format(request.method))
+
     pp = pprint.PrettyPrinter(indent=4)
 
     start = time.time()
@@ -244,6 +262,8 @@ def details(request):
 
 @login_required()
 def query(request):
+    logger.debug("query ({})".format(request.method))
+
     pp = pprint.PrettyPrinter(indent=4)
 
     start = time.time()
@@ -270,9 +290,9 @@ def query(request):
         try:
             # results = _search({'key': q}, {'_id': 0})
 #            results = _search( query=None, fields={'_id': 0})
-            pp.pprint("Query: {}".format(q))
+            logger.info("Query: {}".format(q))
             results = _search({"$text": {"$search": q}})
-            pp.pprint(results)
+            logger.info("Results: {}".format(results))
             context["results"] = results
             context["amount"] = len(results)
         #     es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
@@ -413,6 +433,8 @@ def query_old(request):
 
 @csrf_exempt
 def upload_file(request):
+    logger.debug("upload_file ({})".format(request.method))
+
     if request.method == "POST":
         #        print(pretty_request(request))
         #        if not all (k in request.META for k in ("HTTP_X_USERNAME","HTTP_X_PASSWORD","HTTP_X_FILENAME")):
@@ -435,6 +457,7 @@ def upload_file(request):
             response = HttpResponse()
             response.status_code = 403
             response.reason_phrase = "Invalid credentials or no permission to upload fingerprints"
+            logger.warning("upload_file with invalid credentials or no permission by user {}".format(username))
             return response
 
         if "json" in request.FILES:
@@ -516,18 +539,20 @@ def upload_file(request):
             # Save JSON upload to file (not really needed to be honest)
             demjson.encode_to_file(settings.RAW_PATH + filename + ".json", data)
 
+            logger.info("Fingerprint {}: {}".format(data["key"], data))
             # JSON database insert
             try:
                 _delete({'key': data['key']})
                 _insert(data)
             except ServerSelectionTimeoutError:
-                print("ServerSelectionTimeoutError: could not reach MongoDB")
+                logger.error("ServerSelectionTimeoutError: could not reach MongoDB")
                 response = HttpResponse()
                 response.status_code = 500
                 response.reason_phrase = "Error reaching MongoDB"
                 return response
 
         if "pcap" in request.FILES:
+            logger.info("pcap in request as well")
             try:
                 os.remove(settings.RAW_PATH + filename + ".pcap")
             except IOError:
@@ -559,6 +584,9 @@ def upload_file(request):
 
 @login_required()
 def overview(request):
+    logger.debug("overview ({})".format(request.method))
+
+
     pp = pprint.PrettyPrinter(indent=4)
 
     user: User = request.user
@@ -586,6 +614,7 @@ def overview(request):
     if "son" in request.GET:
         context["son"] = request.GET["son"]
 
+    logger.info("context: {}".format(context))
     _search()
 
     try:
@@ -622,10 +651,10 @@ def overview(request):
 #        pp.pprint(mdb_resp)
 
         context["time"] = time.time() - start
-        print(context["time"])
-
+        logger.debug("Search took {} seconds".format(context["time"]))
 #        results = [x["_source"] for x in response["hits"]["hits"]]
         results = mdb_resp
+        logger.info("Got {} results".format(len(results)))
 
 #        pp.pprint(results)
         # Only do this if there are actual results...
@@ -659,10 +688,11 @@ def overview(request):
 
         # Count the number of shareable fingerprints
         context["syncfps"] = collections.Counter([d['shareable'] for d in results])[True]
+        logger.debug("{} fingerprints allowed to be shared with other DDoSDBs".format(context["syncfps"]))
 
     except ServerSelectionTimeoutError as e:
         context["error"] = " ServerSelectionTimeoutError "
-        print(e)
+        logger.error(e)
 
     # Do something special in overview page if user is a super user
     if user.is_superuser:
@@ -677,6 +707,8 @@ def overview(request):
 
 @login_required()
 def delete(request):
+    logger.debug("delete ({})".format(request.method))
+
     pp = pprint.PrettyPrinter(indent=4)
 
     user: User = request.user
@@ -707,6 +739,12 @@ def delete(request):
     if "key" in request.GET:
         if "ddosdb.delete_fingerprint" in user.get_all_permissions():
            _delete({"key": request.GET["key"]})
+           logger.info("User {} delete fingerprint {}".format(user.username, request.GET["key"]))
+        else:
+            logger.error("********************************************************")
+            logger.error("********  delete request without permission ************")
+            logger.error("********      THIS SHOULD NOT HAPPEN        ************")
+            logger.error("********************************************************")
 
     extra = []
     if "q" in request.GET:
@@ -728,6 +766,8 @@ def delete(request):
 
 @login_required()
 def remote_sync(request):
+    logger.debug("remote_sync ({})".format(request.method))
+
     pp = pprint.PrettyPrinter(indent=4)
     user: User = request.user
 
@@ -740,19 +780,12 @@ def remote_sync(request):
 
     # Get all the shareable fingerprints
     try:
-        # es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-        #
-        # q = "shareable:true"
-        #
-        # response = es.search(index="ddosdb", q=q, size=10000)
-        # fingerprints = [x["_source"] for x in response["hits"]["hits"]]
-        # fp_keys = [fp['key'] for fp in fingerprints]
         response = _search({'shareable': True}, {'_id': 0})
         fp_keys = [fp['key'] for fp in response]
-        print(fp_keys)
+        logger.info("Fingerprints to sync: {}".format(fp_keys))
 
     except ServerSelectionTimeoutError as e:
-        print("Could not setup a connection to MongoDB")
+        logger.error("Could not setup a connection to MongoDB")
         response = HttpResponse()
         response.status_code = 503
         response.reason_phrase = "Database unavailable"
@@ -760,10 +793,10 @@ def remote_sync(request):
 
     results = []
     remotedbs = RemoteDdosDb.objects.filter(active=True)
-    print(remotedbs)
+    logger.info(remotedbs)
     rdbs = []
     for rdb in remotedbs:
-        print(rdb)
+        logger.info(rdb)
         unk_fps = []
         try:
             r = requests.post("{}/unknown-fingerprints".format(rdb.url),
@@ -771,11 +804,11 @@ def remote_sync(request):
                               json=fp_keys,
                               timeout=10)
             if r.status_code == 200:
-                pp.pprint(r.json())
+                logger.debug(r.json())
                 unk_fps = r.json()
                 if len(unk_fps) > 0:
                     fps_to_sync = list(filter(lambda fp: fp['key'] in unk_fps, fingerprints))
-                    pp.pprint(fps_to_sync)
+                    plogger.info("Fingerprints to sync: {}".format(fps_to_sync))
 
                     r = requests.post("{}/fingerprints".format(rdb.url),
                                       auth=(rdb.username, rdb.password),
@@ -787,7 +820,7 @@ def remote_sync(request):
                          "unk_fps_nr": len(unk_fps),
                          })
         except Exception as e:
-            print(e)
+            logger.error(e)
             rdbs.append({"name": rdb.name,
                          "status": 555,
                          "status_reason": "Connection failed",
@@ -803,6 +836,8 @@ def remote_sync(request):
 
 @login_required()
 def toggle_shareable(request):
+    logger.debug("toggle_shareable ({})".format(request.method))
+
     pp = pprint.PrettyPrinter(indent=4)
 
     user: User = request.user
@@ -821,11 +856,12 @@ def toggle_shareable(request):
     try:
         fp = _search_one({"key": key}, {"shareable" : 1, "key" : 1, "submitter" : 1})
         if fp["submitter"] == user.username or user.is_superuser:
+            logger.info("Setting key {} to Shareable={}".format(key, shareable))
             _update({'key': key}, {'$set': {"shareable": shareable}})
         else:
             raise PermissionDenied()
     except Exception as e:
-        print(e)
+        logger.error(e)
         response = HttpResponse()
         response.status_code = 503
         response.reason_phrase = "Database unavailable"
@@ -852,12 +888,15 @@ def toggle_shareable(request):
 
 @login_required()
 def edit_comment(request):
+    logger.debug("edit_comment ({})".format(request.method))
+
     pp = pprint.PrettyPrinter(indent=4)
 
     user: User = request.user
     context = {
         "user": user,
         "permissions": user.get_all_permissions(),
+        "time": 0,
     }
 
     key = ""
@@ -874,9 +913,9 @@ def edit_comment(request):
 
         try:
             fp = mdb.find_one({"key": key})
-            pp.pprint(fp)
+            logger.debug("Found key {} to edit comment".format(fp["key"]))
         except:
-            print("Could not setup a connection to MongoDB")
+            logger.error("Could not setup a connection to MongoDB")
             response = HttpResponse()
             response.status_code = 503
             response.reason_phrase = "Database unavailable"
@@ -896,10 +935,11 @@ def edit_comment(request):
         fp = mdb.find_one({"key": key}, {"comment" : 1, "key" : 1, "submitter" : 1})
         if fp["submitter"] == user.username or user.is_superuser:
             try:
+                logger.info("Setting comment for fingerprint {} to '{}'".format(key, request.POST["comment"]))
                 mdb.find_one_and_update({'key': key}, {'$set': {"comment": request.POST["comment"]}})
             except Exception as e:
-                print(e)
-                print("Could not setup a connection to Elasticsearch")
+                logger.error(e)
+                logger.error("Could not setup a connection to MongoDB")
                 response = HttpResponse()
                 response.status_code = 503
                 response.reason_phrase = "Database unavailable"
@@ -909,12 +949,13 @@ def edit_comment(request):
         return redirect("overview")
 
 def _auth_user_get_perms(request):
+    logger.debug("_auth_user_get_perms")
+
     user_and_perms = {
         "user": None,
         "permissions": []
     }
 
-    # print(pretty_request(request))
 
     if not "HTTP_AUTHORIZATION" in request.META:
         return user_and_perms
@@ -946,6 +987,8 @@ def _auth_user_get_perms(request):
 
 @csrf_exempt
 def my_permissions(request):
+    logger.debug("my_permissions ({})".format(request.method))
+
     if request.method == "GET":
 
         user_perms = _auth_user_get_perms(request)
@@ -958,6 +1001,7 @@ def my_permissions(request):
 
         return JsonResponse({str(user_perms["user"]): user_perms["permissions"]}, safe=False)
     else:
+        logger.warning("my_permissions: POST method for GET only request")
         response = HttpResponse()
         response.status_code = 405
         response.reason_phrase = "Use GET only for this call"
@@ -966,6 +1010,8 @@ def my_permissions(request):
 
 @csrf_exempt
 def fingerprints(request):
+    logger.debug("fingerprints ({})".format(request.method))
+
     """REST API Call"""
     """GET method will return list of keys for all fingerprints present in the database"""
     """can add query parameters to it if needed, e.g.:"""
@@ -992,13 +1038,13 @@ def fingerprints(request):
             # response = es.search(index="ddosdb", q=q, size=10000, _source="key")
             # results = [x["_source"]["key"] for x in response["hits"]["hits"]]
             fps = _search(fields={'key': 1})
-            print(fps)
+            logger.debug(fps)
             results = []
             for fp in fps:
                 results.append(fp['key'])
             return JsonResponse(results, safe=False)
         except ServerSelectionTimeoutError as e:
-            print("MongoDB unreachable")
+            logger.error("MongoDB unreachable")
             response = HttpResponse()
             response.status_code = 500
             response.reason_phrase = "Error with MongoDB"
@@ -1081,6 +1127,7 @@ def fingerprints(request):
 
 @csrf_exempt
 def unknown_fingerprints(request):
+    logger.debug("unknown_fingerprints ({})".format(request.method))
     """Takes a list of fingerprint keys and returns the fingerprint keys not present in the database"""
     """Allowing caller to then only upload fingerprints not yet known by this DDoS-DB"""
     """This is a REST method accepting only POST calls with JSON body content (application/json)"""
@@ -1093,6 +1140,8 @@ def unknown_fingerprints(request):
             raise PermissionDenied()
 
         if request.META['CONTENT_TYPE'] != "application/json":
+            logger.warning("unknown_fingerprints called with wrong content type")
+            logger.warning("Should be 'application/json', is '{}'".format(request.META['CONTENT_TYPE']))
             response = HttpResponse()
             response.status_code = 400
             response.reason_phrase = "Wrong content type"
@@ -1106,17 +1155,17 @@ def unknown_fingerprints(request):
             known_fps = []
             for fp in fps:
                 known_fps.append(fp['key'])
-            print(known_fps)
-            print(data)
+            logger.info("Known fingerprints: ".format(known_fps))
+            logger.info(data)
             for fp in data:
-                print("Fingerprint {} is {}".format(fp, fp in known_fps))
+                logger.info("Fingerprint {} is {}".format(fp, fp in known_fps))
                 if not fp in known_fps:
                     unk_fps.append(fp)
 
             return JsonResponse(unk_fps, safe=False)
 
         except ServerSelectionTimeoutError as e:
-            print("MongoDB unreachable")
+            logger.error("MongoDB unreachable")
             response = HttpResponse()
             response.status_code = 500
             response.reason_phrase = "Error reaching MongoDB"
@@ -1130,6 +1179,7 @@ def unknown_fingerprints(request):
 
 @csrf_exempt
 def fingerprint(request, key):
+    logger.debug("fingerprint ({})".format(request.method))
     if request.method == "GET":
 
         # print(pretty_request(request))
@@ -1140,7 +1190,7 @@ def fingerprint(request, key):
 
         try:
             fps = _search({'key': key}, {'_id': 0})
-            print(fps)
+            logger.debug(fps)
             if len(fps) > 0:
                 return JsonResponse(fps, safe=False)
             else:
@@ -1150,7 +1200,7 @@ def fingerprint(request, key):
                 return response
 
         except ServerSelectionTimeoutError as e:
-            print("MongoDB unreachable")
+            logger.error("MongoDB unreachable")
             response = HttpResponse()
             response.status_code = 500
             response.reason_phrase = "Error with MongoDB"
@@ -1163,6 +1213,7 @@ def fingerprint(request, key):
 
 @login_required()
 def attack_trace(request, key):
+    logger.debug("attack_trace ({}), key={}".format(request.method, key))
     file = ""
     for file_path in os.listdir(settings.RAW_PATH):
         filename, file_extension = os.path.splitext(file_path)
@@ -1180,6 +1231,8 @@ def attack_trace(request, key):
 
 @csrf_exempt
 def remote_dbs(request):
+    logger.debug("remote_dbs ({})".format(request.method))
+
     if request.method == "GET":
 
         user_perms = _auth_user_get_perms(request)
@@ -1199,4 +1252,25 @@ def remote_dbs(request):
         response = HttpResponse()
         response.status_code = 405
         response.reason_phrase = "Only GET supported"
+        return response
+
+
+@csrf_exempt
+def csp_report(request):
+    logger.debug("csp_report ({})".format(request.method))
+
+    pp = pprint.PrettyPrinter(indent=4)
+
+    if request.method == "POST":
+        report = demjson.decode(request.body)
+        logger.info(request.body)
+        logger.info(report)
+        response = HttpResponse()
+        response.status_code = 200
+        return response
+
+    else:
+        logger.warning("GET request on csp_report. Fishy...")
+        response = HttpResponse()
+        response.status_code = 405
         return response
