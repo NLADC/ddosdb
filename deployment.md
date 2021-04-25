@@ -55,13 +55,13 @@ IMPORTANT NOTES:
  - Congratulations! Your certificate and chain have been saved at:
    /etc/letsencrypt/live/ddosdb.mooo.com/fullchain.pem
    Your key file has been saved at:
-   /etc/letsencrypt/live/ddosdb.mooo.com/privkey.pem
+   /etc/letsencrypt/live/<your.domain.name>/privkey.pem
    Your cert will expire on 2021-07-24. To obtain a new or tweaked
    version of this certificate in the future, simply run certbot
    again. To non-interactively renew *all* of your certificates, run
    "certbot renew"
 
- Creating nginx configuration for ddosdb.mooo.com
+ Creating nginx configuration for <your.domain.name>
 
  Copying to nginx container and verifying 
 
@@ -72,7 +72,7 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful
 
 2021/04/25 18:36:07 [notice] 148#148: signal process started
 
- All done. You should now be able to reach ddosdb at https://ddosdb.mooo.com
+ All done. You should now be able to reach ddosdb at https://<your.domain.name>
  
  Because this certificate is a test certificate, your browser will tell you this site is not trusted and not secure.
  You will probably have to tell it somehow to go to this site anyway and ignore this warning. 
