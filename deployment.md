@@ -88,10 +88,10 @@ This shows that everything is working as it should. So go ahead:
 
 Simply re-run the `./letsencrypt.sh` script, but this time do provide an e-mail address and answer 'y' when asked if you want a production certificate. That's all!
 
-Please note you can request certificates for more than one domain, as long as all those domains point to this machine.
+Please note you can request certificates for more than one domain (as long as all those domains point to this machine) by running the script multiple times.
 
 ### Certificate renewal
-Once a day the system checks if the certiicate(s) need to be renewed. This happens automatically when the expiration date is fewer than 30 days away.
+Once a day the system checks if the certificate(s) need to be renewed. Renewal happens automatically when the expiration date is fewer than 30 days away.
 
 ### Updating DDoSDB (with certificates installed)
 If you need to update the system then you can simply re-run the `./letsencrypt.sh` script afterwards to get a new certificate. Just make sure you don't exceed the [rate limit](https://letsencrypt.org/docs/rate-limits/) for requesting production certificates! (This is very unlikely to happen for test certificates, since those rate limits are much much higher). 
