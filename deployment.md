@@ -38,7 +38,7 @@ Requesting and installing a certificate is done with the `./letsencrypt.sh` scri
 ### Testing the waters
 The letsencrypt script will ask you the domain name for which it has to request a certificate. This domain should (of course) resolve to the machine running DDoSDB.
 
-It will then ask you for your e-mail address. This is used by Let's Encrypt to send expiration e-mails. If you don't specify an e-mail address (just press return) the script will assume you want to get a test certificate. If you did specify an e-mail address then the script will ask you if you want to request a production certificate. The default is No (so request a test certificate).
+It will then ask you for your e-mail address. This is used by Let's Encrypt to send expiration e-mails. If you don't specify an e-mail address (just press return) the script will assume you want to get a test certificate. If you did specify an e-mail address then the script will ask you if you want to request a production certificate. The default is No (meaning it will request a test certificate).
 
 You can do this the first time you run the script, just to check that everything is working.
 The output should look like this (but then with coloured text):
