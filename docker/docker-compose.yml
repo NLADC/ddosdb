@@ -9,8 +9,10 @@ services:
       - PUID=1000
       - PGID=1000
     volumes:
-      - mongodb-data:/data/db
+      - ddosdb_mongodb:/data/db
 #      - ./mongo-entrypoint/:/docker-entrypoint-initdb.d/
+    networks:
+      - ddosdb
     expose:
       - 27017
     restart: unless-stopped
@@ -23,7 +25,9 @@ services:
     env_file:
       - ./temp/environment.prod
     volumes:
-      - mongodb-data
+      - ddosdb_mongodb
+    networks:
+      - ddosdb
     ports:
       - 127.0.0.1:8081:8081
     depends_on:
@@ -34,11 +38,13 @@ services:
     image: postgres:12.0-alpine
     container_name: ddosdb_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - ddosdb_postgres:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=ddosdb
       - POSTGRES_PASSWORD=ddosdb
       - POSTGRES_DB=ddosdb
+    networks:
+      - ddosdb
     expose:
       - 5432
     restart: unless-stopped
@@ -52,8 +58,10 @@ services:
     env_file:
       - ./temp/environment.prod
     volumes:
-      - static_volume:/home/ddosdb/ddosdb-static/
-      - data_volume:/home/ddosdb/ddosdb-data/
+      - ddosdb_static:/home/ddosdb/ddosdb-static/
+      - ddosdb_data:/home/ddosdb/ddosdb-data/
+    networks:
+      - ddosdb
     expose:
      - 8000
     depends_on:
@@ -67,10 +75,12 @@ services:
       dockerfile: nginx/Dockerfile
     container_name: ddosdb_nginx
     volumes:
-      - static_volume:/home/ddosdb/ddosdb-static/
-      - data_volume:/home/ddosdb/ddosdb-data/
-      - letsencrypt_volume:/etc/letsencrypt/
-      - nginx_etc:/etc/nginx/conf.d/
+      - ddosdb_static:/home/ddosdb/ddosdb-static/
+      - ddosdb_data:/home/ddosdb/ddosdb-data/
+      - ddosdb_letsencrypt:/etc/letsencrypt/
+      - ddosdb_nginx_etc:/etc/nginx/conf.d/
+    networks:
+      - ddosdb
     ports:
       - 80:80
       - 443:443
@@ -79,9 +89,12 @@ services:
     restart: unless-stopped
 
 volumes:
-  mongodb-data:
-  postgres_data:
-  static_volume:
-  data_volume:
-  letsencrypt_volume:
-  nginx_etc:
+  ddosdb_mongodb:
+  ddosdb_postgres:
+  ddosdb_static:
+  ddosdb_data:
+  ddosdb_letsencrypt:
+  ddosdb_nginx_etc:
+
+networks:
+  ddosdb:

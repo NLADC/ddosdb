@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 
-printf "${COL}\n Are you aure you want to restore certificates and NGINX configurations? [N/y]:${NC}"
+COL='\033[0;37m'
+RED='\033[1;31m'
+NC='\033[0m' # No Color
+
+printf "${COL}\n Are you sure you want to restore certificates and NGINX configurations? [y/N]:${NC}"
 read restore
 
 if [ x"$restore" = x"y" ]

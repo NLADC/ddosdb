@@ -34,7 +34,7 @@ testcert="--test-cert"
 
 if [ -n "$le_email" ]
 then
-  printf "${COL}\n Request production certificates? [N/y]:${NC}"
+  printf "${COL}\n Request production certificates? [y/N]:${NC}"
   read prodcert
   if [ x"$prodcert" = x"y" ]
   then

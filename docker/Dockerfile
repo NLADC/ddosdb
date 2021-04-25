@@ -1,5 +1,5 @@
 # docker exec -it 5e57902b199b /bin/bash
-FROM python:3.8.3-slim
+FROM python:3.9.4-slim
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1

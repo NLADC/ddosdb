@@ -64,12 +64,12 @@ This means DDoSDB is running daemonized (in the background).
 You can check if all containers are up by executing `docker ps`, the output should be something like this:
 
 ```
-CONTAINER ID   IMAGE                  COMMAND                  CREATED          STATUS          PORTS                               NAMES
-b293c7bf798a   docker_nginx           "/docker-entrypoint.…"   14 seconds ago   Up 10 seconds   0.0.0.0:80->80/tcp, :::80->80/tcp   docker_nginx_1
-3f47b83621bc   docker_ddosdb          "/home/ddosdb/entryp…"   20 seconds ago   Up 14 seconds   8000/tcp                            docker_ddosdb_1
-6e5544942fd2   mongo-express          "tini -- /docker-ent…"   20 seconds ago   Up 7 seconds    127.0.0.1:8081->8081/tcp            docker_mongo-express_1
-d4257ab77228   mongo                  "docker-entrypoint.s…"   24 seconds ago   Up 20 seconds   27017/tcp                           docker_mongodb_1
-b9f859a82f6f   postgres:12.0-alpine   "docker-entrypoint.s…"   24 seconds ago   Up 21 seconds   5432/tcp                            docker_db_1
+CONTAINER ID   IMAGE                  COMMAND                  CREATED         STATUS         PORTS                                                                      NAMES
+8990495a1123   docker_nginx           "/sbin/tini -- /dock…"   2 minutes ago   Up 2 minutes   0.0.0.0:80->80/tcp, :::80->80/tcp, 0.0.0.0:443->443/tcp, :::443->443/tcp   ddosdb_nginx
+ba78353fb07e   docker_ddosdb          "/home/ddosdb/entryp…"   2 minutes ago   Up 2 minutes   8000/tcp                                                                   ddosdb_ddosdb
+3b833033adeb   mongo-express          "tini -- /docker-ent…"   2 minutes ago   Up 2 minutes   127.0.0.1:8081->8081/tcp                                                   ddosdb_mongo_express
+c06a03c7f6dd   mongo                  "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   27017/tcp                                                                  ddosdb_mongo
+56893e373bd8   postgres:12.0-alpine   "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   5432/tcp                                                                   ddosdb_db
 
 ```
 
@@ -81,24 +81,34 @@ You can start it again with `docker-compose up -d` or alternatively `docker-comp
 to keep it running in the foreground (not deamonizing it). 
 ### Updating
 
-The docker container is built from the local repository itself, so updating to the current version is done by stopping the containers and removing the data, updating the repository and then rebuilding and re-initialising.
-
-```
-docker-compose down -v
-git pull
-./build.sh
-```
-
-For minor updates it *may* be enough to update and rebuild (without removing data and re-initialising everything).
-In order to do that, simply bring the container down, update the repository and bring the containers back up with an explicit build option:
+The docker container is built from the local repository itself, so updating to the current version is done by stopping the containers, updating the repository and then rebuilding and re-initialising.
 
 ```
 docker-compose down
 git pull
 docker-compose up --build --remove-orphans -d
 ```
-However, this may result in unpredictable behaviour or crashes when the updates are major.
-So using the first approach is recommended. 
+This will keep all settings and already stored fingerprints intact. 
+With major changes this may cause problems however. So if you do encounter an issue, first to try 
+is to delete all images and volumes and start building from scratch. This can be done by executing the `clean.sh` script. Running this script brings down all containers and then removes all images and volumes of ddosdb.
+
+```
+./clean.sh
+./build.sh
+```
+If - for some reason - this fails then one option to try is to remove all images (intermediate and otherwise) as well as all volumes from docker.
+
+**WARNING** : *The docker prune command executed with the options below, removes **all** images and **all** volumes from your sytem! <br/> Not just the ones related with ddosdb!*
+
+So if you have other docker projects, make sure any relevant data is **saved** before you do this!
+```
+# Method of last resort!
+
+docker-compose down
+docker system prune -a --volumes
+./build.sh
+```
+
 
 ## View logging from the container
 
@@ -119,10 +129,10 @@ docker-compose logs -f
 If you only want to see the logging from a specific service you can use:
 
 ```
-docker logs -f docker_ddosdb_1
+docker logs -f ddosdb_ddosdb
 ```
 
-Where `docker_ddosdb_1` is the container name of the ddosdb itself (Use `docker ps` to list them, as mentioned above)
+Where `ddosdb_ddosdb` is the container name of the ddosdb itself (Use `docker ps` to list them, as mentioned above)
 
 ## Acknowledgements
 

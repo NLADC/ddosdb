@@ -13,6 +13,9 @@
     {% else %}
       <a class="p-2 text-dark" href="{% url 'account' %}">Account</a>
       <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>
+      {% if request.user.is_superuser %}
+        <a class="p-2 text-dark" target="_blank" href="/admin/">admin</a>
+      {% endif %}
     {% endif %}
   </nav>
   {% if not request.user.is_authenticated %}
