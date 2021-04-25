@@ -15,159 +15,88 @@
  <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/concordia-logo.png?raw=true"></p>
  <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/No-More-DDoS-2-removebg-preview.png?raw=true"></p>
 
-
-
 # DDoSDB
 
-# ~~Deploying DDoSDB for production~~ (DEPRECATED!)
-## Use docker deployment instead
-#
-- [Prerequisites](#prerequisites)
-- [Clone the repository](#clone-the-repository)
-- [Elasticsearch](#elasticsearch)
-    - [Create a ddosdb index](#create-a-ddosdb-index)
-- [PostgreSQL](#postgresql)
-- [Django and other modules](#django-and-other-modules)
-- [Apache2](#apache2)
-    - [Apache2 virtualhost](#apache2-virtualhost)
-- [Prepare the ddosdb project](#prepare-the-ddosdb-project)
-    - [Copy project to /opt/ddosdb](#copy-project-to-optddosdb)
-    - [Create local settings](#create-local-settings)
-    - [Do the Django migrations](#do-the-django-migrations)
-- [Restart Apache](#restart-apache)
-- [Acknowledgements](#ackmowledgements)
+## Production deployment with Let's Encrypt certificates
+
+### Prerequisites
+Deployment of DDoSDB is simply the dockerized version with [Let's Encrypt](https://letsencrypt.org/) certificates on top.
+So for deployment first follow the steps as outlined by the 
+[dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md)
+instructions.
+
+For requesting and renewing certificates ddosdb uses [certbot](https://certbot.eff.org/) with the [HTTP-01](https://letsencrypt.org/docs/challenge-types/) challenge.
+This means that your ddosdb installation has to have:
+1. Ports 80 (http) and 443 (https) reachable from the internet
+2. A DNS record that points to that machine (no point in requesting a certificate otherwise).
+
+Both are needed *before* you can get a Let's Encrypt certificate.
 
 
+Requesting and installing a certificate is done with the `./letsencrypt.sh` script, in the same directory (docker) as the build script.
 
-## Prerequisites
+### Testing the waters
+The letsencrypt script will ask you the domain name for which it has to request a certificate. This domain should (of course) resolve to the machine running DDoSDB.
 
-We assume (and this is tested on) a debian based setup, although probably any ubuntu based distro will do.
-We further assume a user called _ddosdb_ with sudo privileges. 
-You may have to customize the process if you opted to use a different flavour of Linux since default installation locations etc. can vary between distributions.
+It will then ask you for your e-mail address. This is used by Let's Encrypt to send expiration e-mails. If you don't specify an e-mail address (just press return) the script will assume you want to get a test certificate. If you did specify an e-mail address then the script will ask you if you want to request a production certificate. The default is No (so request a test certificate).
 
-## Clone the repository
-
-```bash
-cd ~
-git clone https://github.com/ddos-clearing-house/ddosdb
+You can do this the first time you run the script, just to check that everything is working.
+The output should look like this (but then with coloured text):
 ```
-## Elasticsearch
-```bash
-sudo apt-get update
-sudo apt-get install -y default-jre-headless
-wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-sudo apt-get install -y apt-transport-https
-echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
-sudo apt-get update && sudo apt-get install -y elasticsearch
-sudo -i service elasticsearch start
-sudo /bin/systemctl enable elasticsearch.service
-```
-### Create a ddosdb index
-```bash
-cd housekeeping
-sh ddosdb.db
-```
-## postgreSQL
-When asked for a password by one of the commands below, use `ddosdb` or change the line ` 'PASSWORD': 'ddosdb',` in `settings_local.py` later in the Create local settings step.
-```bash
-# PostgreSQL:
-sudo apt-get install -y postgresql postgresql-contrib
-sudo -u postgres createdb ddosdb
-sudo -u postgres createuser -P -s ddosdb
-```
-## Django and other modules
-```bash
-sudo apt-get install python3 python3-pip libpq-dev
-sudo pip3 install demjson nclib django-sslserver psycopg2 psycopg2-binary elasticsearch requests pandas
-```
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Plugins selected: Authenticator webroot, Installer None
+Obtaining a new certificate
+Performing the following challenges:
+http-01 challenge for ddosdb.mooo.com
+Using the webroot path /etc/letsencrypt/www for all unmatched domains.
+Waiting for verification...
+Cleaning up challenges
+IMPORTANT NOTES:
+ - Congratulations! Your certificate and chain have been saved at:
+   /etc/letsencrypt/live/ddosdb.mooo.com/fullchain.pem
+   Your key file has been saved at:
+   /etc/letsencrypt/live/ddosdb.mooo.com/privkey.pem
+   Your cert will expire on 2021-07-24. To obtain a new or tweaked
+   version of this certificate in the future, simply run certbot
+   again. To non-interactively renew *all* of your certificates, run
+   "certbot renew"
 
-## Apache2
-```bash
-sudo apt-get install -y apache2 libapache2-mod-wsgi-py3 libapache2-mod-xsendfile
-sudo mkdir /opt/ddosdb-static
-sudo chown -R ddosdb /opt/ddosdb-static
-sudo mkdir /opt/ddosdb-data
-sudo chmod 777 /opt/ddosdb-data
-sudo chown -R ddosdb /opt/ddosdb-data
-sudo mkdir /opt/ddosdb
-sudo chown -R ddosdb /opt/ddosdb
-```
-### Apache2 virtualhost
-```bash
-sudo bash -c "cat > /etc/apache2/sites-available/000-default.conf" << EOL
-<VirtualHost *:80>
-Alias /static /opt/ddosdb-static/
-<Directory /opt/ddosdb-static/>
-    Require all granted
-</Directory>
+ Creating nginx configuration for ddosdb.mooo.com
 
-<Directory /opt/ddosdb/website>
-    <Files wsgi.py>
-        Require all granted
-    </Files>
+ Copying to nginx container and verifying 
 
-    XSendFile On
-    XSendFilePath /opt/ddosdb-data
-</Directory>
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
 
-WSGIDaemonProcess website
-WSGIProcessGroup website
-WSGIScriptAlias / /opt/ddosdb/website/wsgi.py
-</VirtualHost>
-EOL
+ Everything OK. Instructing nginx to reload it's configuration to let the changes take effect
+
+2021/04/25 18:36:07 [notice] 148#148: signal process started
+
+ All done. You should now be able to reach ddosdb at https://ddosdb.mooo.com
+ 
+ Because this certificate is a test certificate, your browser will tell you this site is not trusted and not secure.
+ You will probably have to tell it somehow to go to this site anyway and ignore this warning. 
+ How to do that depends on your browser and is beyond the scope of this guide.
+  
+ For uploads by ddos_dissector you can add an -n option to ignore certificate verification. 
+
 ```
 
-## Prepare the ddosdb project
+This shows that everything is working as it should. So go ahead:
 
-### Copy project to /opt/ddosdb
+### Taking the plunge
 
-```bash
-cd /opt/ddosdb
-cp -R /home/ddosdb/ddosdb/ddosdb/. .
-```
-### Create local settings
-```bash
-echo -n "SECRET_KEY = '" > /opt/ddosdb/website/settings_local.py
-python -c 'import random; print("".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]), end="")' >> /opt/ddosdb/website/settings_local.py
-echo "'" >> /opt/ddosdb/website/settings_local.py
-bash -c "cat >> /opt/ddosdb/website/settings_local.py" << EOL
-# Which hosts are allowed to access the Web interface
-# ALLOWED_HOSTS = ['ddosdb.org', 'localhost', '127.0.0.1']
-# This allows all hosts to connect to the Web interface
-ALLOWED_HOSTS = ['*']
+Simply re-run the `./letsencrypt.sh` script, but this time do provide an e-mail address and answer 'y' when asked if you want a production certificate. That's all!
 
-# Raw path to fingerprint and attack vector data
-# pcap and json are stored here
-RAW_PATH = "/opt/ddosdb-data/"
+Please note you can request certificates for more than one domain, as long as all those domains point to this machine.
 
-# Location where HTML are stored
-STATIC_ROOT = '/opt/ddosdb-static/'
+### Certificate renewal
+Once a day the system checks if the certiicate(s) need to be renewed. This happens automatically when the expiration date is fewer than 30 days away.
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ddosdb',
-        'USER': 'ddosdb',
-        'PASSWORD': 'ddosdb',
-        'HOST': 'localhost'
-    }
-}
+### Updating DDoSDB (with certificates installed)
+If you need to update the system then you can simply re-run the `./letsencrypt.sh` script afterwards to get a new certificate. Just make sure you don't exceed the [rate limit](https://letsencrypt.org/docs/rate-limits/) for requesting production certificates! (This is very unlikely to happen for test certificates, since those rate limits are much much higher). 
 
-ELASTICSEARCH_HOSTS = ["127.0.0.1:9200"]
-
-EOL
-```
-
-### Do the Django migrations
-```bash
-python3 /opt/ddosdb/manage.py collectstatic
-python3 /opt/ddosdb/manage.py migrate
-python3 /opt/ddosdb/manage.py createsuperuser
-```
-## Restart Apache
-```bash
-sudo service apache2 restart
-```
+If you want to keep the same certificates (for example because you are close to the rate limit), then simply run the `backup.sh` script before running the update and the `restore.sh` script afterwards. The former will simply copy all Let's Encrypt data and nginx configurations from docker to local disk, the latter will copy it back again. 
 
 ## Acknowledgements
 

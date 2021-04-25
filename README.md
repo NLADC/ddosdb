@@ -23,13 +23,14 @@ If you don't know what Django is, but would like to understand how DDoSDB is set
 
 ## How to start?
 
-You can use three approaches to running a DDoSDB repository:
+You can use two approaches to running a DDoSDB repository:
 
 - run a fully [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version.
 - run [DDoSDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box)
-- ~~install from [scratch](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) (Apache, Elastic Search, Django, etc...)~~ (deprecated)
  
-For development purposes it may be easier to work with Django directly in a [development setup](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_ddosdb.md).
+For [deployment](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) you can use the [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version and add Let's Encrypt cerificates using the script provided. 
+
+For development purposes you can work with Django directly in a [development setup](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_ddosdb.md).
 
 ## Acknowledgements
 

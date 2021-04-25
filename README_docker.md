@@ -21,7 +21,7 @@
 
 One of the [options for running a DDoSDB](https://github.com/ddos-clearing-house/ddosdb/blob/master/README.md) is the fully dockerized version. 
 
-This guide assumes you have [Docker](https://www.docker.com/get-started) installed.
+This guide assumes you have the [Docker Engine](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
 
 ## Cloning the repository
 
@@ -54,14 +54,15 @@ At the end it should say:
 
 Stop ddosdb by executing 'docker-compose down' in this directory
  'docker-compose up' will restart ddosdb
+ 'docker-compose up --build' will rebuild and restart
 
 To reset ddosdb to factory settings: 
- Run 'docker-compose down -v' to delete the data 
+ Run ./clean.sh to bring down the containers and delete all data 
  Followed by './build.sh' to rebuild & restart 
 ```
 This means DDoSDB is running daemonized (in the background).
 
-You can check if all containers are up by executing `docker ps`, the output should be something like this:
+You can check if all containers are up by executing `docker ps`, the output should look like this:
 
 ```
 CONTAINER ID   IMAGE                  COMMAND                  CREATED         STATUS         PORTS                                                                      NAMES
@@ -81,7 +82,7 @@ You can start it again with `docker-compose up -d` or alternatively `docker-comp
 to keep it running in the foreground (not deamonizing it). 
 ### Updating
 
-The docker container is built from the local repository itself, so updating to the current version is done by stopping the containers, updating the repository and then rebuilding and re-initialising.
+The docker container is built from the local repository itself, so updating to the current version is done by stopping the containers, updating the repository and then rebuilding and restarting.
 
 ```
 docker-compose down
@@ -89,8 +90,17 @@ git pull
 docker-compose up --build --remove-orphans -d
 ```
 This will keep all settings and already stored fingerprints intact. 
-With major changes this may cause problems however. So if you do encounter an issue, first to try 
+With major changes this may cause problems however. So if you do encounter an issue, the first thing to try 
 is to delete all images and volumes and start building from scratch. This can be done by executing the `clean.sh` script. Running this script brings down all containers and then removes all images and volumes of ddosdb.
+
+```
+./clean.sh
+./build.sh
+```
+
+
+You can use Mongo Express to export the database and importing it back again after the update if needed. Please note that Mongo Express is bound to the 127.0.0.1 (localhost) address, meaning you can only access it on the DDoSDB machine itself (for safety reasons) at http://localhost:8081. The username and password are the superuser ones you specified in the first step. 
+<p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
 
 ```
 ./clean.sh

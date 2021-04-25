@@ -106,10 +106,19 @@ then
 #  printf " Everything went swimmingly\n"
 fi
 
-printf "${COL}\n Everything OK. Restarting nginx container to let the changes take effect\n\n${NC}"
+printf "${COL}\n Everything OK. Instructing nginx to reload it's configuration to let the changes take effect\n\n${NC}"
 
-# Finally send SIGHUP to NGINX to reload
-# (In this case simply restart container)
-docker restart ddosdb_nginx
+docker exec ddosdb_nginx nginx -s reload
 
-printf "${COL}\n All done. You should now be able to reach ddosdb at https://$DDOSDB_FQDN\n\n${NC}"
+printf "${COL}\n All done. You should now be able to reach ddosdb at https://$DDOSDB_FQDN\n${NC}"
+if [ -z "$le_email" -o -n "$testcert" ]
+then
+  printf "${RED}%s\n ${NC}"  " " \
+  "Because this certificate is a test certificate, your browser will tell you this site is not trusted and not secure." \
+  "You will probably have to tell it somehow to go to this site anyway and ignore this warning. " \
+  "How to do that depends on your browser and is beyond the scope of this guide."
+
+  printf "${RED}%s\n ${NC}"  " " \
+  "For uploads by ddos_dissector you can add an -n option to ignore certificate verification. "
+fi
+

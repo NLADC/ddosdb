@@ -614,7 +614,7 @@ def overview(request):
     if "son" in request.GET:
         context["son"] = request.GET["son"]
 
-    logger.info("context: {}".format(context))
+    logger.debug("context: {}".format(context))
     _search()
 
     try:
