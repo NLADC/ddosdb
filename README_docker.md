@@ -102,11 +102,7 @@ is to delete all images and volumes and start building from scratch. This can be
 You can use Mongo Express to export the database and importing it back again after the update if needed. Please note that Mongo Express is bound to the 127.0.0.1 (localhost) address, meaning you can only access it on the DDoSDB machine itself (for safety reasons) at http://localhost:8081. The username and password are the superuser ones you specified in the first step. 
 <p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
 
-```
-./clean.sh
-./build.sh
-```
-If - for some reason - this fails then one option to try is to remove all images (intermediate and otherwise) as well as all volumes from docker.
+If - for some reason - updating this way fails, then one final (nuclear) option to try is to remove all images (intermediate and otherwise) as well as all volumes from docker.
 
 **WARNING** : *The docker prune command executed with the options below, removes **all** images and **all** volumes from your sytem! <br/> Not just the ones related with ddosdb!*
 
