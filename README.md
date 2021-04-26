@@ -17,20 +17,23 @@
 
 ## Getting to know DDoSDB components
 
-The heart of DDoSDB is a **Django** Webapp. **MongoDB** is used for storing the fingerprints, the raw .json files and the *pcap* samples are stored locally on disk.
+The heart of DDoSDB is a **Django** Webapp. **MongoDB** is used for storing the fingerprints, with **Mongo Express** you can inspect the fingerprints database and backup/restore it if necessary. **Nginx** is used as webserver front-end (except for the development setup).
+
+The raw .json files and the *pcap* samples are stored locally on disk.
 
 If you don't know what Django is, but would like to understand how DDoSDB is setup, then please checkout the excellent [documentation](https://docs.djangoproject.com/en/) and familiarise yourself a bit with Django by following the [tutorial](https://docs.djangoproject.com/en/3.1/intro/tutorial01/).
 
 ## How to start?
 
-You can use two approaches to running a DDoSDB repository:
+You can use two approaches to running a (local) DDoSDB repository:
 
-- run a fully [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version.
-- run [DDoSDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box)
+- Run a fully [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version, this is the preferred option.
+- Work with Django directly in a [development setup](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_ddosdb.md).
+
  
-For [deployment](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) you can use the [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version and add Let's Encrypt cerificates using the script provided. 
+For [deployment](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) you can use the [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version and add [Let's Encrypt](https://letsencrypt.org/) cerificates using the script provided. 
 
-For development purposes you can work with Django directly in a [development setup](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_ddosdb.md).
+There is also a [DDosDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box) setup. Essentially this is nothing more than a Linux VM with the [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version installed; so if you can docker & docker-compose on your system then running the [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version is the preferred option.
 
 ## Acknowledgements
 
