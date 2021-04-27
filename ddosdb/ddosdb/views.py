@@ -615,7 +615,7 @@ def overview(request):
         context["son"] = request.GET["son"]
 
     logger.debug("context: {}".format(context))
-    _search()
+#    _search()
 
     try:
         # offset = 10 * (context["p"] - 1)
@@ -644,10 +644,13 @@ def overview(request):
         fields = dict.fromkeys(list(context["headers"].keys()), 1)
 
         q = "*"
+        query = {}
         if (context["q"]):
             q = context["q"]
-
-        mdb_resp = _search(fields=fields)
+        q_dis = q.split(':')
+        if q_dis[0] == 'submitter':
+            query = {"submitter":q_dis[1]}
+        mdb_resp = _search(query=query, fields=fields)
 #        pp.pprint(mdb_resp)
 
         context["time"] = time.time() - start
