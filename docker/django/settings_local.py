@@ -2,13 +2,8 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-#SECRET_KEY = 'k&4-)t-@bw3^2eyt(!2dax#%9ly804^+%k-fjbw0&hn)1tp$7c'
-#FIELD_ENCRYPTION_KEYS = [
-#    "f164ec6bd6fbc4aef5647abc15199da0f9badcc1d2127bde2087ae0d794a9a0b"
-#]
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
-FIELD_ENCRYPTION_KEYS = os.environ.get("FIELD_ENCRYPTION_KEYS")
 
 DEBUG = int(os.environ.get("DEBUG", default=0))
 

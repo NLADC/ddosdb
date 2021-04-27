@@ -780,8 +780,8 @@ def remote_sync(request):
 
     # Get all the shareable fingerprints
     try:
-        response = _search({'shareable': True}, {'_id': 0})
-        fp_keys = [fp['key'] for fp in response]
+        fingerprints = _search({'shareable': True}, {'_id': 0})
+        fp_keys = [fp['key'] for fp in fingerprints]
         logger.info("Fingerprints to sync: {}".format(fp_keys))
 
     except ServerSelectionTimeoutError as e:
@@ -796,19 +796,22 @@ def remote_sync(request):
     logger.info(remotedbs)
     rdbs = []
     for rdb in remotedbs:
-        logger.info(rdb)
+        logger.info("Contacting remote DDoSDB:{} @ {}".format(rdb, rdb.url))
         unk_fps = []
         try:
             r = requests.post("{}/unknown-fingerprints".format(rdb.url),
                               auth=(rdb.username, rdb.password),
                               json=fp_keys,
                               timeout=10)
+            logger.info("status:{}".format(r.status_code))
             if r.status_code == 200:
-                logger.debug(r.json())
+                logger.info("Fingerprint keys unknown to {}: {}".format(rdb.name,r.json()))
                 unk_fps = r.json()
                 if len(unk_fps) > 0:
+                    # fps_to_sync = []
+                    # for (unk_fp in unk_fps):
                     fps_to_sync = list(filter(lambda fp: fp['key'] in unk_fps, fingerprints))
-                    plogger.info("Fingerprints to sync: {}".format(fps_to_sync))
+                    logger.debug("Fingerprints to sync: {}".format(fps_to_sync))
 
                     r = requests.post("{}/fingerprints".format(rdb.url),
                                       auth=(rdb.username, rdb.password),
@@ -819,8 +822,10 @@ def remote_sync(request):
                          "unk_fps": unk_fps,
                          "unk_fps_nr": len(unk_fps),
                          })
+            logger.info("Sync response:{}".format(r.status_code))
         except Exception as e:
-            logger.error(e)
+            logger.info("{}".format(e))
+            throw(e)
             rdbs.append({"name": rdb.name,
                          "status": 555,
                          "status_reason": "Connection failed",

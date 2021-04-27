@@ -100,8 +100,8 @@ class RemoteDdosDbForm(forms.ModelForm):
 #    }
 
 class RemoteDdosDbAdmin(admin.ModelAdmin):
-    list_display = ("name", "active", "url", "username")
-    fields = (('name', 'active'), 'url', 'username', 'password')
+    list_display = ("name", "active", "url", "check_cert", "username")
+    fields = (('name', 'active'), ('url','check_cert'), 'username', 'password')
     form = RemoteDdosDbForm
 
 

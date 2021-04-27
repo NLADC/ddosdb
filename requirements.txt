@@ -4,7 +4,6 @@ chardet==4.0.0
 demjson==2.2.4
 Django==3.2
 django-debug-toolbar==3.2.1
-django-searchable-encrypted-fields==0.1.9
 django-sslserver==0.22
 gunicorn==20.1.0
 idna==2.10

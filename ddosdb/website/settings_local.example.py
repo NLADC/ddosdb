@@ -2,9 +2,6 @@
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'm^nfx&3zrbgx1(kuk@dd^4)9atr-^28t5rkyur#hev$&n+#1kn'
-FIELD_ENCRYPTION_KEYS = [
-    "f164ec6bd6fbc4aef5647abc15199da0f9badcc1d2127bde2087ae0d794a9a0b"
-]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

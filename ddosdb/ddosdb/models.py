@@ -6,8 +6,6 @@ from django.dispatch import receiver
 
 from website import settings
 
-from encrypted_fields import fields
-
 class Query(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
@@ -78,15 +76,18 @@ class RemoteDdosDb(models.Model):
     class Meta:
         verbose_name_plural = " Remote DDoS-DBs"
 
-    name = models.CharField('Remote DDoS-DB',max_length = 32,
+    name = models.CharField('Remote DDoS-DB name', max_length=255,
         help_text="""A friendly name for the remote repository""")
     url = models.URLField('Remote DDoS-DB URL',
-        help_text="""The full URL for the remote sync API""")
-    username = models.CharField('Remote Identity',max_length = 255)
+        help_text="""The base URL for the remote sync API""")
+    username = models.CharField('username', max_length=255)
 #    password = models.CharField(max_length=255)
-    password = fields.EncryptedCharField(max_length=255)
-    active   = models.BooleanField(default = False,
+    password = models.CharField(max_length=255)
+    active   = models.BooleanField(default=False,
         help_text="""Activate to sync local fingerprints with this DDoS-DB""")
+
+    check_cert   = models.BooleanField(default=True,
+        help_text="""Whether to check remote DDoS-DB certificate on https""")
 
     def __str__(self):
         postfix = ' (inactive)'
