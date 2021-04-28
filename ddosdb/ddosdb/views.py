@@ -13,6 +13,7 @@ from distutils.util import strtobool
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from pymongo import ReturnDocument
+from bson import BSON
 import logging
 
 from django.conf import settings
@@ -264,6 +265,7 @@ def details(request):
 def query(request):
     logger.debug("query ({})".format(request.method))
 
+ # { key: {$regex: /^0.*/ } }
     pp = pprint.PrettyPrinter(indent=4)
 
     start = time.time()
@@ -286,13 +288,16 @@ def query(request):
             context["o"] = request.GET["o"]
 
         q = context["q"] = request.GET["q"]
-
+        if q=="":
+            q = context["q"] = "{}"
         try:
-            # results = _search({'key': q}, {'_id': 0})
-#            results = _search( query=None, fields={'_id': 0})
             logger.info("Query: {}".format(q))
-            results = _search({"$text": {"$search": q}})
-            logger.info("Results: {}".format(results))
+#            results = _search({"$text": {"$search": q}}, fields={"_id":0})
+            qjson = demjson.decode(q)
+            logger.info(qjson)
+            # { 'attack_vector.dns_qry_name': {$regex: '\.'}  }
+            results = _search(qjson, fields={"_id":0})
+            logger.info("Results: {}".format(len(results)))
             context["results"] = results
             context["amount"] = len(results)
         #     es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
@@ -329,6 +334,7 @@ def query(request):
         #
         #     context["results"] = results
         except Exception as e:
+            pp.pprint(e)
             context["error"] = "Invalid query: " + str(e)
 
     return HttpResponse(render(request, "ddosdb/query.html", context))
@@ -431,6 +437,12 @@ def query_old(request):
 #     return HttpResponse(render(request, "ddosdb/compare.html", context))
 
 
+def _cleanup_fp(fp_in):
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(fp_in)
+
+    return fp_in
+
 @csrf_exempt
 def upload_file(request):
     logger.debug("upload_file ({})".format(request.method))
@@ -475,22 +487,22 @@ def upload_file(request):
                 data["src_ports"] = [x for x in data["src_ports"] if not math.isnan(x)]
 
             # Enrich it all a bit
-            data["amplifiers_size"] = 0
-            data["attackers_size"] = 0
+            # data["amplifiers_size"] = 0
+            # data["attackers_size"] = 0
 
-            if "src_ips" in data:
-                data["src_ips_size"] = len(data["src_ips"])
-
-            if "amplifiers" in data:
-                data["amplifiers_size"] = len(data["amplifiers"])
-
-            if "attackers" in data:
-                data["attackers_size"] = len(data["attackers"])
+            # if "src_ips" in data:
+            #     data["src_ips_size"] = len(data["src_ips"])
+            #
+            # if "amplifiers" in data:
+            #     data["amplifiers_size"] = len(data["amplifiers"])
+            #
+            # if "attackers" in data:
+            #     data["attackers_size"] = len(data["attackers"])
 
             if "tags" in data:
                 data["tags"] = sorted(data["tags"])
 
-            data["ips_involved"] = data["amplifiers_size"] + data["attackers_size"]
+            # data["ips_involved"] = data["amplifiers_size"] + data["attackers_size"]
 
             data["comment"] = ""
 
@@ -540,6 +552,8 @@ def upload_file(request):
             demjson.encode_to_file(settings.RAW_PATH + filename + ".json", data)
 
             logger.info("Fingerprint {}: {}".format(data["key"], data))
+
+            _cleanup_fp(data)
             # JSON database insert
             try:
                 _delete({'key': data['key']})
