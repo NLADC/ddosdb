@@ -11,17 +11,42 @@
     <div class="container d-flex flex-column flex-md-row align-items-center">
         <a class="mr-md-auto" href="{% url "index" %}">
             <img style="height: 40px" src="{% static "ddosdb/img/logo-new.svg" %}">
-        </a>
-        <form class="mx-4 w-100" method="get" action="{% url "query" %}">
-            <input type="text" class="form-control" id="query" name="q" value="{{ q }}" placeholder="Search">
-        </form>
+        </a><h1>Query</h1>
         <nav class="ml-md-auto my-2 my-md-0 mr-md-3 d-block text-nowrap">
             <a class="p-2 text-dark" href="{% url "account" %}">Account</a>
             <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>
         </nav>
     </div>
-        <p align="center">Found {{ results|length }} fingerprints </p>
+
 </div>
+
+<div class="container">
+    <div class="row py-1"></div>
+    <form action="{% url "query" %}" method="get">
+        <div class="input-group">
+            <span class="btn btn-default btn-sm text-dark rounded">Filter:</span>
+            <input type="text" class="form-control " id="query" name="q" value="{}" placeholder="Search"><br/>
+            <span class="btn btn-default btn-sm text-dark rounded">Fields:</span>
+            <input type="text" class="form-control " name="f" placeholder="fields" value="{{ f }}">
+                 <button type="submit" class="btn btn-dark btn-sm rounded-right">Search</button>
+            {% comment %}
+            <a href="{% url "help" %}#sorting" class="btn btn-default btn-sm text-dark rounded">More about sorting</a>
+            {% endcomment %}
+        </div>
+    </form>
+    <div class="row py-1">
+        {% if not error == "" %}
+            <div class="col-md-12 alert alert-danger" role="alert">
+                {{ error }} - <a href="{% url "help" %}">Need help?</a>
+            </div>
+        {% elif amount == 0 %}
+            <div class="col-md-12 alert alert-warning" role="alert">
+                This query did not yield any results - <a href="{% url "help" %}">Need help?</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
 <div class="container">
 
     <div class="row" id="results">

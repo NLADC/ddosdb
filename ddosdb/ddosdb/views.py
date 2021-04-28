@@ -273,66 +273,35 @@ def query(request):
         "results": [],
         "comments": {},
         "q": "",
-        "p": 1,
-        "o": "_score",
-        "pages": range(1, 1),
+        "f": "{_id:0}",
         "amount": 0,
         "error": "",
         "time": 0
     }
 
     if "q" in request.GET:
-        if "p" in request.GET:
-            context["p"] = int(request.GET["p"])
-        if "o" in request.GET:
-            context["o"] = request.GET["o"]
+        f = '{"_id":0}'
+        if "f" in request.GET:
+            f = context["f"] = request.GET["f"]
 
         q = context["q"] = request.GET["q"]
         if q=="":
             q = context["q"] = "{}"
+        if f=="":
+            f = context["f"] = '{"_id":0}'
         try:
             logger.info("Query: {}".format(q))
 #            results = _search({"$text": {"$search": q}}, fields={"_id":0})
             qjson = demjson.decode(q)
+            fjson = demjson.decode(f)
             logger.info(qjson)
             # { 'attack_vector.dns_qry_name': {$regex: '\.'}  }
-            results = _search(qjson, fields={"_id":0})
+            # results = _search(qjson, fields={"_id":0})
+            results = _search(qjson, fields=fjson)
+            context["time"] = time.time() - start
             logger.info("Results: {}".format(len(results)))
             context["results"] = results
             context["amount"] = len(results)
-        #     es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-        #     response = es.search(index="ddosdb", q=q, from_=offset, size=10, sort=context["o"])
-        #     context["time"] = time.time() - start
-        #
-        #     results = [x["_source"] for x in response["hits"]["hits"]]
-        #     context["amount"] = response["hits"]["total"]["value"]
-        #     context["pages"] = range(1, int(math.ceil(context["amount"] / 10)) + 1)
-        #
-        #     #            for x in results:
-        #     #                if "comments" in x:
-        #     #                    context["comments"][x["key"]] = x.pop("comments", None)
-        #
-        #     def clean_result(x):
-        #         # Remove the start_timestamp attribute (if it exists)
-        #         x.pop("start_timestamp", None)
-        #
-        #         #                for y in x["src_ips"]:
-        #         #                    y.pop("as", None)
-        #         #                    y.pop("cc", None)
-        #
-        #         return x
-        #
-        #     results = map(clean_result, results)
-        #     results = list(results)
-        #
-        #     if request.user.has_perm("ddosdb.view_blame"):
-        #         for result in results:
-        #             try:
-        #                 result["blame"] = Blame.objects.get(key=result["key"]).to_dict()
-        #             except ObjectDoesNotExist:
-        #                 pass
-        #
-        #     context["results"] = results
         except Exception as e:
             pp.pprint(e)
             context["error"] = "Invalid query: " + str(e)

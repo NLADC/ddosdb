@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 import logging.config
-
+# this is the main reason for not showing up the toolbar
+import mimetypes
 from website.settings_local import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -21,14 +22,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = True
 LOGLEVEL = 'DEBUG'
 
+mimetypes.add_type("application/javascript", ".js", True)
+
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+}
+
 # Used for the Django-debug-toolbar.
 # If you access this django from another computer
 # then add its IP address to this list to enable DDT to be shown
-INTERNAL_IPS = [
-    # ...
-    '127.0.0.1',
-    # ...
-]
+INTERNAL_IPS = ['127.0.0.1', ]
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
@@ -117,9 +121,6 @@ USE_L10N = True
 USE_TZ = True
 
 
-LOGGING_CONFIG = None
-# Get loglevel from env
-
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
@@ -151,3 +152,4 @@ LOGIN_URL = '/login'
 
 
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
