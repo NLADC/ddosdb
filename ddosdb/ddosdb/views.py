@@ -281,14 +281,17 @@ def query(request):
         "comments": {},
         "q": "{}",
         "f": "{_id:0}",
-        "o": "{key:1}",
+        "o": "",
         "amount": 0,
         "error": "",
         "time": 0
     }
 
+
     if "q" in request.GET:
-        f = '{"_id":0}'
+        f = context["f"]
+        o = context["o"]
+
         if "f" in request.GET:
             f = context["f"] = request.GET["f"]
         if f=="":
@@ -296,8 +299,6 @@ def query(request):
 
         if "o" in request.GET:
             o = context["o"] = request.GET["o"]
-        if o=="":
-            o = context["o"] = '{"_id":1}'
 
         q = context["q"] = request.GET["q"]
         if q=="":
@@ -315,9 +316,12 @@ def query(request):
             context["amount"] = 0
             return HttpResponse(render(request, "ddosdb/query.html", context))
 
+        ojson = None
         try:
             logger.info("Order: {}".format(o))
-            ojson = demjson.decode(o)
+            if len(o) > 0:
+                ojson = demjson.decode(o)
+
         except Exception as e:
             logger.info("Error in Order specification: {}".format(o))
             context["error"] = "Error in Order specification: {}".format(str(e))

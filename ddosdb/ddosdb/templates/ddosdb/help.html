@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <title>DDoSDB - Help with searches</title>
 {% include 'ddosdb/header.html' %}
 <body class="bg-light">
@@ -17,19 +17,69 @@
         <div class="col-sm-12 col-md-7 col-lg-8 mt-sm-4">
             <h2 class="" id="query-language">Query language</h2>
             <p class="lead">
-                DDoSDB uses the MongoDB Query Language (MQL).
-                <code>protocol: "DNS"</code> will match all DNS attacks,
-                <code>(protocol: "DNS" OR protocol: "UDP") AND NOT (src_ips: "127.0.0.1")</code> matches all DNS and UDP attacks that are not from IP 127.0.0.1.
-                <code>dst_ports: [10 TO 50]</code> matches all attacks where the destination port is in the range 10 to 50.
+                DDoSDB relies on MongoDB for storing fingerprints and therefore uses the MongoDB Query Language (MQL).</p>
+            <p>
+                These have the form of <code>{ &lt;field1&gt;: &lt;value1&gt;, ... }</code> for simple queries on equality.
+                The default query when opening the Search page is the empty query <code>{}</code>, which will simply return everything.</p>
+            <p>
+            It is also possible to use <a href="https://docs.mongodb.com/manual/reference/operator/query-comparison/" target="blank">comparison operators</a>.
+            For example: the query to find all fingerprints where the total number of IP addresses involved is more than 2100 is:<br/>
+            <code>{ &quot;total_ips&quot; : { $gt : 2100 } }</code>.</p>
+            <p>To find all fingerprints where total_ips &gt; 2100 and where one of the tags is "FRAGMENTATION":<br/>
+            <code>{ &quot;total_ips&quot; : { $gt : 2100 }, tags : { $eq : &quot;FRAGMENTATION&quot;} }</code></p>
+
+            <p>This works for 'top level' fields. For filtering on nested fields (e.g. contained in <code>attack_vector</code>) the path needs to be specified.
+                So to find all the fingerprints where protocol (<code>ip_proto</code>) in an attack_vector is &quot;UDP&quot; use:<br/>
+                <code>{ &quot;attack_vector.ip_proto&quot; : { $eq : &quot;UDP&quot; } }</code></p>
+            <p>
+                To select the inverse add the $not operator: <br/><code>{ &quot;attack_vector.dns_qry_type&quot; : { $not: { $eq : 1 } } }</code>
+                <br/>This will also return all documents where the <code>dns_qry_type</code> field is not present.
             </p>
+
+
             <h2 class="" id="sorting">Sorting</h2>
-            <p class="lead">
-                DDoSDB follows Elasticsearch sorting conventions. The default sorting method is <code>_score</code>,
-                which uses the internal score of the match.
-                More complex queries can be constructed, like <code>file_type:asc,duration_sec:desc</code>,
-                which will sort by file type in ascending order first, then sort for the duration in descending order.
-                Certain fields may require you to search by the content instead of the key, like <code>start_time.keyword:desc</code>
+            <p>
+                DDoSDB by default follows MongoDB's <i>natural sorting order</i>, meaning that results that are found first are returned first.
+                This is a fancy way of saying that - unless specified - no ordering is applied (and therefore the order is undefined).</p>
+
+           <p>On the Query page, results are displayed from left to right and from top to bottom.
+                The first result is therefore the top-left one, the last result the bottom-right.</p>
+            <p>
+                If you want a specific order in which results are returned you can specify one by stating the fields and the direction.
+                The notation is similar to the one used for searches. For example, to sort by <code>key</code> in ascending order specify:</br>
+                <code>{&quot;key&quot; : 1 }</code></p>
+            <p>
+                If you want to sort in descending order use <code>-1</code> instead of <code>1</code>:</br>
+                <code>{&quot;key&quot; : -1 }</code></br></p>
+
+            <p>
+               You can specify more than one field to sort on (if the first field is not distinctive enough), such as:<br/>
+                <code>{&quot;key&quot; : 1 , &quot;total_ips&quot; : -1}</code><br/>
+                Which would sort first on <code>key</code> in ascending order, then on <code>total_ips</code> in descending order.</p>
+
+            <p>As with searches, if you want to order on fields other than top-level ones, specify the full path to it.
+               So to sort on <code>dns_qry_type</code> (a field of <code>attack_vector</code>) in ascending order:<br/>
+               <code>{ &quot;attack_vector.dns_qry_type&quot; : 1 }</code></p>
+
+            <h2 class="" id="sorting">Filtering results</h2>
+            <p>
+                DDoSDB already presents fingerprints in a shortened form by truncating the list of <code>src_ips</code> involved in an attack.</p>
+            <p>
+                You can shorten this further by specifying (in the <i>Fields</i> input) either <i>fields to exclude</i> (<code>0</code>) or stating explicitly (only) <i>fields to include</i> (<code>1</code>).</p>
+            <p>
+                The default is <code>{&quot;_id&quot;:0}</code>, which means: to exclude <code>_id</code> from the output.
+                This is the MongoDB (internal) identifier for a document/fingerprint, so not relevant for the fingerprint anyway.</p>
+
+            <p>To exclude <code>attack_vector</code> and its (sub-) fields as well:<br/>
+            <code>{&quot;_id&quot;:0, &quot;attack_vector&quot;:0}</code></p>
+
+            <p>If you are only interested in the <code>key</code>, <code>start_time</code> and <code>ip_proto</code>:<br/>
+                <code>{&quot;_id&quot;:0, &quot;key&quot;:1, &quot;start_time&quot;:1, &quot;attack_vector.ip_proto&quot;:1}</code>
             </p>
+            <h2 class="" id="final">Final tips</h2>
+            <p>MongoDB searches can get quite complicated, although the above guidelines should be more than enough for 99% of the cases.</p>
+            <p>If you get lost with the search: emptying all inputs (for <i>Query</i>, <i>Sort</i> and <i>Fields</i>) and pressing the <i>Search</i> button
+                will revert everything back to default and show all fingerprints.</p>
         </div>
     </div>
 </div>
