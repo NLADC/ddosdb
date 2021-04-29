@@ -47,8 +47,15 @@ def _insert(data):
     _mdb().insert(data)
 
 
-def _search(query=None, fields=None):
-    result = list(_mdb().find(query, fields))
+def _search(query=None, fields=None, order=None):
+    q = query
+    if order:
+        q = {}
+        q["$query"] = query
+        q["$orderby"] = order
+
+    logger.info("filter={}, fields={}".format(q,fields))
+    result = list(_mdb().find(q, fields))
     return result
 
 
@@ -272,8 +279,9 @@ def query(request):
     context = {
         "results": [],
         "comments": {},
-        "q": "",
+        "q": "{}",
         "f": "{_id:0}",
+        "o": "{key:1}",
         "amount": 0,
         "error": "",
         "time": 0
@@ -283,28 +291,68 @@ def query(request):
         f = '{"_id":0}'
         if "f" in request.GET:
             f = context["f"] = request.GET["f"]
+        if f=="":
+            f = context["f"] = '{"_id":0}'
+
+        if "o" in request.GET:
+            o = context["o"] = request.GET["o"]
+        if o=="":
+            o = context["o"] = '{"_id":1}'
 
         q = context["q"] = request.GET["q"]
         if q=="":
             q = context["q"] = "{}"
-        if f=="":
-            f = context["f"] = '{"_id":0}'
+
+
         try:
             logger.info("Query: {}".format(q))
-#            results = _search({"$text": {"$search": q}}, fields={"_id":0})
             qjson = demjson.decode(q)
+        except Exception as e:
+            logger.info("Error in query command: {}".format(q))
+            context["error"] = "Error interpreting query: {}".format(str(e))
+            context["time"] = time.time() - start
+            context["results"] = []
+            context["amount"] = 0
+            return HttpResponse(render(request, "ddosdb/query.html", context))
+
+        try:
+            logger.info("Order: {}".format(o))
+            ojson = demjson.decode(o)
+        except Exception as e:
+            logger.info("Error in Order specification: {}".format(o))
+            context["error"] = "Error in Order specification: {}".format(str(e))
+            context["time"] = time.time() - start
+            context["results"] = []
+            context["amount"] = 0
+            return HttpResponse(render(request, "ddosdb/query.html", context))
+
+        try:
+            logger.info("Fields: {}".format(f))
             fjson = demjson.decode(f)
-            logger.info(qjson)
+        except Exception as e:
+            logger.info("Error in Fields specification: {}".format(f))
+            context["error"] = "Error in Fields specification: {}".format(str(e))
+            context["time"] = time.time() - start
+            context["results"] = []
+            context["amount"] = 0
+            return HttpResponse(render(request, "ddosdb/query.html", context))
+
+
+        try:
             # { 'attack_vector.dns_qry_name': {$regex: '\.'}  }
             # results = _search(qjson, fields={"_id":0})
-            results = _search(qjson, fields=fjson)
+            logger.info("q={}, o={}, f={}".format(qjson, ojson, fjson))
+            results = _search(qjson, fields=fjson, order=ojson)
             context["time"] = time.time() - start
             logger.info("Results: {}".format(len(results)))
             context["results"] = results
             context["amount"] = len(results)
         except Exception as e:
-            pp.pprint(e)
-            context["error"] = "Invalid query: " + str(e)
+            logger.info("Error in query command: {} ({})".format(q, str(e)))
+            context["error"] = "Invalid query"
+            context["time"] = time.time() - start
+            context["results"] = []
+            context["amount"] = 0
 
     return HttpResponse(render(request, "ddosdb/query.html", context))
 

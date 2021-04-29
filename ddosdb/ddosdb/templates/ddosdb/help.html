@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+<title>DDoSDB - Help with searches</title>
 {% include 'ddosdb/header.html' %}
 <body class="bg-light">
 {% include 'ddosdb/menu.html' %}
@@ -16,7 +17,7 @@
         <div class="col-sm-12 col-md-7 col-lg-8 mt-sm-4">
             <h2 class="" id="query-language">Query language</h2>
             <p class="lead">
-                DDoSDB uses the Lucene query language.
+                DDoSDB uses the MongoDB Query Language (MQL).
                 <code>protocol: "DNS"</code> will match all DNS attacks,
                 <code>(protocol: "DNS" OR protocol: "UDP") AND NOT (src_ips: "127.0.0.1")</code> matches all DNS and UDP attacks that are not from IP 127.0.0.1.
                 <code>dst_ports: [10 TO 50]</code> matches all attacks where the destination port is in the range 10 to 50.

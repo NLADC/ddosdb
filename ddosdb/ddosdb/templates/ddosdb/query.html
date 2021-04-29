@@ -11,40 +11,50 @@
     <div class="container d-flex flex-column flex-md-row align-items-center">
         <a class="mr-md-auto" href="{% url "index" %}">
             <img style="height: 40px" src="{% static "ddosdb/img/logo-new.svg" %}">
-        </a><h1>Query</h1>
+        </a>
+        <h1>Query</h1>
         <nav class="ml-md-auto my-2 my-md-0 mr-md-3 d-block text-nowrap">
             <a class="p-2 text-dark" href="{% url "account" %}">Account</a>
             <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>
         </nav>
     </div>
-
 </div>
 
 <div class="container">
-    <div class="row py-1"></div>
+    <div class="row py-2"></div>
+
     <form action="{% url "query" %}" method="get">
         <div class="input-group">
-            <span class="btn btn-default btn-sm text-dark rounded">Filter:</span>
-            <input type="text" class="form-control " id="query" name="q" value="{}" placeholder="Search"><br/>
-            <span class="btn btn-default btn-sm text-dark rounded">Fields:</span>
-            <input type="text" class="form-control " name="f" placeholder="fields" value="{{ f }}">
-                 <button type="submit" class="btn btn-dark btn-sm rounded-right">Search</button>
+            <span class="btn btn-default btn-sm text-dark rounded" >Filter:</span>
+            <input type="text" class="form-control col-md-5" id="query" name="q" value="{{ q }}" placeholder="Search"><br/>
+            <span class="btn btn-default btn-sm text-dark rounded col-md-1">order:</span>
+            <input type="text" class="form-control col-md-2" name="o" placeholder="order" value="{{ o }}">
+            <span class="btn btn-default btn-sm text-dark rounded col-md-1">Fields:</span>
+            <input type="text" class="form-control col-md-2" name="f" placeholder="fields" value="{{ f }}">
+                 &nbsp;&nbsp;&nbsp;<button type="submit" class="btn btn-dark btn-sm rounded-right ">Search</button>
             {% comment %}
             <a href="{% url "help" %}#sorting" class="btn btn-default btn-sm text-dark rounded">More about sorting</a>
             {% endcomment %}
         </div>
     </form>
-    <div class="row py-1">
+    <div class="container d-flex flex-column flex-md-row align-items-center">
+        <div class="row py-1">
+            <span>Search yielded {{ results|length }} results   <a href="{% url "help" %}" target="_blank"><small>(help)</small></a> </span>
+        </div>
+    </div>
         {% if not error == "" %}
+        <div class="row py-1">
             <div class="col-md-12 alert alert-danger" role="alert">
                 {{ error }} - <a href="{% url "help" %}">Need help?</a>
             </div>
+        </div>
         {% elif amount == 0 %}
+        <div class="row py-1">
             <div class="col-md-12 alert alert-warning" role="alert">
                 This query did not yield any results - <a href="{% url "help" %}">Need help?</a>
             </div>
+        </div>
         {% endif %}
-    </div>
 </div>
 
 <div class="container">
