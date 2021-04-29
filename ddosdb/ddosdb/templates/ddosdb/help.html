@@ -25,7 +25,15 @@
             It is also possible to use <a href="https://docs.mongodb.com/manual/reference/operator/query-comparison/" target="blank">comparison operators</a>.
             For example: the query to find all fingerprints where the total number of IP addresses involved is more than 2100 is:<br/>
             <code>{ &quot;total_ips&quot; : { $gt : 2100 } }</code>.</p>
-            <p>To find all fingerprints where total_ips &gt; 2100 and where one of the tags is "FRAGMENTATION":<br/>
+
+             <p>
+                To select the inverse add the $not operator: <br/><code>{ &quot;total_ips&quot; : { $not : { $gt : 2100 } } }</code>
+                <br/>This will return all documents where <code>total_ips</code> is smaller than or equal to 2100.
+                Although to be fair that could be achieved as well by the much simpler:<br/>
+                <code>{ &quot;total_ips&quot; : { $lte : 2100 } }</code></p>
+            <p>
+
+            <p>Multiple conditions can be combined. To find all fingerprints where total_ips &gt; 2100 and where one of the tags is "FRAGMENTATION":<br/>
             <code>{ &quot;total_ips&quot; : { $gt : 2100 }, tags : { $eq : &quot;FRAGMENTATION&quot;} }</code></p>
 
             <p>This works for 'top level' fields. For filtering on nested fields (e.g. contained in <code>attack_vector</code>) the path needs to be specified.
@@ -35,15 +43,7 @@
             (i.e. can be synced to other DDoSDB instances):</br>
                 <code>{ &quot;shareable&quot;: true }</code></p>
 
-            <p>
-                To select the inverse add the $not operator: <br/><code>{ &quot;total_ips&quot; : { $not : { $gt : 2100 } } }</code>
-                <br/>This will return all documents where <code>total_ips</code> is smaller than or equal to 2100.
-                Although to be fair that could be achieved as well by the much simpler:<br/>
-                <code>{ &quot;total_ips&quot; : { $lte : 2100 } }</code></p>
-            <p>
-                If you like needless complexity, please note that the earlier example of finding all shareable fingerprints:
-                <code>{ &quot;shareable&quot;: true }</code><br/>
-                can also be written as:
+                If you like needless complexity, please note that this can also be written as:<br/>
                 <code>{ &quot;shareable&quot;: { $not : { $eq : false } } }</code>
             </p>
 
@@ -55,7 +55,8 @@
            <p>On the Query page, results are displayed from left to right and from top to bottom.
                 The first result is therefore the top-left one, the last result the bottom-right.</p>
             <p>
-                If you want a specific order in which results are returned you can specify one by stating the fields and the direction.
+                If you want a specific order in which results are returned,
+                you can specify the fields and the direction in which to sort in the <i>Sort</i> input.
                 The notation is similar to the one used for searches. For example, to sort by <code>key</code> in ascending order specify:</br>
                 <code>{&quot;key&quot; : 1 }</code></p>
             <p>
@@ -83,7 +84,7 @@
             <p>To exclude <code>attack_vector</code> and its (sub-) fields as well:<br/>
             <code>{&quot;_id&quot;:0, &quot;attack_vector&quot;:0}</code></p>
 
-            <p>If you are only interested in the <code>key</code>, <code>start_time</code> and <code>ip_proto</code>:<br/>
+            <p>Conversely, you can specify the fields to be included. If you are only interested in the <code>key</code>, <code>start_time</code> and <code>ip_proto</code>:<br/>
                 <code>{&quot;_id&quot;:0, &quot;key&quot;:1, &quot;start_time&quot;:1, &quot;attack_vector.ip_proto&quot;:1}</code>
             </p>
             <h2 class="" id="final">Final tips</h2>
