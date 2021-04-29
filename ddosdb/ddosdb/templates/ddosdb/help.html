@@ -31,11 +31,21 @@
             <p>This works for 'top level' fields. For filtering on nested fields (e.g. contained in <code>attack_vector</code>) the path needs to be specified.
                 So to find all the fingerprints where protocol (<code>ip_proto</code>) in an attack_vector is &quot;UDP&quot; use:<br/>
                 <code>{ &quot;attack_vector.ip_proto&quot; : { $eq : &quot;UDP&quot; } }</code></p>
-            <p>
-                To select the inverse add the $not operator: <br/><code>{ &quot;attack_vector.dns_qry_type&quot; : { $not: { $eq : 1 } } }</code>
-                <br/>This will also return all documents where the <code>dns_qry_type</code> field is not present.
-            </p>
+            <p>For searching on Boolean values, simply state <i>true</i> or <i>false</i>. So retrieve all fingerprints that are <code>shareable</code>
+            (i.e. can be synced to other DDoSDB instances):</br>
+                <code>{ &quot;shareable&quot;: true }</code></p>
 
+            <p>
+                To select the inverse add the $not operator: <br/><code>{ &quot;total_ips&quot; : { $not : { $gt : 2100 } } }</code>
+                <br/>This will return all documents where <code>total_ips</code> is smaller than or equal to 2100.
+                Although to be fair that could be achieved as well by the much simpler:<br/>
+                <code>{ &quot;total_ips&quot; : { $lte : 2100 } }</code></p>
+            <p>
+                If you like needless complexity, please note that the earlier example of finding all shareable fingerprints:
+                <code>{ &quot;shareable&quot;: true }</code><br/>
+                can also be written as:
+                <code>{ &quot;shareable&quot;: { $not : { $eq : false } } }</code>
+            </p>
 
             <h2 class="" id="sorting">Sorting</h2>
             <p>
