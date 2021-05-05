@@ -5,7 +5,7 @@ RED='\033[1;31m'
 NC='\033[0m' # No Color
 
 cp django/env.dev temp/environment.prod
-printf "SECRET_KEY = \'%s\'\n" $(./lib/secret_key.py) >> temp/environment.prod
+printf "SECRET_KEY=\'%s\'\n" $(./lib/secret_key.py) >> temp/environment.prod
 
 while
   printf "${COL}superuser username:${NC}"
