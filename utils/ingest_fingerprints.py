@@ -7,9 +7,9 @@ import pprint
 import json
 import requests
 import random
+import urllib3
 
-
-DDOSDB_URL='http://127.0.0.1'
+DDOSDB_URL='https://127.0.0.1'
 USERNAME='upload'
 PASSWORD='uploadupload'
 
@@ -45,27 +45,23 @@ else:
 
 pp.pprint(filelist)
 
-keys = []
-
 for fn in filelist:
     data = openJSON(fn)
-    # pp.pprint(data)
+#    pp.pprint(data)
     if 'key' in data:
         try:
             for i in range(0, 5):
                 data['key'] = "".join([random.choice("abcdef0123456789") for i in range(15)])
-                print(data['key'])
-                data1[0] = data
-                data1[1] = data
-
+                print("{}: ".format(data['key']), end="")
+                urllib3.disable_warnings()
                 r = requests.post("{}/fingerprints".format(DDOSDB_URL),
                                   auth=(USERNAME, PASSWORD),
-                                  json=data1,
-                                  timeout=10)
+                                  json=data,
+                                  timeout=10,
+                                  verify=False)
                 print(r.status_code)
         except Exception as e:
             print(e)
             continue
 
-pp.pprint(keys)
 # All done
