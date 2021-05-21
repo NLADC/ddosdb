@@ -396,9 +396,16 @@ def upload_file(request):
             return response
 
         if "json" in request.FILES:
-            # JSON enrichment
             json_content = request.FILES["json"].read()
-            data = demjson.decode(json_content)
+            data = None
+            try:
+                data = demjson.decode(json_content)
+            except demjson.decode.JSONDecodeError as e:
+                logger.error("Fingerprint JSON decode error ({})".format(e))
+                response = HttpResponse()
+                response.status_code = 400
+                response.reason_phrase = "JSON Decode Error ({})".format(e)
+
             # print(data)
             # Add key if not exists
             #        if "key" not in data:
@@ -1010,8 +1017,9 @@ def fingerprints(request):
             response.reason_phrase = "Wrong content type"
             return response
 
+        logger.info("Inserting fingerprint(s)")
         def insert(fp):
-            # es.index(index="ddosdb", doc_type="_doc", id=fp["key"], body=fp, request_timeout=500)
+            logger.info("Inserting fingerprint {}".format(fp["key"]))
             # Register record
             _delete({'key': fp['key']})
             _insert(fp)
