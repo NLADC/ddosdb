@@ -38,6 +38,10 @@ Change into the docker directory of the ddosdb repository.
 cd ddosdb/docker
 ```
 
+Install docker engine:
+
+See instructions: https://docs.docker.com/engine/install/ubuntu/
+
 Start the build script
 
 ```
