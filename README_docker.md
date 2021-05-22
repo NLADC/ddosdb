@@ -21,7 +21,14 @@
 
 One of the [options for running a DDoSDB](https://github.com/ddos-clearing-house/ddosdb/blob/master/README.md) is the fully dockerized version. 
 
-This guide assumes you have the [Docker Engine](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+For this guide to work you have to have the [Docker Engine](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+
+## Install docker
+
+Install the docker engine, see instructions at [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
+
+Especially on Linux ___DO NOT___ install docker and docker-compose from your distributions repository, they are too old and **will not work** for this project. 
+Just follow the instructions from the [docker website](https://docs.docker.com/engine/install/#server). 
 
 ## Cloning the repository
 
@@ -30,13 +37,6 @@ Change to the directory where you want to run it from (in this example your home
 cd ~
 git clone https://github.com/ddos-clearing-house/ddosdb
 ```
-## Install docker
-
-Install the docker engine, see instructions at [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
-
-On linux ***DO NOT*** install docker and docker-compose from your distributions repository, they are too old and will not work for this project. 
-Simply follow the instructions from the [docker website](https://docs.docker.com/engine/install/#server). 
-
 
 ## Building the containers
 
