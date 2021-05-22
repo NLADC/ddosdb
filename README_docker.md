@@ -30,6 +30,13 @@ Change to the directory where you want to run it from (in this example your home
 cd ~
 git clone https://github.com/ddos-clearing-house/ddosdb
 ```
+## Install docker
+
+Install the docker engine, see instructions at [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
+
+On linux ***DO NOT*** install docker and docker-compose from your distributions repository, they are too old and will not work for this project. 
+Simply follow the instructions from the [docker website](https://docs.docker.com/engine/install/#server). 
+
 
 ## Building the containers
 
@@ -38,9 +45,6 @@ Change into the docker directory of the ddosdb repository.
 cd ddosdb/docker
 ```
 
-Install docker engine:
-
-See instructions: https://docs.docker.com/engine/install/ubuntu/
 
 Start the build script
 
