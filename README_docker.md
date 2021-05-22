@@ -19,7 +19,7 @@
 # DDoSDB
 ## Running a Dockerized DDoSDB
 
-One of the [options for running a DDoSDB](https://github.com/ddos-clearing-house/ddosdb/blob/master/README.md) is the fully dockerized version. 
+The best [option](https://github.com/ddos-clearing-house/ddosdb/blob/master/README.md) for running a DDoSDB is the fully dockerized version. 
 
 For this guide to work you have to have the [Docker Engine](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
 
