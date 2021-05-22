@@ -109,7 +109,7 @@ def about(request):
     context = {}
     return HttpResponse(render(request, "ddosdb/about.html", context))
 
-
+@login_required()
 def help_page(request):
     logger.debug("help_page ({})".format(request.method))
     context = {}
@@ -117,7 +117,14 @@ def help_page(request):
 
 
 def signin(request):
-    logger.debug("signin ({})".format(request.method))
+    logger.info("signin ({})".format(request.method))
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    ip = None
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    logger.info("{}".format(ip))
 
     if request.method == "POST":
         username = request.POST['username']
@@ -1215,9 +1222,9 @@ def csp_report(request):
     pp = pprint.PrettyPrinter(indent=4)
 
     if request.method == "POST":
-        report = demjson.decode(request.body)
         logger.info(request.body)
-        logger.info(report)
+        # report = demjson.decode(request.body)
+        # logger.info(report)
         response = HttpResponse()
         response.status_code = 200
         return response
