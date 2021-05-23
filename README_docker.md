@@ -51,7 +51,9 @@ Start the build script
 ```
 ./build.sh
 ```
-The script will ask you for the username, password and e-mail address to use for the superuser. The username and password are also used for the Mongo Express interface.
+The script will ask you for the username, password and e-mail address to use for the superuser. 
+
+This username and password are also used for the Mongo Express interface.
 
 It will then start downloading and configuring all the images it needs for the whole DDoSDB setup, this can take some time.
 

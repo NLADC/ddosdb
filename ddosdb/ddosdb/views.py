@@ -264,11 +264,15 @@ def details(request):
         key = request.GET["key"]
         context["key"] = key
 
+        start = time.time()
+
         try:
             results = _search({'key': key}, {'_id': 0})
             context["results"] = results
         except Exception as e:
             context["error"] = "Invalid query: " + str(e)
+
+        context["time"] = time.time() - start
 
         return HttpResponse(render(request, "ddosdb/details.html", context))
     else:
@@ -569,8 +573,6 @@ def overview(request):
 #    _search()
 
     try:
-        # offset = 10 * (context["p"] - 1)
-
         context["headers"] = {
             #            "multivector_key"   : "multivector",
             "key": "key",
