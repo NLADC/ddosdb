@@ -144,53 +144,53 @@ def signin(request):
     return HttpResponse(render(request, "ddosdb/login.html", context))
 
 
-def request_access(request):
-    logger.debug("request_access ({})".format(request.method))
-
-    context = {
-        "error": False,
-        "success": False
-    }
-
-    if request.method == "POST":
-        captcha_verify = requests.post("https://www.google.com/recaptcha/api/siteverify",
-                                       data={"secret": settings.RECAPTCHA_PRIVATE_KEY,
-                                             "response": request.POST["g-recaptcha-response"]})
-        captcha_okay = demjson.decode(captcha_verify.text)["success"]
-
-        if captcha_okay:
-            access_request = AccessRequest(first_name=request.POST["first-name"],
-                                           last_name=request.POST["last-name"],
-                                           email=request.POST["email"],
-                                           institution=request.POST["institution"],
-                                           purpose=request.POST["purpose"])
-
-            try:
-                send_mail("DDoSDB Access Request",
-                          """
-                First name: {first_name}
-                Last name: {last_name}
-                Email: {email}
-                Institution: {institution}
-                Purpose: {purpose}
-                """.format(first_name=access_request.first_name,
-                           last_name=access_request.last_name,
-                           email=access_request.email,
-                           institution=access_request.institution,
-                           purpose=access_request.purpose),
-                          "noreply@ddosdb.org",
-                          [settings.ACCESS_REQUEST_EMAIL])
-
-                access_request.save()
-
-                context["success"] = True
-            except (SMTPException, ConnectionRefusedError) as e:
-                context["error"] = e
-        else:
-            context["error"] = "Invalid captcha"
-
-    return HttpResponse(render(request, "ddosdb/request-access.html", context))
-
+# def request_access(request):
+#     logger.debug("request_access ({})".format(request.method))
+#
+#     context = {
+#         "error": False,
+#         "success": False
+#     }
+#
+#     if request.method == "POST":
+#         captcha_verify = requests.post("https://www.google.com/recaptcha/api/siteverify",
+#                                        data={"secret": settings.RECAPTCHA_PRIVATE_KEY,
+#                                              "response": request.POST["g-recaptcha-response"]})
+#         captcha_okay = demjson.decode(captcha_verify.text)["success"]
+#
+#         if captcha_okay:
+#             access_request = AccessRequest(first_name=request.POST["first-name"],
+#                                            last_name=request.POST["last-name"],
+#                                            email=request.POST["email"],
+#                                            institution=request.POST["institution"],
+#                                            purpose=request.POST["purpose"])
+#
+#             try:
+#                 send_mail("DDoSDB Access Request",
+#                           """
+#                 First name: {first_name}
+#                 Last name: {last_name}
+#                 Email: {email}
+#                 Institution: {institution}
+#                 Purpose: {purpose}
+#                 """.format(first_name=access_request.first_name,
+#                            last_name=access_request.last_name,
+#                            email=access_request.email,
+#                            institution=access_request.institution,
+#                            purpose=access_request.purpose),
+#                           "noreply@ddosdb.org",
+#                           [settings.ACCESS_REQUEST_EMAIL])
+#
+#                 access_request.save()
+#
+#                 context["success"] = True
+#             except (SMTPException, ConnectionRefusedError) as e:
+#                 context["error"] = e
+#         else:
+#             context["error"] = "Invalid captcha"
+#
+#     return HttpResponse(render(request, "ddosdb/request-access.html", context))
+#
 
 @login_required()
 def account(request):

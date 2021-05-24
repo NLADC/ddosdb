@@ -18,7 +18,4 @@
       {% endif %}
     {% endif %}
   </nav>
-  {% if not request.user.is_authenticated %}
-    <a class="btn btn-secondary" href="{% url 'request-access' %}">Request access</a>
-  {% endif %}
 </div>
