@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django import forms
 
-from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile, RemoteDdosDb
+from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile, RemoteDdosDb, FailedLogin
 
 class QueryAdmin(admin.ModelAdmin):
     list_display = ("user", "query", "timestamp")
@@ -104,6 +104,10 @@ class RemoteDdosDbAdmin(admin.ModelAdmin):
     fields = (('name', 'active'), ('url','check_cert'), 'username', 'password')
     form = RemoteDdosDbForm
 
+class FailedLoginAdmin(admin.ModelAdmin):
+    list_display = ("ipaddress", "logindatetime")
+    fields = ("ipaddress", "logindatetime")
+
 
 # Register your models here.
 admin.site.register(Query, QueryAdmin)
@@ -113,3 +117,4 @@ admin.site.register(FileUpload, FileUploadAdmin)
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(RemoteDdosDb, RemoteDdosDbAdmin)
+admin.site.register(FailedLogin, FailedLoginAdmin)

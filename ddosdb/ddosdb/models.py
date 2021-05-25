@@ -49,17 +49,17 @@ class FileUpload(models.Model):
     filename = models.CharField(max_length=200)
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            send_mail("DDoSDB File Uploaded",
-                      """
-            User: {user}
-            File name: {filename}
-            Timestamp: {timestamp}
-            """.format(user=self.user.username,
-                       filename=self.filename,
-                       timestamp=self.timestamp),
-                      "noreply@ddosdb.org",
-                      [settings.ACCESS_REQUEST_EMAIL])
+        # if not self.pk:
+        #     send_mail("DDoSDB File Uploaded",
+        #               """
+        #     User: {user}
+        #     File name: {filename}
+        #     Timestamp: {timestamp}
+        #     """.format(user=self.user.username,
+        #                filename=self.filename,
+        #                timestamp=self.timestamp),
+        #               "noreply@ddosdb.org",
+        #               [settings.ACCESS_REQUEST_EMAIL])
 
         super(FileUpload, self).save(*args, **kwargs)
 
@@ -94,6 +94,18 @@ class RemoteDdosDb(models.Model):
         if (self.active):
             postfix = ''
         return self.name+postfix
+
+class FailedLogin(models.Model):
+    class Meta:
+        verbose_name_plural = " Failed logins"
+
+    ipaddress = models.CharField('IP Address', max_length=255,
+        help_text="""The IP address the login was from""")
+    logindatetime = models.DateTimeField('DateTime of failed login',
+        help_text="""The time and date of failed login""")
+
+    def __str__(self):
+        return self.ipaddress
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):

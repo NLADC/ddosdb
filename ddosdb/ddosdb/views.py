@@ -6,6 +6,7 @@ import demjson
 import requests
 import base64
 from datetime import datetime
+from datetime import timedelta
 import collections
 import pprint
 import pandas as pd
@@ -27,10 +28,11 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.utils import timezone
 
 from django.core.exceptions import PermissionDenied
 #from ddosdb.enrichment.team_cymru import TeamCymru
-from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb
+from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb, FailedLogin
 
 from ddosdb.database import Database
 #__mdb__ = MongoClient("mongodb://"+settings.MONGODB, serverSelectionTimeoutMS=100).ddosdb.fingerprints
@@ -72,6 +74,15 @@ def _update(query=None, fields=None):
 def _delete(query=None):
     result = _mdb().delete_many(query)
     return result
+
+def _remote_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    ip = None
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 
 def _pretty_request(request):
@@ -117,27 +128,40 @@ def help_page(request):
 
 
 def signin(request):
-    logger.info("signin ({})".format(request.method))
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    ip = None
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
+    ip = _remote_ip(request)
     logger.info("{}".format(ip))
 
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            if "next" in request.GET:
-                return redirect(request.GET["next"])
+        fls = FailedLogin.objects.filter(ipaddress=ip, logindatetime__gt = timezone.now() - timedelta(seconds=60))
+        logger.info("Failed login attempts from {} in the last minute: {}".format(ip, len(fls)))
+
+        if len(fls) < 3:
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                # Remove old failed attempts from this ip older than 10 minutes
+                FailedLogin.objects.filter(ipaddress=ip, logindatetime__lte=timezone.now() - timedelta(minutes=10)).delete()
+
+                login(request, user)
+                if "next" in request.GET:
+                    return redirect(request.GET["next"])
+                else:
+                    return redirect("index")
             else:
-                return redirect("index")
+                fl = FailedLogin()
+                fl.ipaddress = ip
+                fl.logindatetime = timezone.now()
+                fl.save()
+                context = {"failed": True, "message": "Invalid username or password"}
+                if len(fls) == 2:
+                    context["message"] = "Invalid username or password, wait 60 seconds"
         else:
-            context = {"failed": True}
+            fl = FailedLogin()
+            fl.ipaddress = ip
+            fl.logindatetime = timezone.now()
+            fl.save()
+            context = {"failed": True, "message": "Too many failed logins, wait 60 seconds"}
     else:
         context = {}
 
