@@ -24,6 +24,7 @@
     <div class="row py-2"></div>
 
     <form action="{% url "query" %}" method="get">
+        {% csrf_token %}
         <div class="input-group">
             <span class="btn btn-default btn-sm text-dark rounded" >Query:</span>
             <input type="text" class="form-control col-md-5" id="query" name="q" value="{{ q }}" placeholder="Search"><br/>
