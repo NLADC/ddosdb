@@ -10,7 +10,6 @@ services:
       - PGID=1000
     volumes:
       - ddosdb_mongodb:/data/db
-#      - ./mongo-entrypoint/:/docker-entrypoint-initdb.d/
     networks:
       - ddosdb
     expose:
@@ -24,8 +23,6 @@ services:
       - ME_CONFIG_MONGODB_SERVER=mongodb
     env_file:
       - ./temp/environment.prod
-    volumes:
-      - ddosdb_mongodb
     networks:
       - ddosdb
     ports:
@@ -35,7 +32,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:12.0-alpine
+    image: postgres:13-alpine
     container_name: ddosdb_db
     volumes:
       - ddosdb_postgres:/var/lib/postgresql/data/

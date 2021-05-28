@@ -1,5 +1,5 @@
 # docker exec -it 5e57902b199b /bin/bash
-FROM python:3.9.4-slim
+FROM python:3.9-slim
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -7,6 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
+
 COPY requirements.txt docker/temp/
 RUN pip install --requirement docker/temp/requirements.txt
 
