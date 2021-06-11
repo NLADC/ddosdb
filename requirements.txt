@@ -2,7 +2,7 @@ asgiref==3.3.4
 certifi==2020.12.5
 chardet==4.0.0
 demjson==2.2.4
-Django==3.2.3
+Django==3.2.4
 django-debug-toolbar==3.2.1
 django-sslserver==0.22
 gunicorn==20.1.0
