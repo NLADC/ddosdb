@@ -4,14 +4,11 @@ services:
 
   mongodb:
     image: mongo
-#    container_name: mongo
     environment:
       - PUID=1000
       - PGID=1000
-      # - MONGO_INITDB_ROOT_USERNAME=admin
-      # - MONGO_INITDB_ROOT_PASSWORD=adminadmin
     volumes:
-      - mongodb-dev-data:/data/db
+      - mongodb_dev_data:/data/db
       - ./mongo-entrypoint/:/docker-entrypoint-initdb.d/
     ports:
       - 127.0.0.1:27017:27017
@@ -19,16 +16,10 @@ services:
 
   mongo-express:
     image: mongo-express
-    container_name: mongo-express
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb
-      # - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-      # - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-      # - ME_CONFIG_MONGODB_ADMINPASSWORD=adminadmin
       - ME_CONFIG_BASICAUTH_USERNAME=ddosdb
       - ME_CONFIG_BASICAUTH_PASSWORD=ddosdbddosdb
-    volumes:
-      - mongodb-dev-data
     ports:
       - 127.0.0.1:8081:8081
     depends_on:
@@ -36,4 +27,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  mongodb-dev-data:
+  mongodb_dev_data:
