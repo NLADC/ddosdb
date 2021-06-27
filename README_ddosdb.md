@@ -20,13 +20,13 @@
 # DDoSDB
 
 ## Running a DDoSDB for development
-While for a production deployment you'll need a decent (wsgi capable) webserver - such as *Apache* or *Nginx* - as a front-end, an SQL database - PostgreSQL - for user management and logging, and of course a production capable *MongoDB*; the requirements for a development or test setup are a lot less demanding. 
+While for a production deployment you'll need a decent (wsgi capable) webserver - such as *Apache* or *Nginx* - as a front-end, an SQL database - PostgreSQL - for user management and logging, and of course a production capable *MongoDB* and *RabbitMQ*; the requirements for a development or test setup are a lot less demanding. 
 
 #### Web server
 For development the Django development server suffices, no need for a front-end webserver. Rather than a full-fledged SQL database the built-in support for sqlite3 will work just fine. 
 
-#### MongoDB
-A MongoDB is still needed of course, but a single node dockerized version will do. A `docker-compose.yml` is provided in the `mongodb` directory. If you have docker installed then running `docker-compose up -d` in that directory should pull the right Mongo and Mongo Express images and start them.
+#### MongoDB and RabbitMQ
+An instance MongoDB and RabbitMQ are still needed of course, but a single node dockerized version will do for both. A `docker-compose.yml` is provided in the `mongodb-rabbitmq` directory. If you have docker installed then running `docker-compose up -d` in that directory will pull the right Mongo, Mongo Express and RabbitMQ images and start them.
 You can check if it is running by pointing a browser towards [http://localhost:8081/](http://localhost:8081/), which should popup a dialog box asking for a username and password. Entering user `ddosdb` and password `ddosdbddosdb` will show the Mongo Express interface:
 
 <p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
