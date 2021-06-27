@@ -33,7 +33,6 @@ USER ddosdb
 
 WORKDIR /home/ddosdb/
 
-
 ENTRYPOINT ["/home/ddosdb/entrypoint.sh"]
 
 #WORKDIR /

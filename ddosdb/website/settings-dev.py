@@ -50,7 +50,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.humanize'
+    'django.contrib.humanize',
+    'django_celery_beat',
+    'django_celery_results',
 ]
 
 
@@ -150,4 +152,5 @@ LOGIN_URL = '/login'
 
 
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
 

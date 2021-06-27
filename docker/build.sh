@@ -62,14 +62,17 @@ printf "\n${COL} Building volumes, images, and containers${NC}\n\n"
 docker-compose up --build --remove-orphans -d
 
 # Initialize the ddosdb Django App
-printf "\n${COL} Collecting Django static files${NC}\n\n"
-docker-compose exec ddosdb python manage.py collectstatic --noinput
+#printf "\n${COL} Collecting Django static files${NC}\n\n"
+#docker-compose exec ddosdb python manage.py collectstatic --noinput
+#
+#printf "\n${COL} Applying Django migrations${NC}\n\n"
+#docker-compose exec ddosdb python manage.py migrate --noinput
 
-printf "\n${COL} Applying Django migrations${NC}\n\n"
-docker-compose exec ddosdb python manage.py migrate --noinput
+#printf "\n${COL} Creating Django superuser${NC}\n\n"
+#docker-compose exec ddosdb python manage.py createsuperuser --noinput
 
-printf "\n${COL} Creating Django superuser${NC}\n\n"
-docker-compose exec ddosdb python manage.py createsuperuser --noinput
+#printf "\n${COL} Setting up default Celery (beat) tasks ${NC}\n\n"
+#docker-compose exec ddosdb python manage.py celery
 
 printf "\n\n${COL}** Finished **\n\n"
 printf "Stop ddosdb by executing 'docker-compose down' in this directory\n"
