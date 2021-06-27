@@ -1,7 +1,6 @@
 import math
 import os
 import time
-from smtplib import SMTPException
 import demjson
 import requests
 import base64
@@ -13,8 +12,6 @@ import pandas as pd
 from distutils.util import strtobool
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
-from pymongo import ReturnDocument
-from bson import BSON
 import logging
 
 from django.conf import settings
@@ -22,7 +19,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Permission, User
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
@@ -35,7 +31,6 @@ from django.core.exceptions import PermissionDenied
 from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb, FailedLogin
 
 from ddosdb.database import Database
-#__mdb__ = MongoClient("mongodb://"+settings.MONGODB, serverSelectionTimeoutMS=100).ddosdb.fingerprints
 
 Database.initialize()
 

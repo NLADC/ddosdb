@@ -1,13 +1,12 @@
-import os
 from django.apps import AppConfig
 import logging
-import celery
 
 logger = logging.getLogger(__name__)
 
 
 class DdosdbConfig(AppConfig):
     name = 'ddosdb'
+
 
     def ready(self):
         logger.info("DddosdbConfig.ready()")

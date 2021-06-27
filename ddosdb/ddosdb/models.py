@@ -73,6 +73,7 @@ class Profile(models.Model):
 
 
 class RemoteDdosDb(models.Model):
+
     class Meta:
         verbose_name_plural = " Remote DDoS-DBs"
 
