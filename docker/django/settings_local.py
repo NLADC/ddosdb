@@ -14,7 +14,7 @@ CONN_MAX_AGE = 3600
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", default='*').split(" ")
 #ALLOWED_HOSTS = ['*']
 # Raw path to fingerprint and attack vector data
 # pcap and json are stored here
@@ -43,3 +43,14 @@ STATIC_ROOT = '/home/ddosdb/ddosdb-static/'
 
 # MongoDB URI
 MONGODB="mongodb:27017"
+
+# CELERY STUFF
+CELERY_BROKER_URL = 'pyamqp://rabbitmq:5672'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Amsterdam'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_TASK_RESULT_EXPIRES = 604800  # Expire after a week
+CELERY_IMPORTS = ('ddosdb.tasks',)

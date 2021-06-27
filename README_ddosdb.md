@@ -22,18 +22,6 @@
 ## Running a DDoSDB for development
 While for a production deployment you'll need a decent (wsgi capable) webserver - such as *Apache* or *Nginx* - as a front-end, an SQL database - PostgreSQL - for user management and logging, and of course a production capable *MongoDB* and *RabbitMQ*; the requirements for a development or test setup are a lot less demanding. 
 
-#### Web server
-For development the Django development server suffices, no need for a front-end webserver. Rather than a full-fledged SQL database the built-in support for sqlite3 will work just fine. 
-
-#### MongoDB and RabbitMQ
-An instance MongoDB and RabbitMQ are still needed of course, but a single node dockerized version will do for both. A `docker-compose.yml` is provided in the `mongodb-rabbitmq` directory. If you have docker installed then running `docker-compose up -d` in that directory will pull the right Mongo, Mongo Express and RabbitMQ images and start them.
-You can check if it is running by pointing a browser towards [http://localhost:8081/](http://localhost:8081/), which should popup a dialog box asking for a username and password. Entering user `ddosdb` and password `ddosdbddosdb` will show the Mongo Express interface:
-
-<p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
-
-The ddosdb database is created at startup of the Django development server.
-Whenever you want to delete the ddosdb database - for example because you want to start with an empty database again - simply delete the database using Mongo Express and restart Django.
-
 #### Python
 If you have a functioning Python3 running on your system you can use that. But in order to avoid interference with your system version of Python, create a virtual environment.
 ```
@@ -68,9 +56,30 @@ Create a superuser for your user management:
 python manage.py createsuperuser
 ```
 
+#### Web server
+For development the Django development server suffices, no need for a front-end webserver. Rather than a full-fledged SQL database the built-in support for sqlite3 will work just fine. 
+
+#### MongoDB and RabbitMQ
+DDoSDB needs instances of MongoDB and RabbitMQ to function, but a single node dockerized version will do for both. A `docker-compose.yml` is provided in the `mongodb-rabbitmq` directory. If you have docker installed then running `docker-compose up -d` in that directory will pull the right Mongo, Mongo Express and RabbitMQ images and start them.
+You can check if it is running by pointing a browser towards [http://localhost:8081/](http://localhost:8081/), which should popup a dialog box asking for a username and password. Entering user `ddosdb` and password `ddosdbddosdb` will show the Mongo Express interface:
+
+<p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
+
+The ddosdb database is created at startup of the Django development server.
+Whenever you want to delete the ddosdb database - for example because you want to start with an empty database again - simply delete the database using Mongo Express and restart Django.
+
+#### Celery worker and Celery beat
+DDoSDB uses Celery to carry out periodic tasks, hence the need for RabbitMQ (used as the message broker for Celery).
+You can run DDoSDB without Celery worker and beat just fine if you don't need synchronization of fingerprints between different DDoSDB instances (very likely for development). But if you do then you need to start Celery beat and worker. Open a new terminal window and activate the Python virtual environment as described above. Then move to the directory containing the `manage.py` file (`cd ddosdb` from the base directory). 
+
+Start Celery beat and worker with the following command:
+``` 
+celery -A ddosdb worker -B -l info
+```
+
 #### Running the Django development server
 
-Run the Django development (SSL) server by issuing the following command:
+Run the Django development (SSL) server by issuing the following command in the same directory:
 
 ```
 python manage.py runsslserver --settings=website.settings-dev

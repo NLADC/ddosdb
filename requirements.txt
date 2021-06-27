@@ -1,13 +1,8 @@
 amqp==5.0.6
 asgiref==3.3.4
-billiard==3.6.4.0
 celery==5.1.1
 certifi==2020.12.5
 chardet==4.0.0
-click==7.1.2
-click-didyoumean==0.0.3
-click-plugins==1.1.1
-click-repl==0.2.0
 demjson==2.2.4
 Django==3.2.4
 django-celery-beat==2.2.0
@@ -28,7 +23,6 @@ pymongo==3.11.3
 python-crontab==2.5.1
 python-dateutil==2.8.1
 pytz==2021.1
-redis==3.5.3
 requests==2.25.1
 six==1.15.0
 sqlparse==0.4.1
