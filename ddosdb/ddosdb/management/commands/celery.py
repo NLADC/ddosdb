@@ -12,7 +12,7 @@ class Command(BaseCommand):
             logger.info("manage.py celery command")
             # importing model classes
             from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule
-            #        import django_celery_beat.models as cb
+
             intervals = IntervalSchedule.objects.all()
             i = 0
             for iv in intervals:
@@ -24,6 +24,9 @@ class Command(BaseCommand):
             for pt in periodic_tasks:
                 i += 1
                 logger.info("Periodic Task {}: {}".format(i, pt))
+
+            logger.info("Deleting all ddosdb.tasks.check_to_sync tasks")
+            PeriodicTask.objects.filter(task='ddosdb.tasks.check_to_sync').delete()
 
             schedule, created = IntervalSchedule.objects.get_or_create(
                 every=1, period=IntervalSchedule.HOURS)
