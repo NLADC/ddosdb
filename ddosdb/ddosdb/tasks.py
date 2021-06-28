@@ -58,13 +58,16 @@ def sync_remote(self, remote_id):
     }
     logger.info("Fingerprints to sync: {}".format(fp_keys))
 
-
+    url = rdb.url
+    if url.endswith('/'):
+        url = url[:-1]
     try:
-        r = requests.post("{}/unknown-fingerprints".format(rdb.url),
-                          auth=(rdb.username, rdb.password),
-                          json=fp_keys,
-                          timeout=10,
-                          verify=rdb.check_cert)
+        urllib3.disable_warnings()
+        r = requests.post("{}/unknown-fingerprints".format(url),
+                        auth=(rdb.username, rdb.password),
+                        json=fp_keys,
+                        timeout=10,
+                        verify=rdb.check_cert)
         logger.info("status:{}".format(r.status_code))
         if r.status_code == 200:
             logger.info("Fingerprint keys unknown to {}: {}".format(rdb.name, r.json()))
@@ -77,7 +80,7 @@ def sync_remote(self, remote_id):
                 logger.debug("Fingerprints to sync: {}".format(fps_to_sync))
 
                 urllib3.disable_warnings()
-                r = requests.post("{}/fingerprints".format(rdb.url),
+                r = requests.post("{}/fingerprints".format(url),
                                   auth=(rdb.username, rdb.password),
                                   json=fps_to_sync,
                                   verify=rdb.check_cert)
