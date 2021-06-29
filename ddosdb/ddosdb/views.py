@@ -124,7 +124,7 @@ def help_page(request):
 
 def signin(request):
     ip = _remote_ip(request)
-    logger.info("{}".format(ip))
+    logger.info("Login request from {}".format(ip))
 
     if request.method == "POST":
         fls = FailedLogin.objects.filter(ipaddress=ip, logindatetime__gt = timezone.now() - timedelta(seconds=60))
@@ -144,14 +144,16 @@ def signin(request):
                 else:
                     return redirect("index")
             else:
+                logger.info("Login fail from {}".format(ip))
                 fl = FailedLogin()
                 fl.ipaddress = ip
                 fl.logindatetime = timezone.now()
                 fl.save()
                 context = {"failed": True, "message": "Invalid username or password"}
-                if len(fls) == 2:
+                if len(fls) >= 2:
                     context["message"] = "Invalid username or password, wait 60 seconds"
         else:
+            logger.info("Already too many failed attempts from {}, automatic fail".format(ip))
             fl = FailedLogin()
             fl.ipaddress = ip
             fl.logindatetime = timezone.now()
