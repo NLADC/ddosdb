@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 services:
 
@@ -16,21 +16,25 @@ services:
       - 27017
     restart: unless-stopped
 
-  mongo-express:
-    image: mongo-express
-    container_name: ddosdb_mongo_express
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongodb
-    env_file:
-      - ./temp/environment.prod
-    networks:
-      - ddosdb
-    ports:
-      - 127.0.0.1:8081:8081
-    depends_on:
-      - mongodb
-    restart: unless-stopped
-
+#
+#  Uncomment the section below if - for some reason - you
+#  want to be able to view the contents of the MongoDB.
+#
+#  mongo-express:
+#    image: mongo-express
+#    container_name: ddosdb_mongo_express
+#    environment:
+#      - ME_CONFIG_MONGODB_SERVER=mongodb
+#    env_file:
+#      - ./temp/environment.prod
+#    networks:
+#      - ddosdb
+#    ports:
+#      - 127.0.0.1:8081:8081
+#    depends_on:
+#      - mongodb
+#    restart: unless-stopped
+#
   db:
     image: postgres:13-alpine
     container_name: ddosdb_db
@@ -44,15 +48,6 @@ services:
       - ddosdb
     expose:
       - 5432
-    restart: unless-stopped
-
-  rabbitmq:
-    container_name: ddosdb_rabbitmq
-    image: rabbitmq
-    expose:
-      - 5672
-    networks:
-      - ddosdb
     restart: unless-stopped
 
   ddosdb:
@@ -77,35 +72,6 @@ services:
     depends_on:
       - db
       - mongodb
-      - rabbitmq
-    restart: unless-stopped
-
-  celery_worker:
-    container_name: ddosdb_celery_worker
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    command: sh -c "./wait-for ddosdb:8000 -t 300 && celery -A ddosdb worker -l info"
-    env_file:
-      - ./temp/environment.prod
-    depends_on:
-      - ddosdb
-    networks:
-      - ddosdb
-    restart: unless-stopped
-
-  celery_beat:
-    container_name: ddosdb_celery_beat
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    command: sh -c "./wait-for ddosdb:8000 -t 300 && celery -A ddosdb beat -l info"
-    env_file:
-      - ./temp/environment.prod
-    depends_on:
-      - ddosdb
-    networks:
-      - ddosdb
     restart: unless-stopped
 
   nginx:
@@ -124,6 +90,57 @@ services:
       - 80:80
       - 443:443
     depends_on:
+      - ddosdb
+    restart: unless-stopped
+
+
+#
+# If you don't need to synchronize fingerprints between DDoSDB instances
+# Then you can comment everything below this up to the 'volumes' section.
+# i.e.: rabbitmq, celery_worker and celery_beat containers
+# They are only used for that purpose: a regular check on whether
+# there are fingerprints to share (and instances to share it with)
+# and doing actual checks on fingerprints to share if so.
+#
+# Alternatively startup everything *but* rabbitmq and celery_* by doing:
+# docker-compose up -d nginx
+#
+  rabbitmq:
+    container_name: ddosdb_rabbitmq
+    image: rabbitmq
+    expose:
+      - 5672
+    networks:
+      - ddosdb
+    restart: unless-stopped
+
+  celery_worker:
+    container_name: ddosdb_celery_worker
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: sh -c "./wait-for ddosdb:8000 -t 300 && celery -A ddosdb worker -l info"
+    env_file:
+      - ./temp/environment.prod
+    depends_on:
+      - ddosdb
+      - rabbitmq
+    networks:
+      - ddosdb
+    restart: unless-stopped
+
+  celery_beat:
+    container_name: ddosdb_celery_beat
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: sh -c "./wait-for ddosdb:8000 -t 300 && celery -A ddosdb beat -l info"
+    env_file:
+      - ./temp/environment.prod
+    depends_on:
+      - ddosdb
+      - rabbitmq
+    networks:
       - ddosdb
     restart: unless-stopped
 
