@@ -55,6 +55,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    image: ddosdb/ddosdb
     command: sh -c  "python manage.py collectstatic --no-input && "\
                     "python manage.py migrate && "\
                     "python manage.py createsuperuser --noinput || true &&"\
@@ -116,30 +117,24 @@ services:
 
   celery_worker:
     container_name: ddosdb_celery_worker
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    command: sh -c "./wait-for ddosdb:8000 -t 300 && celery -A ddosdb worker -l info"
+    image: ddosdb/ddosdb
+    command: sh -c  "./wait-for ddosdb:8000 -t 300 &&"\
+                    "./wait-for rabbitmq:5672 -t 300 &&"\
+                    "celery -A ddosdb worker -l info"
     env_file:
       - ./temp/environment.prod
-    depends_on:
-      - ddosdb
-      - rabbitmq
     networks:
       - ddosdb
     restart: unless-stopped
 
   celery_beat:
     container_name: ddosdb_celery_beat
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    command: sh -c "./wait-for ddosdb:8000 -t 300 && celery -A ddosdb beat -l info"
+    image: ddosdb/ddosdb
+    command: sh -c  "./wait-for ddosdb:8000 -t 300 &&"\
+                    "./wait-for rabbitmq:5672 -t 300 &&"\
+                    "celery -A ddosdb beat -l info"
     env_file:
       - ./temp/environment.prod
-    depends_on:
-      - ddosdb
-      - rabbitmq
     networks:
       - ddosdb
     restart: unless-stopped
