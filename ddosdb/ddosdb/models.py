@@ -83,8 +83,12 @@ class RemoteDdosDb(models.Model):
         help_text="""The base URL for the remote sync API""")
     username = models.CharField('username', max_length=255)
     password = models.CharField(max_length=255)
-    active   = models.BooleanField(default=False,
-        help_text="""Activate to sync local fingerprints with this DDoS-DB""")
+    active   = models.BooleanField(default=True,
+        help_text="""Activate to sync with this DDoS-DB""")
+    push     = models.BooleanField(default=True,
+        help_text="""Sync towards this DDoS-DB""")
+    pull   = models.BooleanField(default=False,
+        help_text="""Sync from this DDoS-DB""")
 
     check_cert   = models.BooleanField(default=True,
         help_text="""Whether to check remote DDoS-DB certificate on https""")

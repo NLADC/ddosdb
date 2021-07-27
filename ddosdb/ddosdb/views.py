@@ -773,7 +773,7 @@ def remote_sync(request):
         return response
 
     results = []
-    remotedbs = RemoteDdosDb.objects.filter(active=True)
+    remotedbs = RemoteDdosDb.objects.filter(active=True, push=True)
     logger.info(remotedbs)
     rdbs = []
     for rdb in remotedbs:

@@ -34,13 +34,20 @@ def _search(query=None, fields=None, order=None):
 
 @app.task(name='ddosdb.tasks.check_to_sync', bind=True)
 def check_to_sync(self):
-    remotes = RemoteDdosDb.objects.filter(active=True)
+    remotes = RemoteDdosDb.objects.filter(active=True, push=True)
     logger.info("Remote DDoSDBs:")
     i = 0
     for remote in remotes:
         i += 1
-        logger.info("Remote DDoSDB #{}:{} - {}@{}".format(i, remote, remote.username, remote.url))
+        logger.info("Remote (push) DDoSDB #{}:{} - {}@{}".format(i, remote, remote.username, remote.url))
         sync_remote.delay(remote.id)
+
+    remotes = RemoteDdosDb.objects.filter(active=True, pull=True)
+    logger.info("Remote DDoSDBs:")
+    i = 0
+    for remote in remotes:
+        logger.info("Remote (pull) DDoSDB #{}:{} - {}@{}".format(i, remote, remote.username, remote.url))
+        # sync_remote.delay(remote.id)
 
 
 @app.task(name='ddosdb.tasks.sync_remote', bind=True)
