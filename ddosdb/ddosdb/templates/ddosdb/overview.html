@@ -86,8 +86,8 @@
                 </a>
               </div>
             {% elif hdr == "shareable" %}
-              <div title="click to toggle shareable status">
                 {% if user.is_authenticated %}
+                  <div title="click to toggle shareable status">
                   {% if user.username == node|get_item:"submitter"  or user.is_superuser %}
                     <a href="{% url "toggle-shareable" %}?q={{ q }}&key={{node|get_item:"key"}}&o={{ o }}&so={{ so }}&son={{ son }}&shareable={{node|get_item:hdr}}">
                     {% if node|get_item:hdr == True %}
@@ -95,12 +95,18 @@
                     {% else %}
                         <img width="16" height="16" src="{% static "ddosdb/img/red_cross.svg" %}">
                     {% endif %}
-                    </a>
+                  </a>
+                  </div>
+                {% else %}
+                  <div title="shareable status">
+                  {% if node|get_item:hdr == True %}
+                      <img width="16" height="16" src="{% static "ddosdb/img/green_check.svg" %}">
                   {% else %}
-                    {{node|get_item:hdr}}
+                      <img width="16" height="16" src="{% static "ddosdb/img/red_cross.svg" %}">
                   {% endif %}
+                  </div>
                 {% endif %}
-              </div>
+              {% endif %}
             {% elif hdr == "duration_sec" %}
                 {{node|get_item:hdr|precision:3}}
             {% elif hdr == "avg_bps" %}
