@@ -7,5 +7,5 @@
 # Then it won't execute. run-parts --test <DIR> will list the scripts that will run
 
 # --break-my-certs is for test certificates only!
-certbot renew -n --no-self-upgrade --break-my-certs --post-hook "nginx -s reload"
+certbot renew -n --no-self-upgrade --keep --reuse-key --post-hook "nginx -s reload"
 
