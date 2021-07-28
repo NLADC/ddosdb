@@ -759,6 +759,7 @@ def remote_sync(request):
         "user": user,
     }
 
+    # First do a Push sync
     # Get all the shareable fingerprints
     try:
         fingerprints = _search({'shareable': True}, {'_id': 0})
@@ -783,7 +784,7 @@ def remote_sync(request):
             r = requests.post("{}/unknown-fingerprints".format(rdb.url),
                               auth=(rdb.username, rdb.password),
                               json=fp_keys,
-                              timeout=10)
+                              timeout=10, verify=rdb.check_cert)
             logger.info("status:{}".format(r.status_code))
             if r.status_code == 200:
                 logger.info("Fingerprint keys unknown to {}: {}".format(rdb.name,r.json()))
@@ -796,8 +797,10 @@ def remote_sync(request):
 
                     r = requests.post("{}/fingerprints".format(rdb.url),
                                       auth=(rdb.username, rdb.password),
-                                      json=fps_to_sync)
+                                      json=fps_to_sync,
+                                      timeout=10, verify=rdb.check_cert)
             rdbs.append({"name": rdb.name,
+                         "type": "push",
                          "status": r.status_code,
                          "status_reason": r.reason,
                          "unk_fps": unk_fps,
@@ -808,6 +811,7 @@ def remote_sync(request):
             logger.info("{}".format(e))
             throw(e)
             rdbs.append({"name": rdb.name,
+                         "type": "push",
                          "status": 555,
                          "status_reason": "Connection failed",
                          "unk_fps": [],
@@ -815,6 +819,70 @@ def remote_sync(request):
                          })
             continue
 
+    # Now do a Pull sync
+    remotedbs = RemoteDdosDb.objects.filter(active=True, pull=True)
+    logger.info(remotedbs)
+    for rdb in remotedbs:
+        fps_srch = _search(fields={'key': 1, "_id":0})
+        fps = [fp['key'] for fp in fps_srch]
+        logger.info("Fingerprints I have: {}".format(fps))
+
+        logger.info("Contacting remote DDoSDB:{} @ {}".format(rdb, rdb.url))
+        unk_fps = []
+        try:
+            r = requests.get("{}/fingerprints".format(rdb.url),
+                              auth=(rdb.username, rdb.password),
+                             timeout=10, verify=rdb.check_cert)
+            logger.debug("status:{}".format(r.status_code))
+            if r.status_code == 200:
+                logger.info("Fingerprints at {}: {}".format(rdb.name, r.json()))
+                rem_fps = r.json()
+                for rem_fp in rem_fps:
+                    if not rem_fp in fps:
+                        unk_fps.append(rem_fp)
+                logger.info("Fingerprints to pull: {}".format(unk_fps))
+
+                if len(unk_fps) > 0:
+                    for unk_fp in unk_fps:
+                        r = requests.get("{}/fingerprint/{}".format(rdb.url, unk_fp),
+                                         auth=(rdb.username, rdb.password),
+                                         timeout=10, verify=rdb.check_cert)
+                        if r.status_code == 200:
+                            fp = r.json()[0]
+                            # pp.pprint(fp)
+                            fp["shareable"] = False
+                            # Set submit timestamp
+                            fp["submit_timestamp"] = datetime.utcnow().isoformat()
+                            if not 'comment' in fp:
+                                fp['comment'] = ""
+                            _insert(fp)
+                            # file_upload = FileUpload()
+                            # file_upload.user = user_perms["user"]
+                            # file_upload.filename = fp["key"]
+                            # file_upload.save()
+
+                            # logger.info(fp)
+
+                rdbs.append({"name": rdb.name,
+                             "type": "pull",
+                             "status": r.status_code,
+                             "status_reason": r.reason,
+                             "unk_fps": unk_fps,
+                             "unk_fps_nr": len(unk_fps),
+                             })
+
+            logger.info("Sync response:{}".format(r.status_code))
+        except Exception as e:
+            logger.info("{}".format(e))
+            throw(e)
+            rdbs.append({"name": rdb.name,
+                         "type": "pull",
+                         "status": 555,
+                         "status_reason": "Connection failed",
+                         "unk_fps": [],
+                         "unk_fps_nr": 0,
+                         })
+            continue
 
     context["result"] = rdbs
     return HttpResponse(render(request, "ddosdb/remotesync.html", context))

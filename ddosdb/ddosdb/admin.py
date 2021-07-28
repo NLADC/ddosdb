@@ -102,6 +102,7 @@ class RemoteDdosDbForm(forms.ModelForm):
 class RemoteDdosDbAdmin(admin.ModelAdmin):
     list_display = ("name", "active", "push", "pull", "url", "check_cert", "username")
     fields = (('name', 'active','push','pull'), ('url','check_cert'), 'username', 'password')
+
     form = RemoteDdosDbForm
 
 class FailedLoginAdmin(admin.ModelAdmin):
