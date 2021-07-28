@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3.8.19
     ports:
       - 127.0.0.1:5672:5672
 

@@ -106,9 +106,10 @@ services:
 # Alternatively startup everything *but* rabbitmq and celery_* by doing:
 # docker-compose up -d nginx
 #
+  # Specific version of rabbitmq, later one (3.9) causes issues
   rabbitmq:
     container_name: ddosdb_rabbitmq
-    image: rabbitmq
+    image: rabbitmq:3.8.19
     expose:
       - 5672
     networks:
