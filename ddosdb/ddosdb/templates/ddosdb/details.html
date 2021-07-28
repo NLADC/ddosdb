@@ -2,6 +2,16 @@
 {% load get_class %}
 {% load multiply %}
 {% load humanize %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<title>DDosDB - Detailed View</title>
+{% include 'ddosdb/header.html' %}
+<body class="bg-light">
+{% include 'ddosdb/menu.html' %}
+
+{% comment %}
 <!DOCTYPE html>
 <html lang="en">
 <title>DDoSDB - Detailed View</title>
@@ -18,6 +28,7 @@
         </nav>
     </div>
 </div>
+{% endcomment %}
 
 <h1 align="center" class="display-4 ddosdb-subtitle">Details of fingerprint {{ key }}</h1>
 

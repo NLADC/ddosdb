@@ -2,6 +2,16 @@
 {% load get_class %}
 {% load multiply %}
 {% load humanize %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<title>DDosDB - Query View</title>
+{% include 'ddosdb/header.html' %}
+<body class="bg-light">
+{% include 'ddosdb/menu.html' %}
+
+{% comment %}
 <!DOCTYPE html>
 <html lang="en">
 <title>DDoSDB - Query View</title>
@@ -19,6 +29,8 @@
         </nav>
     </div>
 </div>
+{% endcomment %}
+<h1 align="center" class="display-4 ddosdb-subtitle">Query</h1>
 
 <div class="container">
     <div class="row py-2"></div>

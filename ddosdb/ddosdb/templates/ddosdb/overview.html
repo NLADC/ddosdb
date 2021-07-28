@@ -155,7 +155,7 @@
         {{node|get_item:'name'}},
     {% endfor %}
     ),
-      {{ syncfps }} Fingerprints to sync
+      {{ syncfps }} Fingerprints to sync (push)
 {% comment %}
       {% for node in results %}
         {% if node|get_item:'shareable' == True %}
@@ -165,9 +165,13 @@
 {% endcomment %}
     <br/><br/>
     <a class="btn btn-secondary" target="_blank" href="/admin/ddosdb/remoteddosdb/">Remote DBs</a>
+{% comment %}
     {% if syncfps > 0 %}
+{% endcomment %}
       &nbsp;<a class="btn btn-secondary" target="_blank" href="{% url "remote-sync" %}">Sync</a>
+{% comment %}
     {% endif %}
+{% endcomment %}
     </p>
   {% endif %}
 </div>

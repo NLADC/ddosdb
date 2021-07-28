@@ -20,6 +20,7 @@
     <thead>
       <tr>
         <th nowrap="nowrap">Remote DDoS-DB</th>
+        <th nowrap="nowrap">Type</th>
         <th nowrap="nowrap">Status</th>
         <th nowrap="nowrap">Description</th>
         <th nowrap="nowrap">Fingerprints synced</th>
@@ -29,6 +30,7 @@
       {% for node in result %}
         <tr>
           <td>{{node|get_item:'name'}}</td>
+          <td>{{node|get_item:'type'}}</td>
           <td>
             {% if node|get_item:'status' == 200 or node|get_item:'status' == 201 %}
               <img width="16" height="16" src="{% static "ddosdb/img/green_check.svg" %}">
