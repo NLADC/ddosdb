@@ -27,7 +27,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from django.core.exceptions import PermissionDenied
-#from ddosdb.enrichment.team_cymru import TeamCymru
+# from ddosdb.enrichment.team_cymru import TeamCymru
 from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb, FailedLogin
 
 from ddosdb.database import Database
@@ -36,6 +36,8 @@ Database.initialize()
 
 logger = logging.getLogger(__name__)
 
+
+# -------------------------------------------------------------------------------------------------------------------
 def _mdb():
     return Database.getDB()
 
@@ -51,7 +53,7 @@ def _search(query=None, fields=None, order=None):
         q["$query"] = query
         q["$orderby"] = order
 
-    logger.info("filter={}, fields={}".format(q,fields))
+    logger.info("filter={}, fields={}".format(q, fields))
     result = list(_mdb().find(q, fields))
     return result
 
@@ -69,6 +71,7 @@ def _update(query=None, fields=None):
 def _delete(query=None):
     result = _mdb().delete_many(query)
     return result
+
 
 def _remote_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -103,6 +106,8 @@ def _pretty_request(request):
         body=request.body,
     )
 
+
+# -------------------------------------------------------------------------------------------------------------------
 def index(request):
     logger.debug("index ({})".format(request.method))
 
@@ -110,11 +115,14 @@ def index(request):
     return HttpResponse(render(request, "ddosdb/index.html", context))
 
 
+# -------------------------------------------------------------------------------------------------------------------
 def about(request):
     logger.debug("about ({})".format(request.method))
     context = {}
     return HttpResponse(render(request, "ddosdb/about.html", context))
 
+
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def help_page(request):
     logger.debug("help_page ({})".format(request.method))
@@ -122,6 +130,7 @@ def help_page(request):
     return HttpResponse(render(request, "ddosdb/help.html", context))
 
 
+# -------------------------------------------------------------------------------------------------------------------
 def signin(request):
     ip = _remote_ip(request)
     logger.info("Login request from {}".format(ip))
@@ -131,7 +140,7 @@ def signin(request):
         timeout_sec = 0
         # Check failed logins in last 5 minutes
 
-        fls = FailedLogin.objects.filter(ipaddress=ip, logindatetime__gt = timezone.now() - timedelta(seconds=300))
+        fls = FailedLogin.objects.filter(ipaddress=ip, logindatetime__gt=timezone.now() - timedelta(seconds=300))
         logger.info("Failed login attempts from {} in the last 5 minutes: {}".format(ip, len(fls)))
 
         if len(fls) < 3:
@@ -217,6 +226,8 @@ def signin(request):
 #     return HttpResponse(render(request, "ddosdb/request-access.html", context))
 #
 
+
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def account(request):
     logger.debug("account ({})".format(request.method))
@@ -264,6 +275,7 @@ def account(request):
     return HttpResponse(render(request, "ddosdb/account.html", context))
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def signout(request):
     logger.debug("signout ({})".format(request.method))
@@ -272,6 +284,7 @@ def signout(request):
     return redirect("index")
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def details(request):
     logger.debug("details ({})".format(request.method))
@@ -304,11 +317,12 @@ def details(request):
         return redirect("/overview")
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def query(request):
     logger.debug("query ({})".format(request.method))
 
- # { key: {$regex: /^0.*/ } }
+    # { key: {$regex: /^0.*/ } }
     pp = pprint.PrettyPrinter(indent=4)
 
     start = time.time()
@@ -323,23 +337,21 @@ def query(request):
         "time": 0
     }
 
-
     if "q" in request.GET:
         f = context["f"]
         o = context["o"]
 
         if "f" in request.GET:
             f = context["f"] = request.GET["f"]
-        if f=="":
+        if f == "":
             f = context["f"] = '{"_id":0}'
 
         if "o" in request.GET:
             o = context["o"] = request.GET["o"]
 
         q = context["q"] = request.GET["q"]
-        if q=="":
+        if q == "":
             q = context["q"] = "{}"
-
 
         try:
             logger.info("Query: {}".format(q))
@@ -377,7 +389,6 @@ def query(request):
             context["amount"] = 0
             return HttpResponse(render(request, "ddosdb/query.html", context))
 
-
         try:
             # { 'attack_vector.dns_qry_name': {$regex: '\.'}  }
             # results = _search(qjson, fields={"_id":0})
@@ -396,12 +407,16 @@ def query(request):
 
     return HttpResponse(render(request, "ddosdb/query.html", context))
 
+
+# -------------------------------------------------------------------------------------------------------------------
 def _cleanup_fp(fp_in):
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(fp_in)
 
     return fp_in
 
+
+# -------------------------------------------------------------------------------------------------------------------
 @csrf_exempt
 def upload_file(request):
     logger.debug("upload_file ({})".format(request.method))
@@ -562,10 +577,10 @@ def upload_file(request):
         return response
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def overview(request):
     logger.debug("overview ({})".format(request.method))
-
 
     pp = pprint.PrettyPrinter(indent=4)
 
@@ -595,7 +610,7 @@ def overview(request):
         context["son"] = request.GET["son"]
 
     logger.debug("context: {}".format(context))
-#    _search()
+    #    _search()
 
     try:
         context["headers"] = {
@@ -608,11 +623,11 @@ def overview(request):
             #            "duration_sec": "duration (seconds)",
             "total_packets": "# packets",
             #            "amplifiers_size"    : "IP's involved",
-#            "ips_involved": "IP's involved",
+            #            "ips_involved": "IP's involved",
             "total_ips": "IP's involved",
             "avg_bps": "bits/second",
             #            "avg_pps"           : "packets/second",
-#            "total_dst_ports": "# ports",
+            #            "total_dst_ports": "# ports",
             "submit_timestamp": "submitted at",
             "submitter": "submitted by",
             "comment": "comment",
@@ -627,17 +642,17 @@ def overview(request):
             q = context["q"]
         q_dis = q.split(':')
         if q_dis[0] == 'submitter':
-            query = {"submitter":q_dis[1]}
+            query = {"submitter": q_dis[1]}
         mdb_resp = _search(query=query, fields=fields)
-#        pp.pprint(mdb_resp)
+        #        pp.pprint(mdb_resp)
 
         context["time"] = time.time() - start
         logger.debug("Search took {} seconds".format(context["time"]))
-#        results = [x["_source"] for x in response["hits"]["hits"]]
+        #        results = [x["_source"] for x in response["hits"]["hits"]]
         results = mdb_resp
         logger.info("Got {} results".format(len(results)))
 
-#        pp.pprint(results)
+        #        pp.pprint(results)
         # Only do this if there are actual results...
         # and more than one, since one result does not need sorting
         if len(results) > 1:
@@ -686,6 +701,7 @@ def overview(request):
     return HttpResponse(render(request, "ddosdb/overview.html", context))
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def delete(request):
     logger.debug("delete ({})".format(request.method))
@@ -719,8 +735,8 @@ def delete(request):
 
     if "key" in request.GET:
         if "ddosdb.delete_fingerprint" in user.get_all_permissions():
-           _delete({"key": request.GET["key"]})
-           logger.info("User {} delete fingerprint {}".format(user.username, request.GET["key"]))
+            _delete({"key": request.GET["key"]})
+            logger.info("User {} delete fingerprint {}".format(user.username, request.GET["key"]))
         else:
             logger.error("********************************************************")
             logger.error("********  delete request without permission ************")
@@ -745,21 +761,9 @@ def delete(request):
     return redirect("/overview{}".format(extrastr))
 
 
-@login_required()
-def remote_sync(request):
-    logger.debug("remote_sync ({})".format(request.method))
-
-    pp = pprint.PrettyPrinter(indent=4)
-    user: User = request.user
-
-    if not user.is_superuser:
-        raise PermissionDenied()
-
-    context = {
-        "user": user,
-    }
-
-    # First do a Push sync
+# -------------------------------------------------------------------------------------------------------------------
+def remote_push_sync():
+    # Do a Push sync
     # Get all the shareable fingerprints
     try:
         fingerprints = _search({'shareable': True}, {'_id': 0})
@@ -773,7 +777,6 @@ def remote_sync(request):
         response.reason_phrase = "Database unavailable"
         return response
 
-    results = []
     remotedbs = RemoteDdosDb.objects.filter(active=True, push=True)
     logger.info(remotedbs)
     rdbs = []
@@ -787,7 +790,7 @@ def remote_sync(request):
                               timeout=10, verify=rdb.check_cert)
             logger.info("status:{}".format(r.status_code))
             if r.status_code == 200:
-                logger.info("Fingerprint keys unknown to {}: {}".format(rdb.name,r.json()))
+                logger.info("Fingerprint keys unknown to {}: {}".format(rdb.name, r.json()))
                 unk_fps = r.json()
                 if len(unk_fps) > 0:
                     # fps_to_sync = []
@@ -809,7 +812,6 @@ def remote_sync(request):
             logger.info("Sync response:{}".format(r.status_code))
         except Exception as e:
             logger.info("{}".format(e))
-            throw(e)
             rdbs.append({"name": rdb.name,
                          "type": "push",
                          "status": 555,
@@ -819,11 +821,17 @@ def remote_sync(request):
                          })
             continue
 
+    return rdbs
+
+
+# -------------------------------------------------------------------------------------------------------------------
+def remote_pull_sync():
     # Now do a Pull sync
     remotedbs = RemoteDdosDb.objects.filter(active=True, pull=True)
     logger.info(remotedbs)
+    rdbs = []
     for rdb in remotedbs:
-        fps_srch = _search(fields={'key': 1, "_id":0})
+        fps_srch = _search(fields={'key': 1, "_id": 0})
         fps = [fp['key'] for fp in fps_srch]
         logger.info("Fingerprints I have: {}".format(fps))
 
@@ -831,7 +839,7 @@ def remote_sync(request):
         unk_fps = []
         try:
             r = requests.get("{}/fingerprints".format(rdb.url),
-                              auth=(rdb.username, rdb.password),
+                             auth=(rdb.username, rdb.password),
                              timeout=10, verify=rdb.check_cert)
             logger.debug("status:{}".format(r.status_code))
             if r.status_code == 200:
@@ -874,7 +882,6 @@ def remote_sync(request):
             logger.info("Sync response:{}".format(r.status_code))
         except Exception as e:
             logger.info("{}".format(e))
-            throw(e)
             rdbs.append({"name": rdb.name,
                          "type": "pull",
                          "status": 555,
@@ -884,10 +891,32 @@ def remote_sync(request):
                          })
             continue
 
-    context["result"] = rdbs
+    return rdbs
+
+
+# -------------------------------------------------------------------------------------------------------------------
+@login_required()
+def remote_sync(request):
+    logger.debug("remote_sync ({})".format(request.method))
+
+    pp = pprint.PrettyPrinter(indent=4)
+    user: User = request.user
+
+    if not user.is_superuser:
+        raise PermissionDenied()
+
+    rdbs = remote_push_sync()
+    rdbs += remote_pull_sync()
+    logger.info(rdbs)
+
+    context = {
+        "user": user,
+        "result": rdbs,
+    }
     return HttpResponse(render(request, "ddosdb/remotesync.html", context))
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def toggle_shareable(request):
     logger.debug("toggle_shareable ({})".format(request.method))
@@ -908,7 +937,7 @@ def toggle_shareable(request):
         shareable = not strtobool(request.GET["shareable"])
 
     try:
-        fp = _search_one({"key": key}, {"shareable" : 1, "key" : 1, "submitter" : 1})
+        fp = _search_one({"key": key}, {"shareable": 1, "key": 1, "submitter": 1})
         if fp["submitter"] == user.username or user.is_superuser:
             logger.info("Setting key {} to Shareable={}".format(key, shareable))
             _update({'key': key}, {'$set': {"shareable": shareable}})
@@ -920,7 +949,6 @@ def toggle_shareable(request):
         response.status_code = 503
         response.reason_phrase = "Database unavailable"
         return response
-
 
     extra = []
     if "q" in request.GET:
@@ -940,6 +968,7 @@ def toggle_shareable(request):
     return redirect("/overview{}".format(extrastr))
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def edit_comment(request):
     logger.debug("edit_comment ({})".format(request.method))
@@ -986,7 +1015,7 @@ def edit_comment(request):
 
         mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
 
-        fp = mdb.find_one({"key": key}, {"comment" : 1, "key" : 1, "submitter" : 1})
+        fp = mdb.find_one({"key": key}, {"comment": 1, "key": 1, "submitter": 1})
         if fp["submitter"] == user.username or user.is_superuser:
             try:
                 logger.info("Setting comment for fingerprint {} to '{}'".format(key, request.POST["comment"]))
@@ -1002,6 +1031,8 @@ def edit_comment(request):
             raise PermissionDenied()
         return redirect("overview")
 
+
+# -------------------------------------------------------------------------------------------------------------------
 def _auth_user_get_perms(request):
     logger.debug("_auth_user_get_perms")
 
@@ -1009,7 +1040,6 @@ def _auth_user_get_perms(request):
         "user": None,
         "permissions": []
     }
-
 
     if not "HTTP_AUTHORIZATION" in request.META:
         return user_and_perms
@@ -1039,6 +1069,8 @@ def _auth_user_get_perms(request):
 
     return user_and_perms
 
+
+# -------------------------------------------------------------------------------------------------------------------
 @csrf_exempt
 def my_permissions(request):
     logger.debug("my_permissions ({})".format(request.method))
@@ -1062,41 +1094,27 @@ def my_permissions(request):
         return response
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @csrf_exempt
 def fingerprints(request):
     logger.debug("fingerprints ({})".format(request.method))
 
-    """REST API Call"""
-    """GET method will return list of keys for all fingerprints present in the database"""
-    """can add query parameters to it if needed, e.g.:"""
-    """curl -u username:password http://localhost:8000/fingerprints\?q=shareable:true"""
-    """Uses Basic authentication and checks for \"ddosdb.view_fingerprint\" permissions"""
-    """POST method will store all fingerprints present in the body"""
-    """It will remove the shareable property (i.e. set it to False), to by default prevent it from transfering further """
-    """Uses Basic authentication and checks for \"ddosdb.add_fingerprint\" permissions"""
-
-    # curl -X POST -H "Content-Type: application/json" -u user:password -d @test.json http://localhost:8000/fingerprints
     if request.method == "GET":
-
-        q = "*"
-        if "q" in request.GET:
-            q = request.GET["q"]
 
         user_perms = _auth_user_get_perms(request)
 
         if user_perms["user"] is None or "ddosdb.view_fingerprint" not in user_perms["permissions"]:
             raise PermissionDenied()
         try:
-            # offset = 10 * (context["p"] - 1)
-            # es = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS)
-            # response = es.search(index="ddosdb", q=q, size=10000, _source="key")
-            # results = [x["_source"]["key"] for x in response["hits"]["hits"]]
-            fps = _search(fields={'key': 1})
+            # Only return shareable fingerprints
+            fps = _search({'shareable': True}, {'_id': 0})
+
             logger.debug(fps)
             results = []
             for fp in fps:
                 results.append(fp['key'])
             return JsonResponse(results, safe=False)
+
         except ServerSelectionTimeoutError as e:
             logger.error("MongoDB unreachable")
             response = HttpResponse()
@@ -1120,6 +1138,7 @@ def fingerprints(request):
             return response
 
         logger.info("Inserting fingerprint(s)")
+
         def insert(fp):
             logger.info("Inserting fingerprint {}".format(fp["key"]))
             # Register record
@@ -1180,6 +1199,7 @@ def fingerprints(request):
         return response
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @csrf_exempt
 def unknown_fingerprints(request):
     logger.debug("unknown_fingerprints ({})".format(request.method))
@@ -1232,6 +1252,7 @@ def unknown_fingerprints(request):
         return response
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @csrf_exempt
 def fingerprint(request, key):
     logger.debug("fingerprint ({})".format(request.method))
@@ -1266,6 +1287,8 @@ def fingerprint(request, key):
         response.reason_phrase = "Use GET method only for this call"
         return response
 
+
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def attack_trace(request, key):
     logger.debug("attack_trace ({}), key={}".format(request.method, key))
@@ -1284,6 +1307,8 @@ def attack_trace(request, key):
     else:
         return HttpResponse("File not found")
 
+
+# -------------------------------------------------------------------------------------------------------------------
 @csrf_exempt
 def remote_dbs(request):
     logger.debug("remote_dbs ({})".format(request.method))
@@ -1310,6 +1335,7 @@ def remote_dbs(request):
         return response
 
 
+# -------------------------------------------------------------------------------------------------------------------
 @csrf_exempt
 def csp_report(request):
     logger.debug("csp_report ({})".format(request.method))
@@ -1329,3 +1355,5 @@ def csp_report(request):
         response = HttpResponse()
         response.status_code = 405
         return response
+
+# -------------------------------------------------------------------------------------------------------------------
