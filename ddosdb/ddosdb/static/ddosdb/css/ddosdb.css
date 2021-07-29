@@ -1,0 +1,131 @@
+
+[class*="container"] {
+
+/*
+    padding: 1rem;
+    background-color: #ffeeff;
+    border: 1px solid #808080;
+    color: #0;
+*/
+
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+[class*="col"] {
+
+    padding: 0.1rem;
+/*
+
+    background-color: #eeb5ee;
+    border: 1px solid #808080;
+    color: #0;
+*/
+}
+
+#menu.container {
+    padding: 1rem;
+
+/*    background-color: #eeeeee; */
+
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    border: 0;
+}
+
+[class*="login"] {
+    padding: 2rem;
+    margin-top: 1rem;
+    background-color: #eeeeee;
+    border: 1px solid #808080;
+}
+
+input {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+[class*="table"] {
+    padding: 0.1rem;
+}
+
+thead {
+    background-color: #eeeeee;
+    color: #ffffff;
+}
+
+
+a {
+  text-decoration: none;
+  color: #101010
+}
+
+a:hover {
+  color: #a00000;
+/*  font-weight: bold; */
+/*  font-style: italic; */
+}
+
+.overview-header {
+  color: #303030;
+}
+
+.nav-link {
+/*  color: #0a58ca; */
+  color: #000000;
+}
+
+.nav-link:hover, .nav-link:focus {
+/*  color: #0a58ca; */
+  color: #a00000;
+}
+
+
+/* JSON block for query page */
+
+.json-block {
+    font-family: monospace;
+    font-size: 11pt;
+}
+.json-block-indent {
+    padding-left: 1em;
+}
+.json-block-str {
+    color: #005cbf;
+}
+.json-block-int {
+    color: #1c7430;
+}
+.json-block-bool {
+    color: #ff8200;
+}
+.jumbotron {
+    border-radius: 0;
+}
+.ddosdb-title {
+    font-size: 3rem;
+}
+
+.ddosdb-subtitle {
+    font-size: 2.5rem;
+}
+
+@media (max-device-width: 600px) {
+    .ddosdb-title {
+        font-size: 2rem;
+    }
+
+    .ddosdb-subtitle {
+        font-size: 1.8rem;
+    }
+}
+
+.logo { max-width: 100%; }
+
+.is-warning {
+    border-color: #ffc107;
+}
+
+.is-warning:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
+}
