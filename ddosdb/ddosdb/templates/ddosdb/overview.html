@@ -23,7 +23,7 @@
 </div>
 
 <div class="container">
-  <table class="table table-sm table-hover text-center" id="overview-table" align="center">
+  <table class="table table-sm table-hover text-center" align="center">
     <thead>
       <tr>
         <th nowrap="nowrap"></th>
@@ -31,11 +31,11 @@
           <th nowrap="nowrap">
           {% if hdr == o %}
             <div title="change to {{ son }} sort order">
-            <a class="overview-header" href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ son }}&son={{ so }}">
+            <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ son }}&son={{ so }}">
               <img width="16" height="16" src="{% static "ddosdb/img/" %}{{ so }}.png" alt="sort order is {{ so }}">
           {% else %}
             <div title="order by '{{name}}' ({{ so }})">
-            <a class="overview-header" href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ so }}&son={{ son }}">
+            <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ so }}&son={{ son }}">
               <img width="16" height="16" src="{% static "ddosdb/img/empty_sort.png" %}">
           {% endif %}
               {{ name }}
