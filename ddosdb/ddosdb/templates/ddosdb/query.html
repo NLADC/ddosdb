@@ -32,24 +32,49 @@
 {% endcomment %}
 <h1 align="center" class="display-4 ddosdb-subtitle">Query</h1>
 
-<div class="container">
-    <div class="row py-2"></div>
+<div class="container" id="bar">
+<div class="row align-items-center">
+  <div class="col-sm-auto text-end">
+      query:
+  </div>
+  <div class="col-sm-5">
+    <input type="text" id="inputPassword6" class="form-control col-md-2" aria-describedby="passwordHelpInline">
+  </div>
 
-    <form action="{% url "query" %}" method="get">
+  <div class="col-sm-auto text-end">
+      &nbsp;&nbsp;&nbsp;&nbsp;order:
+  </div>
+  <div class="col-sm-2">
+    <input type="text" id="inputPassword7" class="form-control col-md-2" aria-describedby="passwordHelpInline">
+  </div>
+
+  <div class="col-sm-auto text-end">
+      &nbsp;&nbsp;&nbsp;&nbsp;fields:
+  </div>
+  <div class="col-sm-2">
+    <input type="text" id="inputPassword8" class="form-control col-md-2" aria-describedby="passwordHelpInline">
+  </div>
+  <div class="col-sm-1 text-end">
+             <button class="btn btn-ddosdb" type="submit" >Search</button>
+  </div>
+</div></div>
+
+
+<div class="container align-items-center">
+    <form class="form-inline" action="{% url "query" %}" method="get">
         {% csrf_token %}
         <div class="input-group">
-            <span class="btn btn-default btn-sm text-dark rounded" >Query:</span>
-            <input type="text" class="form-control col-md-5" id="query" name="q" value="{{ q }}" placeholder="Search"><br/>
+            <label for="query" class="col-form-label">Query</label>
+            <input type="text" class="form-control" id="query" name="q" value="{{ q }}" placeholder="Search"><br/>
             <span class="btn btn-default btn-sm text-dark rounded col-md-1">Sort:</span>
-            <input type="text" class="form-control col-md-2" name="o" placeholder="order" value="{{ o }}">
+            <input type="text" class="form-control" name="o" placeholder="order" value="{{ o }}">
             <span class="btn btn-default btn-sm text-dark rounded col-md-1">Fields:</span>
-            <input type="text" class="form-control col-md-2" name="f" placeholder="fields" value="{{ f }}">
-                 &nbsp;&nbsp;&nbsp;<button type="submit" class="btn btn-dark btn-sm rounded-right ">Search</button>
-            {% comment %}
-            <a href="{% url "help" %}#sorting" class="btn btn-default btn-sm text-dark rounded">More about sorting</a>
-            {% endcomment %}
+            <input type="text" class="form-control" name="f" placeholder="fields" value="{{ f }}">
+             <button class="btn btn-ddosdb" type="submit" >Search</button>
         </div>
     </form>
+</div>
+
     <div class="container d-flex flex-column flex-md-row align-items-center">
         <div class="row py-1">
             <span>Search yielded {{ results|length }} results   <a href="{% url "help" %}" target="_blank"><small>(help)</small></a> </span>
@@ -74,16 +99,17 @@
 
     <div class="row" id="results">
     {% for node in results %}
-        <div class="col-lg-6 col-md-12 my-2">
+        <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-12 my-2">
             <div class="card">
+                <div class="card-title text-center">fingerprint {{ node.key }}</div>
+                  <div class="card-footer">
+                    {% if node.comment %}
+                        {{ node.comment|linebreaks }}
+                    {% endif %}
+                  </div>
                 <div class="card-body json-block" id="result-{{ forloop.counter0 }}">
                     {% include "ddosdb/json-tree.html" %}
                 </div>
-                {% if node.comment %}
-                  <div class="card-footer">
-                    {{ node.comment|linebreaks }}
-                  </div>
-                {% endif %}
 
             </div>
         </div>

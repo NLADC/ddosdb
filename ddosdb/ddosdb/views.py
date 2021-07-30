@@ -394,6 +394,7 @@ def query(request):
             # results = _search(qjson, fields={"_id":0})
             logger.info("q={}, o={}, f={}".format(qjson, ojson, fjson))
             results = _search(qjson, fields=fjson, order=ojson)
+            # pp.pprint(results)
             context["time"] = time.time() - start
             logger.info("Results: {}".format(len(results)))
             context["results"] = results

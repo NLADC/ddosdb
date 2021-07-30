@@ -1,8 +1,23 @@
 
-[class*="container"] {
+:root {
+    --ddosdb-body-bg: bg-light;
+    --ddosdb-card-body-bg: white;
+    --ddosdb-bg: #cccccc;
+    --ddosdb-bdr: #333333;
+    --ddosdb-menu-bg: #eeeeee;
+    --ddosdb-menu-bdr: #cccccc;
+    --ddosdb-sel: #216fdf;
+    /* #a00000 */
+    --ddosdb-txt: #333333;
+}
 
+
+[class*="container"] {
 /*
     padding: 1rem;
+*/
+
+/*
     background-color: #ffeeff;
     border: 1px solid #808080;
     color: #0;
@@ -15,29 +30,40 @@
 [class*="col"] {
 
     padding: 0.1rem;
-/*
 
+/*
     background-color: #eeb5ee;
     border: 1px solid #808080;
     color: #0;
 */
+
 }
 
 #menu.container {
     padding: 1rem;
 
-/*    background-color: #eeeeee; */
-
+    background-color: var(--ddosdb-menu-bg);
+    border: 1px solid var(--ddosdb-menu-bdr);
     margin-top: 1rem;
     margin-bottom: 2rem;
-    border: 0;
 }
+
+#bar.container {
+    padding-left: 2rem;
+    padding-right: 0rem;
+
+    background-color: var(--ddosdb-menu-bg);
+    border: 1px solid var(--ddosdb-menu-bdr);
+    margin-top: 0.1rem;
+    margin-bottom: 0.2rem;
+}
+
 
 [class*="login"] {
     padding: 2rem;
     margin-top: 1rem;
-    background-color: #eeeeee;
-    border: 1px solid #808080;
+    background-color: var(--ddosdb-menu-bg);
+    border: 1px solid var(--ddosdb-menu-bdr);
 }
 
 input {
@@ -49,43 +75,98 @@ input {
     padding: 0.1rem;
 }
 
-thead {
-    background-color: #eeeeee;
-    color: #ffffff;
+.btn-ddosdb {
+  color: #333333;
+  border-color: var(--ddosdb-bdr);
+  background-color: var(--ddosdb-bg);
 }
 
+.btn-ddosdb:hover {
+  color: var(--ddosdb-sel);
+  border-color: var(--ddosdb-sel);
+}
+
+
+thead {
+    background-color: var(--ddosdb-bg);
+    border: 1px solid var(--ddosdb-bdr);
+    color: var(--ddosdb-txt);
+}
+
+thead a {
+    color: var(--ddosdb-txt);
+    font-weight: normal;
+}
 
 a {
   text-decoration: none;
-  color: #101010
+  color: var(--ddosdb-txt)
 }
 
+
 a:hover {
-  color: #a00000;
+  color: var(--ddosdb-sel);
 /*  font-weight: bold; */
 /*  font-style: italic; */
 }
 
-.overview-header {
-  color: #303030;
-}
-
 .nav-link {
 /*  color: #0a58ca; */
-  color: #000000;
+  color: var(--ddosdb-txt);
 }
 
 .nav-link:hover, .nav-link:focus {
 /*  color: #0a58ca; */
-  color: #a00000;
+  color: var(--ddosdb-sel);
 }
 
+label {
+    background-color: #eeb5ee;
+    border: 1px solid #808080;
+    color: #0;
+}
+input {
+    background-color: #eeb5ee;
+    border: 1px solid #808080;
+    color: #0;
+}
 
-/* JSON block for query page */
+/* JSON block for query and details page */
+
+.card {
+    background-color: var(--ddosdb-body-bg);
+    border: none;
+}
+
+.card-title {
+    font-size: 15pt;
+    font-weight: normal;
+    background-color: var(--ddosdb-bg);
+    border: 1px solid var(--ddosdb-bdr);
+    color: var(--ddosdb-txt);
+    margin-bottom: 0.2em;
+}
+
+.card-body {
+    font-size: 15pt;
+    font-weight: normal;
+    background-color: var(--ddosdb-card-body-bg);
+    border: 1px solid var(--ddosdb-bdr);
+    color: var(--ddosdb-txt);
+}
+
+.card-footer {
+    font-weight: normal;
+    background-color: var(--ddosdb-menu-bg);
+    border: 1px solid var(--ddosdb-bdr);
+    margin-bottom: 0.2em;
+    color: var(--ddosdb-txt);
+}
 
 .json-block {
     font-family: monospace;
     font-size: 11pt;
+    border: 1px solid var(--ddosdb-bdr);
 }
 .json-block-indent {
     padding-left: 1em;

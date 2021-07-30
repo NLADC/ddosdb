@@ -16,7 +16,7 @@
 <html lang="en">
 <title>DDoSDB - Detailed View</title>
 {% include "ddosdb/header.html" %}
-<body class="bg-light">
+<body>
 <div class="pb-3 box-shadow pt-3 border-bottom bg-white">
     <div class="container d-flex flex-column flex-md-row align-items-center">
         <a class="mr-md-auto" href="{% url "index" %}">
@@ -43,19 +43,22 @@
 
     <div class="row" id="results">
     {% for node in results %}
-        <div class="col-lg-6 col-md-12 my-2">
+        <div class="col"></div>
+        <div class="col-xxl-8  col-xl-8 col-lg-8 col-md-12 my-2">
             <div class="card">
+                <div class="card-title text-center">{{ key }}</div>
+                  <div class="card-footer">
+                    {% if node.comment %}
+                      {{ node.comment|linebreaks }}
+                    {% endif %}
+                  </div>
                 <div class="card-body json-block" id="result-{{ forloop.counter0 }}">
                     {% include "ddosdb/json-tree.html" %}
                 </div>
-                {% if node.comment %}
-                  <div class="card-footer">
-                    {{ node.comment|linebreaks }}
-                  </div>
-                {% endif %}
 
             </div>
         </div>
+        <div class="col"></div>
     {% endfor %}
     </div>
 
