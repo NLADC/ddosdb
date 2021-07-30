@@ -110,6 +110,7 @@ a:hover {
 /*  font-style: italic; */
 }
 
+
 .nav-link {
 /*  color: #0a58ca; */
   color: var(--ddosdb-txt);
@@ -120,16 +121,12 @@ a:hover {
   color: var(--ddosdb-sel);
 }
 
-label {
-    background-color: #eeb5ee;
-    border: 1px solid #808080;
-    color: #0;
+.nav-link.disabled {
+  color: lightgrey;
+  pointer-events: none;
+  cursor: default;
 }
-input {
-    background-color: #eeb5ee;
-    border: 1px solid #808080;
-    color: #0;
-}
+
 
 /* JSON block for query and details page */
 
@@ -152,7 +149,7 @@ body {
 */
 
 .card-title {
-    font-size: 15pt;
+    font-size: 12pt;
     font-weight: normal;
     background-color: var(--ddosdb-bg);
     border: 1px solid var(--ddosdb-bdr);
@@ -161,7 +158,7 @@ body {
 }
 
 .card-body {
-    font-size: 15pt;
+    font-size: 10pt;
     font-weight: normal;
     background-color: var(--ddosdb-card-body-bg);
     border: 1px solid var(--ddosdb-bdr);
@@ -178,13 +175,8 @@ body {
 
 .json-block {
     font-family: monospace;
-<<<<<<< HEAD
     font-size: 11pt;
     border: 1px solid var(--ddosdb-bdr);
-=======
-    font-size: 10pt;
-    line-height: 130%;
->>>>>>> 9af23325e086982f9202dca2bab787c9c00136bb
 }
 .json-block-indent {
     padding-left: 1.5em;
@@ -223,6 +215,7 @@ body {
 
 .is-warning {
     border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
 }
 
 .is-warning:focus {

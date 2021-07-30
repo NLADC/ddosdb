@@ -8,45 +8,18 @@
 <html lang="en">
 <title>DDosDB - Detailed View</title>
 {% include 'ddosdb/header.html' %}
-<body class="bg-light">
-{% include 'ddosdb/menu.html' %}
-
-{% comment %}
-<!DOCTYPE html>
-<html lang="en">
-<title>DDoSDB - Detailed View</title>
-{% include "ddosdb/header.html" %}
 <body>
-<div class="pb-3 box-shadow pt-3 border-bottom bg-white">
-    <div class="container d-flex flex-column flex-md-row align-items-center">
-        <a class="mr-md-auto" href="{% url "index" %}">
-            <img style="height: 40px" src="{% static "ddosdb/img/logo-new.svg" %}">
-        </a>
-        <nav class="ml-md-auto my-2 my-md-0 mr-md-3 d-block text-nowrap">
-            <a class="p-2 text-dark" href="{% url "account" %}">Account</a>
-            <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>
-        </nav>
-    </div>
-</div>
-{% endcomment %}
-
-<h1 align="center" class="display-4 ddosdb-subtitle">Details of fingerprint {{ key }}</h1>
+{% with title="Fingerprint Details" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
 
 <div class="container">
-    <div class="row py-1">
-        {% if not error == "" %}
-            <div class="col-md-12 alert alert-danger" role="alert">
-                {{ error }} - <a href="{% url "help" %}">Need help?</a>
-            </div>
-        {% endif %}
-    </div>
-
     <div class="row" id="results">
     {% for node in results %}
         <div class="col"></div>
-        <div class="col-xxl-8  col-xl-8 col-lg-8 col-md-12 my-2">
+        <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-12 my-2">
             <div class="card">
-                <div class="card-title text-center">{{ key }}</div>
+                <div class="card-title text-center">fingerprint {{ key }}</div>
                   <div class="card-footer">
                     {% if node.comment %}
                       {{ node.comment|linebreaks }}
@@ -61,8 +34,8 @@
         <div class="col"></div>
     {% endfor %}
     </div>
-
 </div>
+
 {% include "ddosdb/footer.html" %}
 </body>
 </html>

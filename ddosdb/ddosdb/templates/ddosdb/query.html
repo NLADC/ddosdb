@@ -5,101 +5,68 @@
 
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <title>DDosDB - Query View</title>
 {% include 'ddosdb/header.html' %}
-<body class="bg-light">
-{% include 'ddosdb/menu.html' %}
+<body>
+{% with title="Query" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
 
-{% comment %}
-<!DOCTYPE html>
-<html lang="en">
-<title>DDoSDB - Query View</title>
-{% include "ddosdb/header.html" %}
-<body class="bg-light">
-<div class="pb-3 box-shadow pt-3 border-bottom bg-white">
-    <div class="container d-flex flex-column flex-md-row align-items-center">
-        <a class="mr-md-auto" href="{% url "index" %}">
-            <img style="height: 40px" src="{% static "ddosdb/img/logo-new.svg" %}">
-        </a>
-        <h1>Query</h1>
-        <nav class="ml-md-auto my-2 my-md-0 mr-md-3 d-block text-nowrap">
-            <a class="p-2 text-dark" href="{% url "account" %}">Account</a>
-            <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>
-        </nav>
+<form class="form-inline" action="{% url "query" %}" method="get">
+    {% csrf_token %}
+    <div class="container" id="bar">
+        <div class="row align-items-center">
+            <div class="col-sm-auto text-end">query:</div>
+            <div class="col-sm-5">
+                <input type="text" class="form-control col-md-2" id="query" name="q" value="{{ q }}" placeholder="Search">
+            </div>
+
+            <div class="col-sm-auto text-end">&nbsp;&nbsp;&nbsp;&nbsp;order:</div>
+            <div class="col-sm-2">
+                <input type="text" class="form-control col-md-2" name="o" placeholder="order" value="{{ o }}">
+            </div>
+
+            <div class="col-sm-auto text-end">&nbsp;&nbsp;&nbsp;&nbsp;fields:</div>
+            <div class="col-sm-2">
+                <input type="text" class="form-control col-md-2" name="f" placeholder="fields" value="{{ f }}">
+            </div>
+
+            <div class="col-sm-1 text-end">
+                <button class="btn btn-ddosdb" type="submit" >Search</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<div class="container align-items-center" id="bar">
+    <div class="row py-1">
+        <div class="col-sm-12">
+        Search yielded {{ results|length }} results <a href="{% url "help" %}" target="_blank"><small>(help)</small></a>
+        </div>
     </div>
 </div>
-{% endcomment %}
-<h1 align="center" class="display-4 ddosdb-subtitle">Query</h1>
-
-<div class="container" id="bar">
-<div class="row align-items-center">
-  <div class="col-sm-auto text-end">
-      query:
-  </div>
-  <div class="col-sm-5">
-    <input type="text" id="inputPassword6" class="form-control col-md-2" aria-describedby="passwordHelpInline">
-  </div>
-
-  <div class="col-sm-auto text-end">
-      &nbsp;&nbsp;&nbsp;&nbsp;order:
-  </div>
-  <div class="col-sm-2">
-    <input type="text" id="inputPassword7" class="form-control col-md-2" aria-describedby="passwordHelpInline">
-  </div>
-
-  <div class="col-sm-auto text-end">
-      &nbsp;&nbsp;&nbsp;&nbsp;fields:
-  </div>
-  <div class="col-sm-2">
-    <input type="text" id="inputPassword8" class="form-control col-md-2" aria-describedby="passwordHelpInline">
-  </div>
-  <div class="col-sm-1 text-end">
-             <button class="btn btn-ddosdb" type="submit" >Search</button>
-  </div>
-</div></div>
-
-
 <div class="container align-items-center">
-    <form class="form-inline" action="{% url "query" %}" method="get">
-        {% csrf_token %}
-        <div class="input-group">
-            <label for="query" class="col-form-label">Query</label>
-            <input type="text" class="form-control" id="query" name="q" value="{{ q }}" placeholder="Search"><br/>
-            <span class="btn btn-default btn-sm text-dark rounded col-md-1">Sort:</span>
-            <input type="text" class="form-control" name="o" placeholder="order" value="{{ o }}">
-            <span class="btn btn-default btn-sm text-dark rounded col-md-1">Fields:</span>
-            <input type="text" class="form-control" name="f" placeholder="fields" value="{{ f }}">
-             <button class="btn btn-ddosdb" type="submit" >Search</button>
-        </div>
-    </form>
-</div>
-
-    <div class="container d-flex flex-column flex-md-row align-items-center">
-        <div class="row py-1">
-            <span>Search yielded {{ results|length }} results   <a href="{% url "help" %}" target="_blank"><small>(help)</small></a> </span>
+{% if not error == "" %}
+    <div class="row py-1">
+        <div class="col-sm-12 alert alert-danger" role="alert">
+            {{ error }} - <a href="{% url "help" %}" target="_blank">Need help?</a>
         </div>
     </div>
-        {% if not error == "" %}
-        <div class="row py-1">
-            <div class="col-md-12 alert alert-danger" role="alert">
-                {{ error }} - <a href="{% url "help" %}">Need help?</a>
-            </div>
+{% elif amount == 0 %}
+    <div class="row py-1">
+        <div class="col-sm-12 alert alert-warning" role="alert">
+            This query did not yield any results - <a href="{% url "help" %}" target="_blank">Need help?</a>
         </div>
-        {% elif amount == 0 %}
-        <div class="row py-1">
-            <div class="col-md-12 alert alert-warning" role="alert">
-                This query did not yield any results - <a href="{% url "help" %}">Need help?</a>
-            </div>
-        </div>
-        {% endif %}
+    </div>
+{% endif %}
 </div>
 
 <div class="container">
-
     <div class="row" id="results">
     {% for node in results %}
-        <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-12 my-2">
+        <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-12 my-2">
             <div class="card">
                 <div class="card-title text-center">fingerprint {{ node.key }}</div>
                   <div class="card-footer">
@@ -115,7 +82,6 @@
         </div>
     {% endfor %}
     </div>
-
 </div>
 {% include "ddosdb/footer.html" %}
 </body>

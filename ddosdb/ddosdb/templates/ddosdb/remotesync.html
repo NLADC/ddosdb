@@ -9,10 +9,10 @@
 <!DOCTYPE html>
 <html lang="en">
 {% include 'ddosdb/header.html' %}
-<body class="bg-light">
-{% include 'ddosdb/menu.html' %}
-
-<h1 align="center" class="display-4 ddosdb-subtitle">Remote DDoS-DB Sync results</h1>
+<body>
+{% with title="Remote DDoS-DB Sync results" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
 
 {% if result %}
 <div>

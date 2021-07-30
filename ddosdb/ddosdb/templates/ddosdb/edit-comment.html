@@ -4,20 +4,43 @@
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
-<title>DDoSDB - Edit Comment</title>
+<title>DDosDB - Edit Comment</title>
 {% include "ddosdb/header.html" %}
-<body class="bg-light">
-<div class="pb-3 box-shadow pt-3 border-bottom bg-white">
-    <div class="container d-flex flex-column flex-md-row align-items-center">
-        <a class="mr-md-auto" href="{% url "index" %}">
-            <img style="height: 40px" src="{% static "ddosdb/img/logo-new.svg" %}">
-        </a>
-        <nav class="ml-md-auto my-2 my-md-0 mr-md-3 d-block text-nowrap">
-            <a class="p-2 text-dark" href="{% url "account" %}">Account</a>
-            <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>
-        </nav>
+<body>
+{% with title="Edit Comment" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
+
+
+<div class="container">
+    <div class="row" id="results">
+        <div class="col"></div>
+        <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-12 my-2">
+            <div class="card">
+                <div class="card-title text-center">comment for fingerprint {{ key }}</div>
+                  <div class="card-footer text-center">
+                    <form action="{% url "edit-comment" %}" method="post">
+                      {% csrf_token %}
+                      <input id="key" name="key" type="hidden" value="{{ key }}">
+                      <div class="form-outline mb-3">
+                        <textarea autofocus name="comment" rows="10" class="form-control col-md-2">{% if node.comment %}{{ node.comment }}{% endif %}</textarea>
+                      </div>
+                      <div class="form-outline mb-1">
+                      <button type="submit" class="btn btn-ddosdb">Add Comment</button>
+                      </div>
+                      </form>
+                  </div>
+                <div class="card-body json-block" id="result-{{ forloop.counter0 }}">
+                    {% include "ddosdb/json-tree.html" %}
+                </div>
+
+            </div>
+        </div>
+        <div class="col"></div>
     </div>
 </div>
+
+{% comment %}
 <div class="container">
     <form action="{% url "edit-comment" %}" method="post">
       {% csrf_token %}
@@ -38,6 +61,8 @@
         </div>
     </form>
 </div>
+{% endcomment %}
+
 {% include "ddosdb/footer.html" %}
 </body>
 </html>

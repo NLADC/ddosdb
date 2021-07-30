@@ -1,19 +1,19 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+<title>DDoSDB - Account Information</title>
+
 {% include 'ddosdb/header.html' %}
-<body class="bg-light">
-{% include 'ddosdb/menu.html' %}
-<div class="jumbotron">
-    <div class="container">
-        <div class="text-left">
-            <h1 class="display-4">Account</h1>
-        </div>
-    </div>
-</div>
+<body>
+{% with title="Account Information" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
+
+
 <div class="container">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-12 my-2">
+
             {% if error %}
                 <div class="alert alert-danger">
                     {{ error }}
@@ -23,38 +23,15 @@
                     {{ success }}
                 </div>
             {% endif %}
-            <h4 class="mb-3">Account details</h4>
-            <p>
-                Your account grants you access to DDoSDB and belongs only to you, which is why it is not possible to change your name or institution.
-                If you do need to change your name or institution, please contact us.
-            </p>
-            <form action="{% url "account" %}" method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="firstName">First name</label>
-                        <input type="text" class="form-control" name="first-name" id="firstName" placeholder="" value="{{ user.first_name }}" readonly>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="lastName">Last name</label>
-                        <input type="text" class="form-control" name="last-name" id="lastName" placeholder="" value="{{ user.last_name }}" readonly>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" name="email" id="email" placeholder="you@example.com" value="{{ user.email }}" required>
-                </div>
-                <div class="mb-3">
-                    <label for="institution">Institution</label>
-                    <input type="text" class="form-control" name="institution" id="institution" placeholder="Sample University" value="{{ user.profile.institution }}" readonly>
-                </div>
 
-                <button type="submit" class="btn btn-dark float-right">Save changes</button>
-                <div class="clearfix"></div>
-            </form>
-            <hr class="mb-4">
+            <h4 class="mb-3 text-center">Account details for user '{{ user }}'</h4>
+
+            <p class="lead">
+                Your account grants you access to DDoSDB and belongs only to you.
+                Do not share your credentials with anyone else.
+            </p>
             <h4 class="mb-3">Password</h4>
-            <p>Please use a strong password. We do not enforce a certain pattern, but a good password makes it significantly more difficult for others to gain access to your account.</p>
+            <p class="lead">Please use a strong password. We do not enforce a certain pattern, but a good password makes it significantly more difficult for others to gain access to your account.</p>
             <form action="{% url "account" %}" method="post">
                 {% csrf_token %}
                 <div class="mb-3">
@@ -72,101 +49,30 @@
                     <small class="text-danger" style="display: none" id="newPasswordSame">The entered passwords are not the same</small>
                 </div>
 
-                <button type="submit" class="btn btn-dark float-right">Save new password</button>
+                <button type="submit" class="btn btn-ddosdb float-right">Save new password</button>
                 <div class="clearfix"></div>
             </form>
+
+
         </div>
-        <div class="col-md-4">
-            <h4 class="mb-3">Permissions</h4>
-            <p>The following permissions have been assigned to your account:</p>
-            <i class="fa fa-fw fa-check mr-2"></i>Query DDoSDB<br>
-            <i class="fa fa-fw fa-check mr-2"></i>Download fingerprints<br>
-            <i class="fa fa-fw fa-check mr-2"></i>Download attack vectors<br>
+        <div class="col-1"></div>
+        <div class="col ml-4">
+                        <h4 class="mb-3 text-center">Permissions</h4>
+            <p class="lead">The following permissions have been assigned to your account:</p>
+            <i class="bi-check-lg" style="font-size: 16px; color: green;"></i> Query DDoSDB<br>
+            <i class="bi-check-lg" style="font-size: 16px; color: green;"></i> Download fingerprints<br>
+            <i class="bi-check-lg" style="font-size: 16px; color: green;"></i> Download attack vectors<br>
             {% if "ddosdb.upload_fingerprint" in permissions %}
-                <i class="fa fa-fw fa-check mr-2"></i>Upload fingerprints<br>
+                <i class="bi-check-lg" style="font-size: 16px; color: green;"></i> Upload fingerprints<br>
             {% else %}
-                <i class="fa fa-fw fa-times mr-2"></i>Upload fingerprints<br>
+                <i class="bi-x-lg" style="font-size: 16px; color: red;"></i> Upload fingerprints<br>
             {% endif %}
+
         </div>
     </div>
 </div>
 
 {% include "ddosdb/footer.html" %}
 
-<script>
-    // Adopted from https://stackoverflow.com/questions/948172/password-strength-meter
-    function scorePassword(pass) {
-        let score = 0;
-        if (!pass) return score;
-
-        // award every unique letter until 5 repetitions
-        let letters = {};
-        for (let i=0; i<pass.length; i++) {
-            letters[pass[i]] = (letters[pass[i]] || 0) + 1;
-            score += 5.0 / letters[pass[i]];
-        }
-
-        // bonus points for mixing it up
-        let variations = {
-            digits: /\d/.test(pass),
-            lower: /[a-z]/.test(pass),
-            upper: /[A-Z]/.test(pass),
-            nonWords: /\W/.test(pass),
-        };
-
-        let variationCount = 0;
-        for (let check in variations) {
-            variationCount += (variations[check] === true) ? 1 : 0;
-        }
-        score += (variationCount - 1) * 10;
-
-        return score;
-    }
-
-    let newPasswordField = document.getElementById("newPassword");
-    let newPasswordDescription = document.getElementById("newPasswordDescription");
-
-    newPasswordField.addEventListener("keyup", e => {
-        let value = e.originalTarget.value;
-        let score = scorePassword(value);
-
-        newPasswordDescription.style.display = "inherit";
-
-        newPasswordField.classList.remove("is-invalid");
-        newPasswordField.classList.remove("is-warning");
-        newPasswordField.classList.remove("is-valid");
-        newPasswordDescription.classList.remove("text-danger");
-        newPasswordDescription.classList.remove("text-warning");
-        newPasswordDescription.classList.remove("text-success");
-
-        if (score < 60) {
-            newPasswordDescription.innerHTML = "Very weak password. Consider using something stronger.";
-            newPasswordDescription.classList.add("text-danger");
-            newPasswordField.classList.add("is-invalid");
-        } else if (score < 80) {
-            newPasswordDescription.innerHTML = "Average password. Consider using something stronger.";
-            newPasswordDescription.classList.add("text-warning");
-            newPasswordField.classList.add("is-warning");
-        } else {
-            newPasswordDescription.innerHTML = "Strong password.";
-            newPasswordDescription.classList.add("text-success");
-            newPasswordField.classList.add("is-valid");
-        }
-    });
-
-    let newPasswordRepeatField = document.getElementById("newPassword2");
-    let newPasswordSame = document.getElementById("newPasswordSame");
-
-    newPasswordRepeatField.addEventListener("keyup", e => {
-        let value = e.originalTarget.value;
-        if (value !== newPasswordField.value) {
-            newPasswordSame.style.display = "inherit";
-            newPasswordRepeatField.classList.add("is-invalid");
-        } else {
-            newPasswordSame.style.display = "none";
-            newPasswordRepeatField.classList.remove("is-invalid");
-        }
-    });
-</script>
 </body>
 </html>

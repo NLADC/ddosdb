@@ -1,20 +1,13 @@
 {% load static %}
 <div class="container d-flex">
   <div class="col text-center">
-    <img src="{% static "ddosdb/img/logo-CONCORDIA1.svg" %}" height="64"><br/>
+    <img src="{% static "ddosdb/img/logo-CONCORDIA1.svg" %}" height=64px ><br/>
   {% if time %}
-    <small class="text-muted"> {{ time }} seconds</small>
+    {% if user.is_authenticated %}
+      {% if user.is_superuser %}
+        <small class="text-muted"> {{ time }} seconds</small>
+      {% endif %}
+    {% endif %}
   {% endif %}
   </div>
-</div>
-
-  <ul class="list-inline">
-        <!--
-        <li class="list-inline-item"><a class="text-dark" href="#">Documentation</a></li>
-        <li class="list-inline-item"><a class="text-dark" href="#">FAQ</a></li>
-        <li class="list-inline-item"><a class="text-dark" href="#">Terms of Use</a></li>
-        <li class="list-inline-item"><a class="text-dark" href="#">Privacy Policy</a></li>
-        <li class="list-inline-item"><a class="text-dark" href="mailto:j.j.santanna@utwente.nl">Contact Us</a></li>
-        -->
-  </ul>
 </div>

@@ -268,9 +268,9 @@ def account(request):
                     user = authenticate(request, username=user.username, password=request.POST["new-password"])
                     context["success"] = "Successfully changed your password"
                 else:
-                    context["error"] = "The current password is incorrect"
+                    context["error"] = "The provided current password is incorrect"
             else:
-                context["error"] = "The passwords are not the same"
+                context["error"] = "The new passwords are not the same"
 
     return HttpResponse(render(request, "ddosdb/account.html", context))
 

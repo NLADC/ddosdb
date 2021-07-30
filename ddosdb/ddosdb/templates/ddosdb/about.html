@@ -3,18 +3,15 @@
 <html lang="en">
 <title>DDoSDB - About</title>
 {% include 'ddosdb/header.html' %}
-<body class="bg-light">
-{% include 'ddosdb/menu.html' %}
-<div class="jumbotron">
-    <div class="container">
-        <div class="text-left">
-            <h1 class="display-4">About</h1>
-        </div>
-    </div>
-</div>
+<body>
+{% with title="About" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
+
 <div class="container">
     <div class="row">
-        <div class="col-sm-12 col-md-7 col-lg-8 mt-sm-4">
+        <div class="col"></div>
+        <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-12 my-2">
             <p class="lead">
                 DDoSDB is a platform for helping victims of DDoS attacks, the academic community,
                 and the security community to share and get access to actual and enriched information of DDoS attacks.
@@ -29,6 +26,7 @@
                 generates fingerprints, and anonymizes the identity of the victim (<a href="https://github.com/jjsantanna/ddosdb" target="_blank">link</a>).
             </p>
         </div>
+        <div class="col"></div>
     </div>
 </div>
 

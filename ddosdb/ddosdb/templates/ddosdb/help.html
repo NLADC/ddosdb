@@ -3,18 +3,15 @@
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <title>DDoSDB - Help with searches</title>
 {% include 'ddosdb/header.html' %}
-<body class="bg-light">
-{% include 'ddosdb/menu.html' %}
-<div class="jumbotron">
-    <div class="container">
-        <div class="text-left">
-            <h1 class="display-4">Help and information</h1>
-        </div>
-    </div>
-</div>
+<body>
+{% with title="Query Help and Information" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
+
 <div class="container">
     <div class="row">
-        <div class="col-sm-12 col-md-7 col-lg-8 mt-sm-4">
+        <div class="col"></div>
+        <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-12 my-2">
             <h2 class="" id="query-language">Query language</h2>
             <p class="lead">
                 DDoSDB relies on MongoDB for storing fingerprints and therefore uses the MongoDB Query Language (MQL).</p>
@@ -92,6 +89,7 @@
             <p>If you get lost with the search: emptying all inputs (for <i>Query</i>, <i>Sort</i> and <i>Fields</i>) and pressing the <i>Search</i> button
                 will revert everything back to default and show all fingerprints.</p>
         </div>
+        <div class="col"></div>
     </div>
 </div>
 
