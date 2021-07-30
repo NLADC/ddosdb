@@ -138,6 +138,19 @@ input {
     border: none;
 }
 
+/*
+body {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  background-color: #fff;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+*/
+
 .card-title {
     font-size: 15pt;
     font-weight: normal;
@@ -165,11 +178,16 @@ input {
 
 .json-block {
     font-family: monospace;
+<<<<<<< HEAD
     font-size: 11pt;
     border: 1px solid var(--ddosdb-bdr);
+=======
+    font-size: 10pt;
+    line-height: 130%;
+>>>>>>> 9af23325e086982f9202dca2bab787c9c00136bb
 }
 .json-block-indent {
-    padding-left: 1em;
+    padding-left: 1.5em;
 }
 .json-block-str {
     color: #005cbf;
