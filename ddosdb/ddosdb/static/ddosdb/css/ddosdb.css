@@ -7,6 +7,7 @@
     --ddosdb-menu-bg: #eeeeee;
     --ddosdb-menu-bdr: #cccccc;
     --ddosdb-sel: #216fdf;
+    --ddosdb-note-col: grey;
     /* #a00000 */
     --ddosdb-txt: #333333;
     --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -14,7 +15,7 @@
 
 body {
   font-size: 14pt !important;
-  background-color: white;
+  background-color:  var(--ddosdb-body-bg);
   font-weight: lighter;
 }
 .ddosdb-table {
@@ -212,6 +213,13 @@ a:hover {
     margin-bottom: 0.2em;
     color: var(--ddosdb-txt);
 }
+
+.ddosdb-note {
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: var(--ddosdb-note-col);
+}
+
 
 .json-block {
     font-family: monospace;

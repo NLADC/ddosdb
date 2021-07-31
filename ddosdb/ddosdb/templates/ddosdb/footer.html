@@ -5,7 +5,7 @@
   {% if time %}
     {% if user.is_authenticated %}
       {% if user.is_superuser %}
-        <small class="text-muted"> {{ time }} seconds</small>
+        <div class="ddosdb-note"> {{ time }} seconds</div>
       {% endif %}
     {% endif %}
   {% endif %}
