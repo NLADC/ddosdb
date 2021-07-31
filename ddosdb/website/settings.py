@@ -18,6 +18,16 @@ from website.settings_local import *
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Put migrations for everything together
+# To prevent permission denied errors in docker
+# since django_celery apps will otherwise
+# have migrations in the python system folders
+
+MIGRATION_MODULES = {
+    'ddosdb': 'ddosdb.migrations',
+    'django_celery_beat': 'ddosdb.migrations',
+    'django_celery_results': 'ddosdb.migrations',
+}
 
 # Application definition
 
