@@ -7,31 +7,39 @@ RUN apt-get update && apt-get install -y netcat
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# install dependencies
-RUN pip install --upgrade pip
-
-COPY requirements.txt docker/temp/
-RUN pip install --requirement docker/temp/requirements.txt
-
+# Create user
 RUN adduser --system --group ddosdb
 # create the appropriate directories
 ENV HOME=/home/ddosdb
 
-COPY ddosdb /home/ddosdb/
-COPY docker/django/settings_local.py /home/ddosdb/website/
+USER ddosdb
+WORKDIR /home/ddosdb/
+
+# Create venv and set ENV accordingly
+ENV VIRTUAL_ENV=$HOME/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# update pip
+RUN pip install --upgrade pip
+# install wheel
+RUN pip install wheel
+
+COPY requirements.txt $HOME
+
+RUN pip install --requirement requirements.txt
+
+COPY ddosdb $HOME
+COPY docker/django/settings_local.py $HOME/website/
 
 # copy entrypoint.sh
-COPY docker/django/entrypoint.sh /home/ddosdb/
+COPY docker/django/entrypoint.sh $HOME
 
 RUN mkdir /home/ddosdb/ddosdb-static
 RUN mkdir /home/ddosdb/ddosdb-data/
 
 # chown all the files to the ddosdb user
-RUN chown -R ddosdb:ddosdb $HOME
-
-USER ddosdb
-
-WORKDIR /home/ddosdb/
+#RUN chown -R ddosdb:ddosdb $HOME
 
 ENTRYPOINT ["/home/ddosdb/entrypoint.sh"]
 
