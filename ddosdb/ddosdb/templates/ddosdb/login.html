@@ -7,9 +7,9 @@
 <div class="container">
   <div class="row justify-content-md-center">
   <div class="col-md-auto login">
-    <img class="mb-4 logo" src="{% static "ddosdb/img/logo.svg" %}" alt="" width="400" height="150">
+    <img class="mb-1 logo" src="{% static "ddosdb/img/logo.svg" %}" alt="" width="200">
 <!--    <form class="py-5 mx-auto" style="width: 400px; max-width: 93vw" method="post" action="">-->
-    <form class="mx-auto" style="width: 400px; max-width: 93vw" method="post" action="">
+    <form class="mx-auto" method="post" action="">
         {% csrf_token %}
         {% if failed %}
             <div class="alert alert-danger">
@@ -23,7 +23,7 @@
             <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
         </div>
         <button class="btn btn-ddosdb" type="submit">Sign in</button>
-            <br><a href="{% url "index" %}" class="text-dark pt-3"><i class="fa fa-arrow-left"></i> Back home</a>
+            <br/><br/><a href="{% url "index" %}" class="text-dark pt-3"><i class="bi-arrow-left-square"></i> Back home</a>
     </form>
   </div>
   </div>

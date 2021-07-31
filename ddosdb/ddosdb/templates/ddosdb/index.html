@@ -12,7 +12,7 @@
 <div class="jumbotron">
     <div class="container" id="bar">
         <div class="pb-md-5 pb-sm-3 my-4 text-center">
-            <h2 class="display-4 ddosdb-title"><strong>Collecting</strong> and <strong>Sharing</strong> important information of <strong>DDoS attacks</strong></h2>
+            <h2 class="display-4 ddosdb-subtitle"><strong>Collecting</strong> and <strong>Sharing</strong> important information about <strong>DDoS attacks</strong></h2>
         </div>
 
         <div class="container my-4" align="center">
@@ -35,13 +35,13 @@
             <img src="{% static "ddosdb/img/illustration.svg" %}" class="img-fluid w-100 p-2">
         </div>
         <div class="col-sm-12 col-md-9">
-            <p class="lead">
+            <p>
                 DDoSDB is a platform for helping victims of DDoS attacks, the academic community,
                 and the security community to share and get access to actual and enriched information of DDoS attacks.
                 The purpose of sharing attacks is to enable comparison with other attacks,
                 facilitate legal attribution, and improve detection and mitigation strategies.
             </p>
-            <p class="lead">
+            <p>
                 DDosDB provides an interface for searching unique characteristics of attacks (fingerprints) and
                 also provides a sample of its actual attack data (ex. pcap and nfdump file).
                 All data within DDoSDB come from collaborators that own attack data (usually collected as victim).
@@ -51,12 +51,13 @@
         </div>
     </div>
 </div>
-<div class="jumbotron bg-dark text-light text-center">
-    <div class="container my-5">
+
+<!--<div class="jumbotron bg-dark text-light text-center">-->
+    <div class="container my-5 bg-dark text-light text-center">
         <h1 class="display-4 ddosdb-title">Search for attacks</h1>
         <p class="lead">Take advantage of the best public DDoS attack database for improving your defence strategies.</p>
     </div>
-</div>
+<!--</div>-->
 
 {% include "ddosdb/footer.html" %}
 </body>
