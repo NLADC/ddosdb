@@ -39,6 +39,34 @@
 
 }
 
+/* Special styles to satisfy CSP setting (no unsafe-inline for style attrs) */
+.menu-icon {
+    font-size: 32px;
+}
+.overview-icon {
+    font-size: 14px;
+}
+.ddosdb-green {
+    color: green;
+}
+.ddosdb-red {
+    color: red;
+}
+.ddosdb-grey {
+    color: grey;
+}
+.ddosdb-lightgrey {
+    color: lightgrey;
+}
+.float-left {
+    float: left;
+}
+.float-right {
+    float: right;
+}
+/* End Special styles */
+
+
 #menu.container {
     padding: 1rem;
 

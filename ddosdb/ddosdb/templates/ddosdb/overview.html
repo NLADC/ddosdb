@@ -47,7 +47,7 @@
             </a>
           {% if hdr == "submitter" and q != "" %}
             <a href="{% url "overview" %}?q=&o={{ o }}&so={{ so }}&son={{ son }}">
-              <img width="16" height="16" src="{% static "ddosdb/img/red_cross.svg" %}">
+              <i class="bi-x-lg overview-icon ddosdb-red"></i>
             </a>
           {% endif %}
             </div>
@@ -65,10 +65,10 @@
               {% else %}
                 <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o=key&so={{ so }}&son={{ son }}">
               {% endif %}
-                  <div title="delete {{ node|get_item:'key' }}"><i class="bi-trash" style="font-size: 16px;"></i></div>
+                  <div title="delete {{ node|get_item:'key' }}"><i class="bi-trash overview-icon"></i></div>
                 </a>
           {% else %}
-            <i class="bi-trash" style="font-size: 16px; color: lightgrey;"></i>
+            <i class="bi-trash ddosdb-lightgrey overview-icon"></i>
           {% endif %}
           </td>
           {% for hdr,name in headers.items %}
@@ -101,18 +101,18 @@
                   <div title="click to toggle shareable status">
                     <a href="{% url "toggle-shareable" %}?q={{ q }}&key={{node|get_item:"key"}}&o={{ o }}&so={{ so }}&son={{ son }}&shareable={{node|get_item:hdr}}">
                     {% if node|get_item:hdr == True %}
-                      <i class="bi-check-circle" style="font-size: 16px; color: green;"></i>
+                      <i class="bi-check-circle overview-icon ddosdb-green" ></i>
                     {% else %}
-                      <i class="bi-x-circle" style="font-size: 16px; color: red;"></i>
+                      <i class="bi-x-circle overview-icon ddosdb-red"></i>
                     {% endif %}
                     </a>
                   </div>
                 {% else %}
                   <div title="shareable status">
                     {% if node|get_item:hdr == True %}
-                      <i class="bi-check-circle" style="font-size: 16px; color: grey;"></i>
+                      <i class="bi-check-circle overview-icon ddosdb-grey"></i>
                     {% else %}
-                      <i class="bi-x-circle" style="font-size: 16px; color: grey;"></i>
+                      <i class="bi-x-circle overview-icon ddosdb-grey"></i>
                     {% endif %}
                   </div>
                 {% endif %}
@@ -135,7 +135,7 @@
             {% elif hdr == "comment" %}
               <div title="{{node|get_item:hdr}}">
                 {% if user.username == node|get_item:"submitter"  or user.is_superuser %}
-                  <span style="float:left;">
+                  <span class="float-left">
                     &nbsp;<a href="{% url "edit-comment" %}?key={{node|get_item:"key"}}">
                       <i class="bi-pencil-square" style="font-size: 16px;"></i>
                     </a>

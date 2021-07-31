@@ -41,12 +41,10 @@
                 <div class="mb-3">
                     <label for="newPassword">New password</label>
                     <input type="password" class="form-control" name="new-password" id="newPassword" placeholder="New password" required>
-                    <small class="" style="display: none" id="newPasswordDescription">Lorem ipsum</small>
                 </div>
                 <div class="mb-3">
                     <label for="newPassword2">New password <span class="text-muted">(Repeat)</span></label>
                     <input type="password" class="form-control" name="new-password2" id="newPassword2" placeholder="New password (repeat)" required>
-                    <small class="text-danger" style="display: none" id="newPasswordSame">The entered passwords are not the same</small>
                 </div>
 
                 <button type="submit" class="btn btn-ddosdb float-right">Save new password</button>
@@ -59,13 +57,13 @@
         <div class="col ml-4">
                         <h4 class="mb-3 text-center">Permissions</h4>
             <p class="lead">The following permissions have been assigned to your account:</p>
-            <i class="bi-check-lg" style="font-size: 16px; color: green;"></i> Query DDoSDB<br>
-            <i class="bi-check-lg" style="font-size: 16px; color: green;"></i> Download fingerprints<br>
-            <i class="bi-check-lg" style="font-size: 16px; color: green;"></i> Download attack vectors<br>
+            <i class="bi-check-lg ddosdb-green"></i> Query DDoSDB<br>
+            <i class="bi-check-lg ddosdb-green"></i> Download fingerprints<br>
+            <i class="bi-check-lg ddosdb-green"></i> Download attack vectors<br>
             {% if "ddosdb.upload_fingerprint" in permissions %}
-                <i class="bi-check-lg" style="font-size: 16px; color: green;"></i> Upload fingerprints<br>
+                <i class="bi-check-lg ddosdb-green"></i> Upload fingerprints<br>
             {% else %}
-                <i class="bi-x-lg" style="font-size: 16px; color: red;"></i> Upload fingerprints<br>
+                <i class="bi-x-lg ddosdb-red"></i> Upload fingerprints<br>
             {% endif %}
 
         </div>

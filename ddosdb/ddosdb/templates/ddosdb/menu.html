@@ -8,7 +8,7 @@
   </div>
   <div class="col-sm-auto">
     <a class="nav-link menu-icon" target="_blank" href="{% url 'about' %}">
-      <div title="about"><i class="bi-question-circle" style="font-size: 32px;"></i></div>
+      <div title="about"><i class="bi-question-circle menu-icon" ></i></div>
     </a>
   </div>
   <div class="col text-center">
@@ -18,55 +18,32 @@
     <nav class="nav text-end">
       {% if not request.user.is_authenticated %}
         <a class="nav-link disabled" target="_blank">
-          <div title="account information"><i class="bi-person" style="font-size: 32px;"></i></div>
+          <div title="account information"><i class="bi-person menu-icon"></i></div>
         </a>
         <a class="nav-link disabled" target="_blank">
-          <div title="admin"><i class="bi-gear" style="font-size: 32px;"></i></div>
+          <div title="admin"><i class="bi-gear menu-icon"></i></div>
         </a>
         <a class="nav-link" href="{% url 'login' %}">
-          <div title="log in"><i class="bi-box-arrow-in-left" style="font-size: 32px;"></i></div>
+          <div title="log in"><i class="bi-box-arrow-in-left menu-icon" ></i></div>
         </a>
       {% else %}
         <a class="nav-link" target="_blank" href="{% url 'account' %}">
-          <div title="user '{{ request.user.username }}' account information"><i class="bi-person" style="font-size: 32px;"></i></div>
+          <div title="user '{{ request.user.username }}' account information"><i class="bi-person menu-icon" ></i></div>
         </a>
         {% if request.user.is_superuser %}
           <a class="nav-link" target="_blank" href="/admin/">
-            <div title="admin settings"><i class="bi-gear" style="font-size: 32px;"></i></div>
+            <div title="admin settings"><i class="bi-gear menu-icon"></i></div>
           </a>
         {% else %}
           <a class="nav-link disabled" target="_blank">
-            <div title="admin settings"><i class="bi-gear" style="font-size: 32px;"></i></div>
+            <div title="admin settings"><i class="bi-gear menu-icon" ></i></div>
           </a>
         {% endif %}
         <a class="nav-link menu-icon" href="{% url 'logout' %}">
-          <div title="log out user '{{ request.user.username }}'"><i class="bi-box-arrow-right" style="font-size: 32px;"></i></div>
+          <div title="log out user '{{ request.user.username }}'"><i class="bi-box-arrow-right menu-icon" ></i></div>
         </a>
       {% endif %}
-      <!--
-      <a class="p-2 text-dark" href="{% url 'index' %}">Blog</a>
-      -->
     </nav>
   </div>
 </div>
 
-<!--<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 box-shadow container mt-3">-->
-<!--  <a class="mr-md-auto" href="{% url 'index' %}">-->
-<!--    <img title="go to start page" src="{% static "ddosdb/img/logo-new.svg" %}" height="40">-->
-<!--  </a>-->
-<!--  <nav class="my-2 my-md-0 mr-md-3">-->
-<!--    <a class="p-2 text-dark" href="{% url 'about' %}">About</a>-->
-<!--    &lt;!&ndash;-->
-<!--    <a class="p-2 text-dark" href="{% url 'index' %}">Blog</a>-->
-<!--    &ndash;&gt;-->
-<!--    {% if not request.user.is_authenticated %}-->
-<!--      <a class="p-2 text-dark" href="{% url 'login' %}">Log in</a>-->
-<!--    {% else %}-->
-<!--      <a class="p-2 text-dark" href="{% url 'account' %}">Account</a>-->
-<!--      <a class="p-2 text-dark" href="{% url 'logout' %}">Log out ({{ request.user.username }})</a>-->
-<!--      {% if request.user.is_superuser %}-->
-<!--        <a class="p-2 text-dark" target="_blank" href="/admin/">admin</a>-->
-<!--      {% endif %}-->
-<!--    {% endif %}-->
-<!--  </nav>-->
-<!--</div>-->
