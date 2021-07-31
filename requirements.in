@@ -1,0 +1,12 @@
+django
+celery
+django_celery_beat
+django_celery_results
+demjson
+requests
+pandas
+pymongo
+django_debug_toolbar
+django-sslserver
+psycopg2-binary
+gunicorn

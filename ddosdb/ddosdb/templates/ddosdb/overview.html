@@ -127,7 +127,7 @@
             {% elif hdr == "total_packets" %}
                 <div class="text-end">{{node|get_item:hdr|precision:0|intcomma}}</div>
             {% elif hdr == "submit_timestamp" %}
-                {{node|get_item:hdr|str_todatetime|date:'Y-m-d H:i:s'}}
+                {{node|get_item:hdr|str_todatetime|date:'Y-m-d'}}
             {% elif hdr == "tags" %}
               <div title="{{node|get_item:hdr|short_list:1}}">
                 {{node|get_item:hdr|short_list:0}}

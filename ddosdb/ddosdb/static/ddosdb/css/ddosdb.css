@@ -206,7 +206,7 @@ a:hover {
 }
 
 .card-footer {
-    font-weight: normal;
+    font-weight: light;
     background-color: var(--ddosdb-menu-bg);
     border: 1px solid var(--ddosdb-bdr);
     margin-bottom: 0.2em;

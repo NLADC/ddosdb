@@ -35,16 +35,6 @@ INTERNAL_IPS = ['127.0.0.1', ]
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
-# Put migrations for everything together
-# To prevent permission denied errors in docker
-# since django_celery apps will otherwise
-# have migrations in the python system folders
-
-MIGRATION_MODULES = {
-    'ddosdb': 'ddosdb.migrations',
-    'django_celery_beat': 'ddosdb.migrations',
-    'django_celery_results': 'ddosdb.migrations',
-}
 
 # Application definition
 
