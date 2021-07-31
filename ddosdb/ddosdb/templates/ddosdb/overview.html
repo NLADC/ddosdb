@@ -137,7 +137,7 @@
                 {% if user.username == node|get_item:"submitter"  or user.is_superuser %}
                   <span class="float-left">
                     &nbsp;<a href="{% url "edit-comment" %}?key={{node|get_item:"key"}}">
-                      <i class="bi-pencil-square" style="font-size: 16px;"></i>
+                      <i class="bi-pencil-square"></i>
                     </a>
                   </span>
                 {% endif %}
