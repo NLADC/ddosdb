@@ -625,12 +625,12 @@ def overview(request):
             "total_packets": "# packets",
             #            "amplifiers_size"    : "IP's involved",
             #            "ips_involved": "IP's involved",
-            "total_ips": "IP's involved",
+            "total_ips": "# IPs",
             "avg_bps": "bits/second",
             #            "avg_pps"           : "packets/second",
             #            "total_dst_ports": "# ports",
-            "submit_timestamp": "submitted at",
-            "submitter": "submitted by",
+            "submit_timestamp": "submitted",
+            "submitter": "by",
             "comment": "comment",
         }
 
