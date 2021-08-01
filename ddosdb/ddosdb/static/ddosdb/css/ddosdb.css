@@ -16,7 +16,7 @@
 body {
   font-size: 14pt !important;
   background-color:  var(--ddosdb-body-bg);
-  font-weight: lighter;
+  font-weight: normal;
 }
 .ddosdb-table {
   font-size: 0.9rem !important;
@@ -207,7 +207,7 @@ a:hover {
 }
 
 .card-footer {
-    font-weight: light;
+    font-weight: normal;
     background-color: var(--ddosdb-menu-bg);
     border: 1px solid var(--ddosdb-bdr);
     margin-bottom: 0.2em;
@@ -216,7 +216,7 @@ a:hover {
 
 .ddosdb-note {
   font-size: 0.875rem;
-  font-weight: normal;
+  font-weight: light;
   color: var(--ddosdb-note-col);
 }
 
