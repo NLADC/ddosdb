@@ -75,18 +75,15 @@
           <td>
             {% if hdr == "multivector_key" %}
             {% comment %}
-              <a target="_blank" href="{% url "query" %}?q=multivector_key:{{ node|get_item:hdr|urlencode }}">
+              <a href="{% url "query" %}?q=multivector_key:{{ node|get_item:hdr|urlencode }}">
             {% endcomment %}
                 {{node|get_item:hdr}}
             {% comment %}
               </a>
             {% endcomment %}
             {% elif hdr == "key" %}
-              <div title="open detailed view in a new tab">
-                {% comment %}
-                <a target="_blank" href="{% url "query" %}?q=key:{{ node|get_item:hdr|urlencode }}">
-                {% endcomment %}
-                <a target="_blank" href="{% url "details" %}?key={{ node|get_item:hdr|urlencode }}">
+              <div title="open detailed view">
+                <a  href="{% url "details" %}?key={{ node|get_item:hdr|urlencode }}">
                   {{node|get_item:hdr}}
                 </a>
               </div>
