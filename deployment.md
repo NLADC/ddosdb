@@ -98,6 +98,21 @@ If you need to update the system then you can simply re-run the `./letsencrypt.s
 
 If you want to keep the same certificates (for example because you are close to the rate limit), then simply run the `backup.sh` script before running the update and the `restore.sh` script afterwards. The former will simply copy all Let's Encrypt data and nginx configurations from docker to local disk, the latter will copy it back again. 
 
+### Warning for those using UFW
+It is important to note that docker will create its own iptables rules to manage the forwarding of traffic to the right containers. This will circumvent any UFW rules you create to limit interaction with DDoSDB. To make sure UFW rules are enforced with the dockerized version of DDoSDB, follow these steps.
+1. Disable iptables for docker: Create `/etc/docker/daemon.json` with the following content:
+```json
+{
+    "iptables": false
+}
+```
+2. Restart docker (`service docker restart`), and if docker has already created iptables rules, reboot your machine.
+3. Allow UFW to forward traffic: `sudo sed -i -e 's/DEFAULT_FORWARD_POLICY="DROP"/DEFAULT_FORWARD_POLICY="ACCEPT"/g' /etc/default/ufw`
+4. Reload UFW (`sudo ufw reload`)
+5. Provide docker with necessary routing, since it will not create its own iptables rules: `sudo iptables -t nat -A POSTROUTING ! -o docker0 -s 172.17.0.0/16 -j MASQUERADE`
+
+Done! Your UFW rules will now also be enforced for your docker containers. Thanks to [this](https://stackoverflow.com/a/46266757/4309688) stack overflow answer.
+
 ## Acknowledgements
 
 The development of the clearing house was partly funded by the European Union’s Horizon 2020 Research and Innovation program under Grant Agreement No 830927. It will be used by the Dutch National Anti-DDoS Coalition, a self-funded public-private initiative to collaboratively protect Dutch organizations and the wider Internet community from DDoS attacks. Websites: https://www.concordia-h2020.eu/ and https://www.nomoreddos.org/en/
