@@ -84,7 +84,7 @@ six==1.15.0
     # via
     #   click-repl
     #   python-dateutil
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via
     #   django
     #   django-debug-toolbar
