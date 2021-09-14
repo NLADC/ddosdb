@@ -35,6 +35,8 @@ class Command(BaseCommand):
             IntervalSchedule.objects.get_or_create(every=15, period=IntervalSchedule.SECONDS)
             schedule, created = IntervalSchedule.objects.get_or_create(
                 every=1, period=IntervalSchedule.HOURS)
+            schedule, created = IntervalSchedule.objects.get_or_create(
+                every=1, period=IntervalSchedule.DAYS)
 
             # Create Pull sync if needed
             p_task, created = PeriodicTask.objects.get_or_create(
