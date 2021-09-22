@@ -33,7 +33,7 @@ click-repl==0.2.0
     # via celery
 demjson==2.2.4
     # via -r requirements.in
-django==3.2.4
+django==3.2.5
     # via
     #   -r requirements.in
     #   django-celery-beat
