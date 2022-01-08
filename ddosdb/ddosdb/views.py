@@ -659,6 +659,12 @@ def overview(request):
         if len(results) > 1:
             df = pd.DataFrame.from_dict(results)
             # pp.pprint(df)
+
+            # Remove the headers that are not present in the results (e.g. due to changing formats)
+            avail_cols = list(df.columns)
+            for field in fields:
+                if not field in avail_cols:
+                    context["headers"].pop(field)
             o = [context["o"]][0]
 
             # Do a special sort if the column to sort by is 'submitter'
