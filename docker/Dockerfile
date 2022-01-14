@@ -24,6 +24,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install --upgrade pip
 # install wheel
 RUN pip install wheel
+# downgrade setuptools to <58 to support 2to3 builds (for demjson 2.2.4 on Mac)
+RUN pip install --upgrade setuptools==57.5.0
 
 COPY requirements.txt $HOME
 
