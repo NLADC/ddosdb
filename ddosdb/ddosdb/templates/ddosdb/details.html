@@ -19,7 +19,11 @@
         <div class="col"></div>
         <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-12 my-2">
             <div class="card">
-                <div class="card-title text-center">fingerprint {{ key }}</div>
+                <div class="card-title text-center" title="download fingerprint">
+                    <a  href="{% url "download" %}?key={{ key|urlencode }}">
+                    fingerprint {{ key }}
+                    </a>
+                </div>
                   <div class="card-footer">
                     {% if node.comment %}
                       {{ node.comment|linebreaks }}

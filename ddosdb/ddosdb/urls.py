@@ -12,6 +12,7 @@ urlpatterns = [
     path('logout', views.signout, name='logout'),
     path('query', views.query, name='query'),
     path('details', views.details, name='details'),
+    path('download', views.download, name='download'),
     # path('compare', views.compare, name='compare'),
     path('upload-file', views.upload_file, name='upload-file'),
     path('overview', views.overview, name='overview'),
