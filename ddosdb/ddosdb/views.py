@@ -452,7 +452,7 @@ def upload_file(request):
             data = None
             try:
                 data = demjson.decode(json_content)
-            except demjson.decode.JSONDecodeError as e:
+            except demjson.JSONDecodeError as e:
                 logger.error("Fingerprint JSON decode error ({})".format(e))
                 response = HttpResponse()
                 response.status_code = 400
