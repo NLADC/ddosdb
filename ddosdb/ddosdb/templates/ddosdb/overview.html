@@ -32,6 +32,7 @@
     <thead>
       <tr>
         <th nowrap="nowrap"></th>
+        <th nowrap="nowrap"></th>
         {% for hdr,name in headers.items %}
           <th nowrap="nowrap">
           {% if hdr == o %}
@@ -70,6 +71,11 @@
           {% else %}
             <i class="bi-trash ddosdb-lightgrey overview-icon"></i>
           {% endif %}
+          </td>
+          <td>
+            <a href="{% url "download" %}?key={{node|get_item:'key'}}">
+              <div title="download {{ node|get_item:'key' }}"><i class="bi-save overview-icon"></i></div>
+            </a>
           </td>
           {% for hdr,name in headers.items %}
           <td>
