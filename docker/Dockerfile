@@ -1,5 +1,7 @@
 # docker exec -it 5e57902b199b /bin/bash
-FROM python:3.9-slim
+# Need python < 3.9 and fuller version than slim, because of problems installing pandas/numpy for MAC M1 arch.
+# Build still takes an awful lang time... (> 5 mins)
+FROM python:3.8-bullseye
 
 RUN apt-get update && apt-get install -y netcat
 
