@@ -43,7 +43,7 @@ def _mdb():
 
 
 def _insert(data):
-    _mdb().insert(data)
+    _mdb().insert(data, check_keys=False)
 
 
 def _search(query=None, fields=None, order=None):
