@@ -319,6 +319,39 @@ def details(request):
 
 # -------------------------------------------------------------------------------------------------------------------
 @login_required()
+def download(request):
+    logger.debug("details ({})".format(request.method))
+
+    pp = pprint.PrettyPrinter(indent=4)
+
+    start = time.time()
+    context = {
+        "results": [],
+        "time": 0,
+        "error": ""
+    }
+
+    if "key" in request.GET:
+        key = request.GET["key"]
+        context["key"] = key
+
+        start = time.time()
+
+        try:
+            results = _search({'key': key}, {'_id': 0})
+            # context["results"] = results
+            return HttpResponse(results, headers={
+                'Content-Type': 'application/json',
+                'Content-Disposition': 'attachment; filename="{}.json"'.format(key)})
+
+        except Exception as e:
+            context["error"] = "Invalid query: " + str(e)
+    else:
+        return redirect("/overview")
+
+
+# -------------------------------------------------------------------------------------------------------------------
+@login_required()
 def query(request):
     logger.debug("query ({})".format(request.method))
 

@@ -59,7 +59,8 @@ printf "\nGenerating self-signed certificate for localhost\n"
 openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=EU/ST=N\/A/L=N\/A/O=Concordia/OU=DDoS Clearing House/CN=localhost" -keyout ./temp/ddosdb-localhost.key  -out ./temp/ddosdb-localhost.crt
 
 printf "\n${COL} Building volumes, images, and containers${NC}\n\n"
-docker-compose up --build --remove-orphans -d
+docker-compose build
+docker-compose up -d
 
 # Initialize the ddosdb Django App
 #printf "\n${COL} Collecting Django static files${NC}\n\n"
