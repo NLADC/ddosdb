@@ -15,8 +15,9 @@
 {% endwith %}
 
 {% if result %}
-<div>
-  <table class="table-hover" id="overview-table" align="center">
+
+<div class="container">
+  <table class="table table-sm table-hover text-center ddosdb-table" align="center">
     <thead>
       <tr>
         <th nowrap="nowrap">Remote DDoS-DB</th>
@@ -33,9 +34,9 @@
           <td>{{node|get_item:'type'}}</td>
           <td>
             {% if node|get_item:'status' == 200 or node|get_item:'status' == 201 %}
-              <img width="16" height="16" src="{% static "ddosdb/img/green_check.svg" %}">
+              <i class="bi-check-circle overview-icon ddosdb-green" ></i>
             {% else %}
-              <img width="16" height="16" src="{% static "ddosdb/img/red_cross.svg" %}">
+              <i class="bi-x-circle overview-icon ddosdb-red"></i>
             {% endif %}
           </td>
           <td>{{node|get_item:'status_reason'}} ({{node|get_item:'status'}})</td>
