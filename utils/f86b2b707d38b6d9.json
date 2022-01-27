@@ -1,0 +1,53 @@
+{
+  "attack_vectors": [
+    {
+      "service": "Fragmented IP packets",
+      "protocol": "UDP",
+      "source_port": 0,
+      "destination_ports": [
+        0
+      ],
+      "TCP_flags": "N/A",
+      "nr_flows": 5891,
+      "nr_packets": 31796000,
+      "nr_megabytes": 31150,
+      "time_start": "2021-12-06 21:00:00",
+      "time_end": "2021-12-06 21:01:17",
+      "duration_seconds": 77,
+      "source_ips": "5891 IP addresses ommitted"
+    },
+    {
+      "service": "LDAP",
+      "protocol": "UDP",
+      "source_port": 389,
+      "destination_ports": [
+        27260,
+        48458,
+        8687
+      ],
+      "TCP_flags": "N/A",
+      "nr_flows": 3503,
+      "nr_packets": 18688000,
+      "nr_megabytes": 28160,
+      "time_start": "2021-12-06 21:00:00",
+      "time_end": "2021-12-06 21:01:18",
+      "duration_seconds": 78,
+      "source_ips": "3503 IP addresses ommitted"
+    }
+  ],
+  "target": "211.167.239.23",
+  "tags": [
+    "Fragmentation attack",
+    "Amplification attack"
+  ],
+  "time_start": "2021-12-06 21:00:00",
+  "duration_seconds": 97,
+  "nr_flows": 9663,
+  "nr_megabytes": 59492,
+  "nr_packets": 51756000,
+  "total_ips": 1011,
+  "average_mbps": 4906,
+  "average_pps": 533567,
+  "average_Bpp": 1149,
+  "key": "f86b2b707d38b6d93686047aff8a2c0d"
+}
