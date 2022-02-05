@@ -39,9 +39,18 @@ pip install -r requirements.txt
  
 In the `website` directory, copy `settings_local_example.py` to `settings_local.py` and make changes to `settings_local.py` if needed (but it probably isn't).
 
+#### MongoDB and RabbitMQ
+DDoSDB needs instances of MongoDB and RabbitMQ to function, but a single node dockerized version will do for both. A `docker-compose.yml` is provided in the `mongodb-rabbitmq` directory. If you have docker installed then running `docker-compose up -d` in that directory will pull the right Mongo, Mongo Express and RabbitMQ images and start them.
+You can check if it is running by pointing a browser towards [http://localhost:8081/](http://localhost:8081/), which should popup a dialog box asking for a username and password. Entering user `ddosdb` and password `ddosdbddosdb` will show the Mongo Express interface:
+
+<p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
+
+The ddosdb database is created at startup of the Django development server.
+Whenever you want to delete the ddosdb database - for example because you want to start with an empty database again - simply delete the database using Mongo Express and restart Django.
+
 #### Prepare the Django project
 
-Change to the `ddosdb` directory.
+Once you have MongoDB and RabbitMQ up and running, change to the `ddosdb` directory.
 
 Perform the Django migrations:
 
@@ -58,15 +67,6 @@ python manage.py createsuperuser
 
 #### Web server
 For development the Django development server suffices, no need for a front-end webserver. Rather than a full-fledged SQL database the built-in support for sqlite3 will work just fine. 
-
-#### MongoDB and RabbitMQ
-DDoSDB needs instances of MongoDB and RabbitMQ to function, but a single node dockerized version will do for both. A `docker-compose.yml` is provided in the `mongodb-rabbitmq` directory. If you have docker installed then running `docker-compose up -d` in that directory will pull the right Mongo, Mongo Express and RabbitMQ images and start them.
-You can check if it is running by pointing a browser towards [http://localhost:8081/](http://localhost:8081/), which should popup a dialog box asking for a username and password. Entering user `ddosdb` and password `ddosdbddosdb` will show the Mongo Express interface:
-
-<p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
-
-The ddosdb database is created at startup of the Django development server.
-Whenever you want to delete the ddosdb database - for example because you want to start with an empty database again - simply delete the database using Mongo Express and restart Django.
 
 #### Celery worker and Celery beat
 DDoSDB uses Celery to carry out periodic tasks, hence the need for RabbitMQ (used as the message broker for Celery).
@@ -94,7 +94,7 @@ In both cases the `--settings=website.settings-dev` argument ensures that the de
 
 Go to admin section of the website at [https://localhost:8000/admin](https://localhost:8000/admin) and log in using the credentials you created in the createsuperuser step. Create some other users you can use for viewing, uploading etc.
 
-Finally visit the start/search page of the ddosdb at [https://localhost:8000/](https://localhost:8000/)
+Finally, visit the start/search page of the ddosdb at [https://localhost:8000/](https://localhost:8000/)
 
 If everything seems to be running you can upload fingerprints to the database using the [ddos_dissector](https://github.com/ddos-clearing-house/ddos_dissector), using one of the user accounts (with upload permissions) that you created.
 
