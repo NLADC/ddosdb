@@ -169,23 +169,44 @@
     {% endif %}
 {% endcomment %}
   </p>
+{% comment %}
   <p align="center" class="text-muted"><small>{{ remotedbs|length }} remote DBs (
     {% for node in remotedbs %}
         {{node|get_item:'name'}},
     {% endfor %}
     ),
     {{ syncfps }} Fingerprints to sync (push)</small>
-{% comment %}
       {% for node in results %}
         {% if node|get_item:'shareable' == True %}
           {{node|get_item:'key'}} |
         {% endif %}
       {% endfor %}
-{% endcomment %}
     <br/>
   </p>
+{% endcomment %}
   {% endif %}
 </div>
+
+<div class="container text-centered">
+  {% if misps %}
+  <p align="center" class="text-muted">
+    <a class="btn btn-ddosdb" target="_blank" href="/admin/ddosdb/misp/">MISPs</a>
+   &nbsp;<a class="btn btn-ddosdb" target="_blank" href="{% url "misp-sync" %}">Sync</a>
+  </p>
+
+{% comment %}
+  <p align="center" class="text-muted"><small>{{ misps|length }} MISPs (
+    {% for node in misps %}
+        {{node|get_item:'name'}},
+    {% endfor %}
+    ),
+    {{ syncfps }} Fingerprints to sync (push)</small>
+    <br/>
+  </p>
+{% endcomment %}
+  {% endif %}
+</div>
+
 
 
  {% include "ddosdb/footer.html" %}

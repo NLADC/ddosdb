@@ -9,7 +9,7 @@ import requests
 import random
 import urllib3
 
-DDOSDB_URL='https://127.0.0.1'
+DDOSDB_URL='http://127.0.0.1:8000'
 USERNAME='upload'
 PASSWORD='uploadupload'
 

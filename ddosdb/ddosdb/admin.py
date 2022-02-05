@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django import forms
 
-from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile, RemoteDdosDb, FailedLogin
+from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile, RemoteDdosDb, MISP, FailedLogin
 
 class QueryAdmin(admin.ModelAdmin):
     list_display = ("user", "query", "timestamp")
@@ -99,11 +99,29 @@ class RemoteDdosDbForm(forms.ModelForm):
 #        'password': forms.PasswordInput(),
 #    }
 
+
 class RemoteDdosDbAdmin(admin.ModelAdmin):
     list_display = ("name", "active", "push", "pull", "url", "check_cert", "username")
     fields = (('name', 'active','push','pull'), ('url','check_cert'), 'username', 'password')
 
     form = RemoteDdosDbForm
+
+
+class MISPForm(forms.ModelForm):
+    class Meta:
+        model = MISP
+        fields = []
+# Uncommenting code below will give
+#        widgets = {
+#        'password': forms.PasswordInput(),
+#    }
+
+
+class MISPAdmin(admin.ModelAdmin):
+    list_display = ("name", "active", "push", "pull", "url", "check_cert")
+    fields = (('name', 'active','push','pull'), ('url','check_cert'), 'authkey')
+
+    form = MISPForm
 
 class FailedLoginAdmin(admin.ModelAdmin):
     list_display = ("ipaddress", "logindatetime")
@@ -118,4 +136,5 @@ admin.site.register(FileUpload, FileUploadAdmin)
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(RemoteDdosDb, RemoteDdosDbAdmin)
+admin.site.register(MISP, MISPAdmin)
 admin.site.register(FailedLogin, FailedLoginAdmin)

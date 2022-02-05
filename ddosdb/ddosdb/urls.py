@@ -18,6 +18,7 @@ urlpatterns = [
     path('overview', views.overview, name='overview'),
     path('delete', views.delete, name='delete'),
     path('remote-sync', views.remote_sync, name='remote-sync'),
+    path('misp-sync', views.misp_sync, name='misp-sync'),
     path('edit-comment', views.edit_comment, name='edit-comment'),
     path('toggle-shareable', views.toggle_shareable, name='toggle-shareable'),
     path('my-permissions', views.my_permissions, name='my-permissions'),

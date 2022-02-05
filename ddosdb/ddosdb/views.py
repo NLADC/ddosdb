@@ -28,9 +28,9 @@ from django.utils import timezone
 
 from django.core.exceptions import PermissionDenied
 # from ddosdb.enrichment.team_cymru import TeamCymru
-from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb, FailedLogin
-
+from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb, FailedLogin, MISP
 from ddosdb.database import Database
+import ddosdb.misp
 
 Database.initialize()
 
@@ -738,6 +738,12 @@ def overview(request):
             rdbs.append({"name": remotedb.name})
         context["remotedbs"] = rdbs
 
+        misps = MISP.objects.filter(active=True)
+        rdbs = []
+        for misp in misps:
+            rdbs.append({"name": misp.name})
+        context["misps"] = rdbs
+
     return HttpResponse(render(request, "ddosdb/overview.html", context))
 
 
@@ -935,6 +941,128 @@ def remote_pull_sync():
 
 
 # -------------------------------------------------------------------------------------------------------------------
+def remote_misp_push_sync():
+    rmisps = []
+    misps = MISP.objects.filter(active=True, push=True)
+    logger.info(misps)
+
+    try:
+        fingerprints = _search({'shareable': True}, {'_id': 0})
+        fp_keys = [fp['key'] for fp in fingerprints]
+        logger.info("Fingerprints to sync: {}".format(fp_keys))
+
+    except ServerSelectionTimeoutError as e:
+        logger.error("Could not setup a connection to MongoDB")
+        return []
+
+    for misp in misps:
+        logger.info("Contacting remote MISP:{} @ {}".format(misp.name, misp.url))
+        try:
+            known_fps = ddosdb.misp.get_misp_fingerprints(misp)
+            unk_fps = []
+            unk_fps_keys = []
+            for fp in fingerprints:
+                if not fp['key'] in known_fps:
+                    unk_fps.append(fp)
+                    unk_fps_keys.append(fp['key'])
+
+            logger.info("MISP {} needs sync for {} fingerprints {}".format(misp.name, len(unk_fps_keys), unk_fps_keys))
+            for fp in unk_fps:
+                logger.debug("Syncing fingerprint {}".format(fp['key']))
+                ddosdb.misp.add_misp_fingerprint(misp, fp)
+
+            rmisps.append({"name": misp.name,
+                           "type": "push",
+                           "status": 200,
+                           "status_reason": 'OK',
+                           "unk_fps": unk_fps_keys,
+                           "unk_fps_nr": len(unk_fps_keys),
+                           })
+        except Exception as e:
+            logger.error("{}".format(e))
+            rmisps.append({"name": misp.name,
+                           "type": "push",
+                           "status": 555,
+                           "status_reason": 'Connection failed',
+                           "unk_fps": [],
+                           "unk_fps_nr": 0,
+                           })
+
+    return rmisps
+
+
+# -------------------------------------------------------------------------------------------------------------------
+def remote_misp_pull_sync():
+    # # Now do a Pull sync
+    # remotedbs = RemoteDdosDb.objects.filter(active=True, pull=True)
+    # logger.info(remotedbs)
+    # rdbs = []
+    # for rdb in remotedbs:
+    #     fps_srch = _search(fields={'key': 1, "_id": 0})
+    #     fps = [fp['key'] for fp in fps_srch]
+    #     logger.info("Fingerprints I have: {}".format(fps))
+    #
+    #     logger.info("Contacting remote DDoSDB:{} @ {}".format(rdb, rdb.url))
+    #     unk_fps = []
+    #     try:
+    #         r = requests.get("{}/fingerprints".format(rdb.url),
+    #                          auth=(rdb.username, rdb.password),
+    #                          timeout=10, verify=rdb.check_cert)
+    #         logger.debug("status:{}".format(r.status_code))
+    #         if r.status_code == 200:
+    #             logger.info("Fingerprints at {}: {}".format(rdb.name, r.json()))
+    #             rem_fps = r.json()
+    #             for rem_fp in rem_fps:
+    #                 if not rem_fp in fps:
+    #                     unk_fps.append(rem_fp)
+    #             logger.info("Fingerprints to pull: {}".format(unk_fps))
+    #
+    #             if len(unk_fps) > 0:
+    #                 for unk_fp in unk_fps:
+    #                     r = requests.get("{}/fingerprint/{}".format(rdb.url, unk_fp),
+    #                                      auth=(rdb.username, rdb.password),
+    #                                      timeout=10, verify=rdb.check_cert)
+    #                     if r.status_code == 200:
+    #                         fp = r.json()[0]
+    #                         # pp.pprint(fp)
+    #                         fp["shareable"] = False
+    #                         # Set submit timestamp
+    #                         fp["submit_timestamp"] = datetime.utcnow().isoformat()
+    #                         if not 'comment' in fp:
+    #                             fp['comment'] = ""
+    #                         _insert(fp)
+    #                         # file_upload = FileUpload()
+    #                         # file_upload.user = user_perms["user"]
+    #                         # file_upload.filename = fp["key"]
+    #                         # file_upload.save()
+    #
+    #                         # logger.info(fp)
+    #
+    #             rdbs.append({"name": rdb.name,
+    #                          "type": "pull",
+    #                          "status": r.status_code,
+    #                          "status_reason": r.reason,
+    #                          "unk_fps": unk_fps,
+    #                          "unk_fps_nr": len(unk_fps),
+    #                          })
+    #
+    #         logger.info("Sync response:{}".format(r.status_code))
+    #     except Exception as e:
+    #         logger.info("{}".format(e))
+    #         rdbs.append({"name": rdb.name,
+    #                      "type": "pull",
+    #                      "status": 555,
+    #                      "status_reason": "Connection failed",
+    #                      "unk_fps": [],
+    #                      "unk_fps_nr": 0,
+    #                      })
+    #         continue
+    #
+    # return rdbs
+    return []
+
+
+# -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def remote_sync(request):
     logger.debug("remote_sync ({})".format(request.method))
@@ -954,6 +1082,28 @@ def remote_sync(request):
         "result": rdbs,
     }
     return HttpResponse(render(request, "ddosdb/remotesync.html", context))
+
+
+# -------------------------------------------------------------------------------------------------------------------
+@login_required()
+def misp_sync(request):
+    logger.debug("misp_sync ({})".format(request.method))
+
+    pp = pprint.PrettyPrinter(indent=4)
+    user: User = request.user
+
+    if not user.is_superuser:
+        raise PermissionDenied()
+
+    misps = remote_misp_push_sync()
+    misps += remote_misp_pull_sync()
+    logger.info(misps)
+
+    context = {
+        "user": user,
+        "result": misps,
+    }
+    return HttpResponse(render(request, "ddosdb/mispsync.html", context))
 
 
 # -------------------------------------------------------------------------------------------------------------------

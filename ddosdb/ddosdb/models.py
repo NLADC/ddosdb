@@ -6,6 +6,7 @@ from django.dispatch import receiver
 
 from website import settings
 
+
 class Query(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
@@ -73,43 +74,71 @@ class Profile(models.Model):
 
 
 class RemoteDdosDb(models.Model):
-
     class Meta:
         verbose_name_plural = " Remote DDoS-DBs"
 
     name = models.CharField('Remote DDoS-DB name', max_length=255,
-        help_text="""A friendly name for the remote repository""")
+                            help_text="""A friendly name for the remote repository""")
     url = models.URLField('Remote DDoS-DB URL',
-        help_text="""The base URL for the remote sync API""")
+                          help_text="""The base URL for the remote sync API""")
     username = models.CharField('username', max_length=255)
     password = models.CharField(max_length=255)
-    active   = models.BooleanField(default=True,
-        help_text="""Check this to sync with this DDoS-DB""")
-    push     = models.BooleanField(default=False,
-        help_text="""Sync towards this DDoS-DB""")
-    pull   = models.BooleanField(default=True,
-        help_text="""Sync from this DDoS-DB""")
+    active = models.BooleanField(default=True,
+                                 help_text="""Check this to sync with this DDoS-DB""")
+    push = models.BooleanField(default=False,
+                               help_text="""Sync towards this DDoS-DB""")
+    pull = models.BooleanField(default=True,
+                               help_text="""Sync from this DDoS-DB""")
 
-    check_cert   = models.BooleanField(default=True,
-        help_text="""Whether to check remote DDoS-DB certificate on https""")
+    check_cert = models.BooleanField(default=True,
+                                     help_text="""Whether to check remote DDoS-DB certificate on https""")
 
     def __str__(self):
         postfix = ' (inactive)'
         if (self.active):
             postfix = ''
-        return self.name+postfix
+        return self.name + postfix
+
+
+class MISP(models.Model):
+    class Meta:
+        verbose_name_plural = " MISPs"
+
+    name = models.CharField('MISP name', max_length=255,
+                            help_text="""A friendly name for the MISP instance""")
+    url = models.URLField('MISP URL',
+                          help_text="""The base URL for the MISP""")
+    authkey = models.CharField('Authentication Key', max_length=255,
+                               help_text="""Authentication key for the MISP Automation API""")
+    active = models.BooleanField(default=True,
+                                 help_text="""Check this to sync with this MISP""")
+    push = models.BooleanField(default=False,
+                               help_text="""Sync towards this MISP""")
+    pull = models.BooleanField(default=True,
+                               help_text="""Sync from this MISP""")
+
+    check_cert = models.BooleanField(default=True,
+                                     help_text="""Whether to check remote certificate on https""")
+
+    def __str__(self):
+        postfix = ' (inactive)'
+        if (self.active):
+            postfix = ''
+        return self.name + postfix
+
 
 class FailedLogin(models.Model):
     class Meta:
         verbose_name_plural = " Failed logins"
 
     ipaddress = models.CharField('IP Address', max_length=255,
-        help_text="""The IP address the login was from""")
+                                 help_text="""The IP address the login was from""")
     logindatetime = models.DateTimeField('DateTime of failed login',
-        help_text="""The time and date of failed login""")
+                                         help_text="""The time and date of failed login""")
 
     def __str__(self):
         return self.ipaddress
+
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):

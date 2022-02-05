@@ -38,7 +38,7 @@ class Command(BaseCommand):
             schedule, created = IntervalSchedule.objects.get_or_create(
                 every=1, period=IntervalSchedule.DAYS)
 
-            # Create Pull sync if needed
+            # Create Pull sync(s) if needed
             p_task, created = PeriodicTask.objects.get_or_create(
                 name='Remote pull sync',  # Description
                 task='ddosdb.tasks.pull_sync',  # name of task.
@@ -60,6 +60,30 @@ class Command(BaseCommand):
                 logger.info("Push sync task created")
             else:
                 logger.info("Push sync task already exists")
+            logger.info("with scheduled interval of: {}".format(p_task.interval))
+
+            # Create MISP pull sync(s) if needed
+            p_task, created = PeriodicTask.objects.get_or_create(
+                name='MISP pull sync',  # Description
+                task='ddosdb.tasks.misp_pull_sync',  # name of task.
+                defaults={'interval': schedule}
+            )
+            if created:
+                logger.info("MISP pull sync task created")
+            else:
+                logger.info("MISP pull sync task already exists")
+            logger.info("with scheduled interval of: {}".format(p_task.interval))
+
+            # Create MISP push sync if needed
+            p_task, created = PeriodicTask.objects.get_or_create(
+                name='MISP push sync',  # Description
+                task='ddosdb.tasks.misp_push_sync',  # name of task.
+                defaults={'interval': schedule}
+            )
+            if created:
+                logger.info("MISP push sync task created")
+            else:
+                logger.info("MISP push sync task already exists")
             logger.info("with scheduled interval of: {}".format(p_task.interval))
 
 

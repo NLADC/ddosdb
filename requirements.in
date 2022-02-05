@@ -10,3 +10,4 @@ django_debug_toolbar
 django-sslserver
 psycopg2-binary
 gunicorn
+pymisp

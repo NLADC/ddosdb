@@ -1,6 +1,6 @@
 from . import views
 from .celery import app
-from .views import remote_push_sync, remote_pull_sync
+from .views import remote_push_sync, remote_pull_sync, remote_misp_push_sync, remote_misp_pull_sync
 import requests
 import urllib3
 import logging
@@ -49,6 +49,17 @@ def push_sync(self):
 @app.task(name='ddosdb.tasks.pull_sync', bind=True)
 def pull_sync(self):
     return remote_pull_sync()
+
+
+@app.task(name='ddosdb.tasks.misp_push_sync', bind=True)
+def misp_push_sync(self):
+    return remote_misp_push_sync()
+
+
+@app.task(name='ddosdb.tasks.misp_pull_sync', bind=True)
+def misp_pull_sync(self):
+    return remote_misp_pull_sync()
+
 
 
 # @app.task(name='ddosdb.tasks.check_to_sync', bind=True)
