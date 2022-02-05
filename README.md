@@ -33,8 +33,6 @@ You can use two approaches to running a (local) DDoSDB repository:
  
 For [deployment](https://github.com/ddos-clearing-house/ddosdb/blob/master/deployment.md) you can use the [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version and add [Let's Encrypt](https://letsencrypt.org/) cerificates using the script provided. 
 
-There is also a [DDosDB-in-a-box](https://github.com/ddos-clearing-house/dddosdb-in-a-box) setup. Essentially this is nothing more than a Linux VM with the [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version installed; so if you can docker & docker-compose on your system then running the [dockerized](https://github.com/ddos-clearing-house/ddosdb/blob/master/README_docker.md) version is the preferred option.
-
 ## Acknowledgements
 
 The DDoS clearing house can be used by any community of organizations that wishes to collaboratively defend themselves against DDoS attacks. The development of the clearing house was partly funded by the European Union’s Horizon 2020 Research and Innovation program under Grant Agreement No 830927. It will be used by the Dutch National Anti-DDoS Coalition, a self-funded public-private initiative to collaboratively protect Dutch organizations and the wider Internet community from DDoS attacks. Websites: https://www.concordia-h2020.eu/ and https://www.nomoreddos.org/en/.
