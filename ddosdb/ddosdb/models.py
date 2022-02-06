@@ -112,9 +112,9 @@ class MISP(models.Model):
                                help_text="""Authentication key for the MISP Automation API""")
     active = models.BooleanField(default=True,
                                  help_text="""Check this to sync with this MISP""")
-    push = models.BooleanField(default=False,
+    push = models.BooleanField(default=True,
                                help_text="""Sync towards this MISP""")
-    pull = models.BooleanField(default=True,
+    pull = models.BooleanField(default=False,
                                help_text="""Sync from this MISP""")
 
     check_cert = models.BooleanField(default=True,
