@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    help = 'Clean and initialize celery (beat) tasks'
+    help = 'Clean and initialize (celery (beat) powered) synchronization tasks'
 
     def handle(self, *args, **kwargs):
         try:

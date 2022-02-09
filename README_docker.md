@@ -111,7 +111,11 @@ is to delete all images and volumes and start building from scratch. This can be
 ```
 
 
-You can use Mongo Express to export the database and importing it back again after the update if needed. Please note that Mongo Express is bound to the 127.0.0.1 (localhost) address, meaning you can only access it on the DDoSDB machine itself (for safety reasons) at http://localhost:8081. The username and password are the superuser ones you specified in the first step. 
+You can enable and use Mongo Express to export the database and importing it back again after the update if needed. 
+
+To enable Mongo Express uncomment the relevant lines in the docker-compose.yml file and restarting the containers.
+
+Please note that Mongo Express is bound to the 127.0.0.1 (localhost) address, meaning you can only access it on the DDoSDB machine itself (for safety reasons) at http://localhost:8081. The username and password are the superuser ones you specified in the first step. 
 <p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
 
 If - for some reason - updating this way fails, then one final (nuclear) option to try is to remove all images (intermediate and otherwise) as well as all volumes from docker.
