@@ -25,11 +25,22 @@
             {% endif %}
 
             <h4 class="mb-3 text-center">Account details for user '{{ user }}'</h4>
-
             <p class="lead">
                 Your account grants you access to DDoSDB and belongs only to you.
                 Do not share your credentials with anyone else.
             </p>
+            <h4 class="mb-3">Authorization Token</h4>
+            <p class="lead">You can use a token to access the DDoSDB API.
+                By clicking the red lock icon below, you can see the token linked to your account and how to use it in an HTTP header.
+                            </p>
+            <i class="bi-lock-fill ddosdb-red " data-bs-toggle="collapse" data-bs-target="#collapseToken" aria-expanded="false" aria-controls="collapseToken"></i>
+
+            <div class="collapse" id="collapseToken">
+                <b>Keep this token safe and do not share it with others, it has all the permissions of your account.</b>
+                <p class="card-body">Authorization: Token {{ token }}</p>
+            </div>
+            <p/>
+
             <h4 class="mb-3">Password</h4>
             <p class="lead">Please use a strong password. We do not enforce a certain pattern, but a good password makes it significantly more difficult for others to gain access to your account.</p>
             <form action="{% url "account" %}" method="post">
@@ -57,15 +68,14 @@
         <div class="col ml-4">
                         <h4 class="mb-3 text-center">Permissions</h4>
             <p class="lead">The following permissions have been assigned to your account:</p>
-            <i class="bi-check-lg ddosdb-green"></i> Query DDoSDB<br>
-            <i class="bi-check-lg ddosdb-green"></i> Download fingerprints<br>
-            <i class="bi-check-lg ddosdb-green"></i> Download attack vectors<br>
+            <i class="bi-check-lg ddosdb-green"></i> Query DDoSDB<br/>
+            <i class="bi-check-lg ddosdb-green"></i> Download fingerprints<br/>
+            <i class="bi-check-lg ddosdb-green"></i> Download attack vectors<br/>
             {% if "ddosdb.upload_fingerprint" in permissions %}
-                <i class="bi-check-lg ddosdb-green"></i> Upload fingerprints<br>
+                <i class="bi-check-lg ddosdb-green"></i> Upload fingerprints<br/>
             {% else %}
-                <i class="bi-x-lg ddosdb-red"></i> Upload fingerprints<br>
+                <i class="bi-x-lg ddosdb-red"></i> Upload fingerprints<br/>
             {% endif %}
-
         </div>
     </div>
 </div>

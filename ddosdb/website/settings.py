@@ -31,6 +31,10 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django_celery_beat',
     'django_celery_results',
+    'rest_framework',
+    # 'rest_auth',
+    # 'rest_auth.registration',
+    'rest_framework.authtoken',
 ]
 
 
@@ -110,7 +114,8 @@ logging.config.dictConfig({
     'formatters': {
         'console': {
 #            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s',
-            'format': '%(asctime)s %(levelname)s PID:%(process)d [%(name)s.py:%(lineno)s] %(message)s',
+#             'format': '%(asctime)s %(levelname)s PID:%(process)d [%(name)s.py:%(lineno)s] %(message)s',
+            'format': '%(levelname)s [%(filename)s:%(lineno)s/%(funcName)s] %(message)s',
         },
     },
     'handlers': {
@@ -137,3 +142,12 @@ LOGIN_URL = '/login'
 
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}

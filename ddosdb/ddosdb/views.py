@@ -25,8 +25,9 @@ from django.shortcuts import render, redirect, reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils import timezone
-
 from django.core.exceptions import PermissionDenied
+from rest_framework.authtoken.models import Token
+
 # from ddosdb.enrichment.team_cymru import TeamCymru
 from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb, FailedLogin, MISP
 from ddosdb.database import Database
@@ -233,12 +234,18 @@ def account(request):
     logger.debug("account ({})".format(request.method))
 
     user: User = request.user
+    token, created = Token.objects.get_or_create (user=request.user)
+    logger.debug(token)
+
     context = {
         "user": user,
         "permissions": user.get_all_permissions(),
+        "token": token.key,
         "success": "",
         "error": ""
     }
+
+
 
     if request.method == "POST":
         if "email" in request.POST:
@@ -993,72 +1000,7 @@ def remote_misp_push_sync():
 
 # -------------------------------------------------------------------------------------------------------------------
 def remote_misp_pull_sync():
-    # # Now do a Pull sync
-    # remotedbs = RemoteDdosDb.objects.filter(active=True, pull=True)
-    # logger.info(remotedbs)
-    # rdbs = []
-    # for rdb in remotedbs:
-    #     fps_srch = _search(fields={'key': 1, "_id": 0})
-    #     fps = [fp['key'] for fp in fps_srch]
-    #     logger.info("Fingerprints I have: {}".format(fps))
-    #
-    #     logger.info("Contacting remote DDoSDB:{} @ {}".format(rdb, rdb.url))
-    #     unk_fps = []
-    #     try:
-    #         r = requests.get("{}/fingerprints".format(rdb.url),
-    #                          auth=(rdb.username, rdb.password),
-    #                          timeout=10, verify=rdb.check_cert)
-    #         logger.debug("status:{}".format(r.status_code))
-    #         if r.status_code == 200:
-    #             logger.info("Fingerprints at {}: {}".format(rdb.name, r.json()))
-    #             rem_fps = r.json()
-    #             for rem_fp in rem_fps:
-    #                 if not rem_fp in fps:
-    #                     unk_fps.append(rem_fp)
-    #             logger.info("Fingerprints to pull: {}".format(unk_fps))
-    #
-    #             if len(unk_fps) > 0:
-    #                 for unk_fp in unk_fps:
-    #                     r = requests.get("{}/fingerprint/{}".format(rdb.url, unk_fp),
-    #                                      auth=(rdb.username, rdb.password),
-    #                                      timeout=10, verify=rdb.check_cert)
-    #                     if r.status_code == 200:
-    #                         fp = r.json()[0]
-    #                         # pp.pprint(fp)
-    #                         fp["shareable"] = False
-    #                         # Set submit timestamp
-    #                         fp["submit_timestamp"] = datetime.utcnow().isoformat()
-    #                         if not 'comment' in fp:
-    #                             fp['comment'] = ""
-    #                         _insert(fp)
-    #                         # file_upload = FileUpload()
-    #                         # file_upload.user = user_perms["user"]
-    #                         # file_upload.filename = fp["key"]
-    #                         # file_upload.save()
-    #
-    #                         # logger.info(fp)
-    #
-    #             rdbs.append({"name": rdb.name,
-    #                          "type": "pull",
-    #                          "status": r.status_code,
-    #                          "status_reason": r.reason,
-    #                          "unk_fps": unk_fps,
-    #                          "unk_fps_nr": len(unk_fps),
-    #                          })
-    #
-    #         logger.info("Sync response:{}".format(r.status_code))
-    #     except Exception as e:
-    #         logger.info("{}".format(e))
-    #         rdbs.append({"name": rdb.name,
-    #                      "type": "pull",
-    #                      "status": 555,
-    #                      "status_reason": "Connection failed",
-    #                      "unk_fps": [],
-    #                      "unk_fps_nr": 0,
-    #                      })
-    #         continue
-    #
-    # return rdbs
+    logger.warning('MISP pull sync not implemented')
     return []
 
 
@@ -1541,7 +1483,7 @@ def csp_report(request):
         return response
 
     else:
-        logger.warning("GET request on csp_report. Fishy...")
+        logger.error("GET request on csp_report. Fishy...")
         response = HttpResponse()
         response.status_code = 405
         return response

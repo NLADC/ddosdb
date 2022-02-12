@@ -12,6 +12,7 @@ import urllib3
 DDOSDB_URL='http://127.0.0.1:8000'
 USERNAME='upload'
 PASSWORD='uploadupload'
+# TOKEN='c93716aec5a20572683e7110c46195f7e0aab085'
 
 def openJSON(filename):
     """open the JSON (result) file and return it as a json structure"""
@@ -54,8 +55,9 @@ for fn in filelist:
                 data['key'] = "".join([random.choice("abcdef0123456789") for i in range(15)])
                 print("{}: ".format(data['key']), end="")
                 urllib3.disable_warnings()
-                r = requests.post("{}/fingerprints".format(DDOSDB_URL),
+                r = requests.post("{}/api/fingerprint/".format(DDOSDB_URL),
                                   auth=(USERNAME, PASSWORD),
+                                  # headers={'Authorization': 'Token {}'.format(TOKEN)},
                                   json=data,
                                   timeout=10,
                                   verify=False)

@@ -1,6 +1,6 @@
 #import django.contrib.auth.views
-from django.urls import path
-from . import views
+from django.urls import include, path
+from . import views, api
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -28,4 +28,5 @@ urlpatterns = [
     path('remote-dbs', views.remote_dbs, name='remote-dbs'),
     path('attack-trace/<key>', views.attack_trace, name='attack-trace'),
     path('csp-report', views.csp_report, name='csp-report'),
+
 ]

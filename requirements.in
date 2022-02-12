@@ -8,6 +8,7 @@ pandas
 pymongo
 django_debug_toolbar
 django-sslserver
+djangorestframework
 psycopg2-binary
 gunicorn
 pymisp
