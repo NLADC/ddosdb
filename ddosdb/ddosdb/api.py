@@ -3,7 +3,7 @@ import demjson
 from datetime import datetime
 # from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, renderer_classes
-from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import PermissionDenied
@@ -11,8 +11,8 @@ from django.core.exceptions import PermissionDenied
 # from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 
-from ddosdb.database import Database
 from ddosdb.models import FileUpload
+from ddosdb.database import Database
 
 Database.initialize()
 
@@ -211,12 +211,13 @@ def permissions(request):
     group_perms = request.user.get_group_permissions()
 
     # make a combined set (a set cannot contain duplicates)
-    user_permissions = user_perms | group_perms
+    user_permissions = list(user_perms | group_perms)
+    user_permissions.sort()
 
     if user_permissions is None:
         raise PermissionDenied()
 
-    return JsonResponse({str(request.user): list(user_permissions)}, safe=False)
+    return JsonResponse({str(request.user): user_permissions}, safe=False)
 
 
 # ---------------------------------------------------------------------------------

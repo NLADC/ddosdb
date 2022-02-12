@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django import forms
 
-from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile, RemoteDdosDb, MISP, FailedLogin
+# from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile, RemoteDdosDb, MISP, FailedLogin
+from ddosdb.models import Query, FileUpload, Profile, RemoteDdosDb, MISP, FailedLogin
 
 
 # class QueryAdmin(admin.ModelAdmin):

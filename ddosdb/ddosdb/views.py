@@ -29,7 +29,7 @@ from django.core.exceptions import PermissionDenied
 from django_rest_multitokenauth.models import MultiToken
 
 # from ddosdb.enrichment.team_cymru import TeamCymru
-from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb, FailedLogin, MISP
+from ddosdb.models import Query, RemoteDdosDb, FailedLogin, MISP, FileUpload
 from ddosdb.database import Database
 import ddosdb.misp
 

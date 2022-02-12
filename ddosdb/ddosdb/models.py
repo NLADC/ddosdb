@@ -13,26 +13,26 @@ class Query(models.Model):
     query = models.TextField()
 
 
-class AccessRequest(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=150)
-    email = models.EmailField(max_length=150)
-    institution = models.CharField(max_length=100)
-    purpose = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True, blank=True)
-    accepted = models.BooleanField(default=False)
+# class AccessRequest(models.Model):
+#     first_name = models.CharField(max_length=30)
+#     last_name = models.CharField(max_length=150)
+#     email = models.EmailField(max_length=150)
+#     institution = models.CharField(max_length=100)
+#     purpose = models.TextField()
+#     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
+#     accepted = models.BooleanField(default=False)
 
 
-class Blame(models.Model):
-    key = models.CharField(max_length=32)
-    name = models.CharField(max_length=150)
-    description = models.TextField(default="")
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "description": self.description
-        }
+# class Blame(models.Model):
+#     key = models.CharField(max_length=32)
+#     name = models.CharField(max_length=150)
+#     description = models.TextField(default="")
+#
+#     def to_dict(self):
+#         return {
+#             "name": self.name,
+#             "description": self.description
+#         }
 
 
 class Fingerprint(models.Model):
