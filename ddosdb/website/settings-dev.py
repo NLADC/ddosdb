@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'rest_framework',
     # 'rest_auth',
     # 'rest_auth.registration',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
+    'django_rest_multitokenauth',
 ]
 
 
@@ -160,8 +161,9 @@ DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+        'django_rest_multitokenauth.coreauthentication.MultiTokenAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',

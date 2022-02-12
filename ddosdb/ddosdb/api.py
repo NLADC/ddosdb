@@ -56,7 +56,6 @@ def _delete(query=None):
 
 # Create your views here.
 @api_view(['GET', 'POST'])
-@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def index(request):
     logger.debug("Index")
@@ -66,7 +65,6 @@ def index(request):
 
 # ---------------------------------------------------------------------------------
 @api_view(['GET', 'POST'])
-@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def fingerprints(request):
     logger.info("fingerprints ({})".format(request.method))
@@ -170,7 +168,6 @@ def fingerprints(request):
 
 # ---------------------------------------------------------------------------------
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def fingerprint(request, key):
     logger.debug("fingerprint/{} ({})".format(key, request.method))
@@ -206,7 +203,6 @@ def fingerprint(request, key):
 
 # ---------------------------------------------------------------------------------
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def permissions(request):
     logger.debug("permissions ")
@@ -225,7 +221,6 @@ def permissions(request):
 
 # ---------------------------------------------------------------------------------
 @api_view(['POST'])
-@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def unknown_fingerprints(request):
     logger.debug("unknown_fingerprints ({})".format(request.method))

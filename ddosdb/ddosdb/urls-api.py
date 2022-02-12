@@ -9,5 +9,4 @@ urlpatterns = [
     path('fingerprint/', api.fingerprints, name='fingerprints'),
     path('fingerprint/<key>', api.fingerprint, name='fingerprint'),
     path('unknown-fingerprints/', api.unknown_fingerprints, name='unknown-fingerprints'),
-    path('token/', obtain_auth_token, name='api_token_auth'),
 ]

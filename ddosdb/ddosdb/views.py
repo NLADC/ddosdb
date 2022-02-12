@@ -26,7 +26,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
-from rest_framework.authtoken.models import Token
+from django_rest_multitokenauth.models import MultiToken
 
 # from ddosdb.enrichment.team_cymru import TeamCymru
 from ddosdb.models import Query, AccessRequest, Blame, FileUpload, RemoteDdosDb, FailedLogin, MISP
@@ -234,18 +234,16 @@ def account(request):
     logger.debug("account ({})".format(request.method))
 
     user: User = request.user
-    token, created = Token.objects.get_or_create (user=request.user)
-    logger.debug(token)
+    # token, created = Token.objects.get_or_create (user=request.user)
+    # logger.debug(token)
 
     context = {
         "user": user,
         "permissions": user.get_all_permissions(),
-        "token": token.key,
+        # "token": token.key,
         "success": "",
         "error": ""
     }
-
-
 
     if request.method == "POST":
         if "email" in request.POST:
@@ -280,6 +278,84 @@ def account(request):
                 context["error"] = "The new passwords are not the same"
 
     return HttpResponse(render(request, "ddosdb/account.html", context))
+
+
+# -------------------------------------------------------------------------------------------------------------------
+@login_required()
+def tokens(request):
+    logger.debug("tokens ({})".format(request.method))
+
+    user_perms = request.user.get_user_permissions()
+    group_perms = request.user.get_group_permissions()
+
+    # make a combined set (a set cannot contain duplicates)
+    permissions = user_perms | group_perms
+
+    if request.method == "GET":
+        user: User = request.user
+
+        def token_date(token: MultiToken):
+            return token.created
+
+        tokens = list(MultiToken.objects.filter(user=request.user))
+        tokens.sort(key=token_date, reverse=True)
+        logger.debug(tokens)
+        # token, created = Token.objects.get_or_create (user=request.user)
+        # logger.debug(token)
+
+        context = {
+            "user": user,
+            "permissions": user.get_all_permissions(),
+            "tokens": tokens,
+            "success": "",
+            "error": ""
+        }
+        return HttpResponse(render(request, "ddosdb/tokens.html", context))
+
+    if request.method == "POST":
+        if "django_rest_multitokenauth.add_multitoken" not in permissions:
+            raise PermissionDenied()
+
+        description='New Token'
+        if "description" in request.POST:
+            descr = request.POST["description"].strip()
+            if len(descr) > 0:
+                description = descr
+
+        token = MultiToken.objects.create(
+            user=request.user,
+            user_agent=description,
+            last_known_ip=request.META.get('REMOTE_ADDR'),
+        )
+
+    return redirect("/tokens")
+
+
+# -------------------------------------------------------------------------------------------------------------------
+@login_required()
+def delete_token(request):
+    key = ""
+    if "key" in request.GET:
+        key = request.GET['key']
+    logger.debug("Delete token ({})".format(key))
+
+    user_perms = request.user.get_user_permissions()
+    group_perms = request.user.get_group_permissions()
+
+    # make a combined set (a set cannot contain duplicates)
+    permissions = user_perms | group_perms
+
+    if "django_rest_multitokenauth.delete_multitoken" not in permissions:
+        raise PermissionDenied()
+
+    # User is allowed to delete tokens. But do check first wether the specified token belongs to this user.
+    token: MultiToken = MultiToken.objects.filter(user=request.user, key=key)
+    logger.debug(token)
+
+    if len(token) == 1:
+        token[0].delete()
+
+    return redirect("/tokens")
 
 
 # -------------------------------------------------------------------------------------------------------------------

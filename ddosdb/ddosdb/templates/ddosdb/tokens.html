@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<title>DDoSDB - Authorization Tokens</title>
+
+{% include 'ddosdb/header.html' %}
+<body>
+{% with title="Authorization Tokens" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
+
+
+<div class="container">
+
+  <div class="row">
+    <p class="lead">
+        You can use authorization tokens to access the DDoSDB API. The table below lists your current tokens (if any).
+        These tokens have the same authorizations as your account and therefore need to be kept secret.
+        <br/>This is why the table is collapsed by default. Simply click on the table header to expand it and show the list of tokens.
+    </p>
+  </div>
+
+  <div class="row">
+    <p class="lead">You currently have {{ tokens|length }} tokens.</p>
+  </div>
+
+  <table class="table table-sm table-hover text-center ddosdb-table" align="center">
+    <thead data-bs-toggle="collapse" data-bs-target="#collapseToken" aria-expanded="false" aria-controls="collapseToken">
+      <tr>
+        <th nowrap="nowrap"></th>
+        <th nowrap="nowrap">Description</th>
+        <th nowrap="nowrap">Authorization Token</th>
+        <th nowrap="nowrap">Created (UTC)</th>
+      </tr>
+    </thead>
+    <tbody class="collapse" id="collapseToken">
+      {% for token in tokens %}
+        <tr>
+          <td>
+            {% if perms.django_rest_multitokenauth.delete_multitoken %}
+              <a href="{% url "delete-token" %}?key={{ token.key }}">
+                <i class="bi-trash overview-icon"></i>
+              </a>
+            {% else %}
+                <i class="bi-trash ddosdb-lightgrey overview-icon"></i>
+            {% endif %}
+          </td>
+          <td>{{ token.user_agent }}</td>
+          <td>{{ token.key }}</td>
+          <td>{{ token.created }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+</div>
+{% if perms.django_rest_multitokenauth.add_multitoken %}
+<div class="container text-centered">
+    <div class="row">
+        <p class="lead">Create a new token by typing a description in the field below and clicking the 'Add Token' button.</p>
+    </div>
+
+    <form action="{% url "tokens" %}" method="post">
+      {% csrf_token %}
+    <div class="container" id="bar">
+        <div class="row align-items-center">
+            <div class="col-sm-9">
+                <input type="text" maxlength=255 class="form-control col-md-2" id="description" name="description" placeholder="New Token">
+            </div>
+            <div class="col-sm-1">
+                &nbsp;
+            </div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-ddosdb">Add Token</button>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+{% else %}
+    If you need (additional) authorization tokens, please contact the admin of this DDoSDB
+{% endif %}
+
+
+{% include "ddosdb/footer.html" %}
+
+</body>
+</html>

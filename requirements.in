@@ -9,6 +9,7 @@ pymongo
 django_debug_toolbar
 django-sslserver
 djangorestframework
+django-rest-multitokenauth
 psycopg2-binary
 gunicorn
 pymisp

@@ -21,6 +21,9 @@
           <div title="account information"><i class="bi-person menu-icon"></i></div>
         </a>
         <a class="nav-link disabled" target="_blank">
+          <div title="Authorization tokens"><i class="bi-key menu-icon"></i></div>
+        </a>
+        <a class="nav-link disabled" target="_blank">
           <div title="admin"><i class="bi-gear menu-icon"></i></div>
         </a>
         <a class="nav-link" href="{% url 'login' %}">
@@ -30,6 +33,15 @@
         <a class="nav-link" target="_blank" href="{% url 'account' %}">
           <div title="user '{{ request.user.username }}' account information"><i class="bi-person menu-icon" ></i></div>
         </a>
+        {% if perms.django_rest_multitokenauth.view_multitoken %}
+        <a class="nav-link" target="_blank" href="{% url 'tokens' %}">
+          <div title="Authorization tokens for user '{{ request.user.username }}'"><i class="bi-key menu-icon"></i></div>
+        </a>
+        {% else %}
+        <a class="nav-link disabled" target="_blank">
+          <div title="Authorization tokens"><i class="bi-key menu-icon"></i></div>
+        </a>
+        {% endif %}
         {% if request.user.is_superuser %}
           <a class="nav-link" target="_blank" href="/admin/">
             <div title="admin settings"><i class="bi-gear menu-icon"></i></div>

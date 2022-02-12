@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.conf import settings
 from django.urls import include, path
+from django.urls import re_path
 
 urlpatterns = [
     path('', include('ddosdb.urls')),
     path('api/', include('ddosdb.urls-api')),
+    # re_path(r'^api/auth/', include('django_rest_multitokenauth.urls', namespace='multi_token_auth')),
     path('admin/', admin.site.urls),
 ]
 
