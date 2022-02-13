@@ -913,8 +913,8 @@ def remote_push_sync():
         logger.info("Contacting remote DDoSDB:{} @ {}".format(rdb, rdb.url))
         unk_fps = []
         try:
-            r = requests.post("{}/unknown-fingerprints".format(rdb.url),
-                              auth=(rdb.username, rdb.password),
+            r = requests.post("{}api/unknown-fingerprints/".format(rdb.url),
+                              headers={'Authorization': 'Token {}'.format(rdb.authkey)},
                               json=fp_keys,
                               timeout=10, verify=rdb.check_cert)
             logger.info("status:{}".format(r.status_code))
@@ -927,8 +927,8 @@ def remote_push_sync():
                     fps_to_sync = list(filter(lambda fp: fp['key'] in unk_fps, fingerprints))
                     logger.debug("Fingerprints to sync: {}".format(fps_to_sync))
 
-                    r = requests.post("{}/fingerprints".format(rdb.url),
-                                      auth=(rdb.username, rdb.password),
+                    r = requests.post("{}api/fingerprint/".format(rdb.url),
+                                      headers={'Authorization': 'Token {}'.format(rdb.authkey)},
                                       json=fps_to_sync,
                                       timeout=10, verify=rdb.check_cert)
             rdbs.append({"name": rdb.name,
@@ -967,8 +967,8 @@ def remote_pull_sync():
         logger.info("Contacting remote DDoSDB:{} @ {}".format(rdb, rdb.url))
         unk_fps = []
         try:
-            r = requests.get("{}/fingerprints".format(rdb.url),
-                             auth=(rdb.username, rdb.password),
+            r = requests.get("{}api/fingerprint/".format(rdb.url),
+                             headers={'Authorization': 'Token {}'.format(rdb.authkey)},
                              timeout=10, verify=rdb.check_cert)
             logger.debug("status:{}".format(r.status_code))
             if r.status_code == 200:
@@ -981,8 +981,8 @@ def remote_pull_sync():
 
                 if len(unk_fps) > 0:
                     for unk_fp in unk_fps:
-                        r = requests.get("{}/fingerprint/{}".format(rdb.url, unk_fp),
-                                         auth=(rdb.username, rdb.password),
+                        r = requests.get("{}api/fingerprint/{}".format(rdb.url, unk_fp),
+                                         headers={'Authorization': 'Token {}'.format(rdb.authkey)},
                                          timeout=10, verify=rdb.check_cert)
                         if r.status_code == 200:
                             fp = r.json()[0]

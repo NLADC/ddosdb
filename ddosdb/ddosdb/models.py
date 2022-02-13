@@ -81,8 +81,8 @@ class RemoteDdosDb(models.Model):
                             help_text="""A friendly name for the remote repository""")
     url = models.URLField('Remote DDoS-DB URL',
                           help_text="""The base URL for the remote sync API""")
-    username = models.CharField('username', max_length=255)
-    password = models.CharField(max_length=255)
+    authkey = models.CharField('Authentication Key', max_length=255,
+                               help_text="""Authorization Token for the remote DDoSDB API""")
     active = models.BooleanField(default=True,
                                  help_text="""Check this to sync with this DDoS-DB""")
     push = models.BooleanField(default=False,
@@ -92,6 +92,11 @@ class RemoteDdosDb(models.Model):
 
     check_cert = models.BooleanField(default=True,
                                      help_text="""Whether to check remote DDoS-DB certificate on https""")
+
+    def save(self, *args, **kwargs):
+        if not self.url.endswith('/'):
+            self.url = "{}/".format(self.url)
+        return super(RemoteDdosDb, self).save(*args, **kwargs)
 
     def __str__(self):
         postfix = ' (inactive)'
