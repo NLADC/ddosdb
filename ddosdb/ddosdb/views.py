@@ -179,55 +179,6 @@ def signin(request):
     return HttpResponse(render(request, "ddosdb/login.html", context))
 
 
-# def request_access(request):
-#     logger.debug("request_access ({})".format(request.method))
-#
-#     context = {
-#         "error": False,
-#         "success": False
-#     }
-#
-#     if request.method == "POST":
-#         captcha_verify = requests.post("https://www.google.com/recaptcha/api/siteverify",
-#                                        data={"secret": settings.RECAPTCHA_PRIVATE_KEY,
-#                                              "response": request.POST["g-recaptcha-response"]})
-#         captcha_okay = demjson.decode(captcha_verify.text)["success"]
-#
-#         if captcha_okay:
-#             access_request = AccessRequest(first_name=request.POST["first-name"],
-#                                            last_name=request.POST["last-name"],
-#                                            email=request.POST["email"],
-#                                            institution=request.POST["institution"],
-#                                            purpose=request.POST["purpose"])
-#
-#             try:
-#                 send_mail("DDoSDB Access Request",
-#                           """
-#                 First name: {first_name}
-#                 Last name: {last_name}
-#                 Email: {email}
-#                 Institution: {institution}
-#                 Purpose: {purpose}
-#                 """.format(first_name=access_request.first_name,
-#                            last_name=access_request.last_name,
-#                            email=access_request.email,
-#                            institution=access_request.institution,
-#                            purpose=access_request.purpose),
-#                           "noreply@ddosdb.org",
-#                           [settings.ACCESS_REQUEST_EMAIL])
-#
-#                 access_request.save()
-#
-#                 context["success"] = True
-#             except (SMTPException, ConnectionRefusedError) as e:
-#                 context["error"] = e
-#         else:
-#             context["error"] = "Invalid captcha"
-#
-#     return HttpResponse(render(request, "ddosdb/request-access.html", context))
-#
-
-
 # -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def account(request):
@@ -285,11 +236,7 @@ def account(request):
 def tokens(request):
     logger.debug("tokens ({})".format(request.method))
 
-    user_perms = request.user.get_user_permissions()
-    group_perms = request.user.get_group_permissions()
-
-    # make a combined set (a set cannot contain duplicates)
-    permissions = user_perms | group_perms
+    permissions = request.user.get_all_permissions()
 
     if request.method == "GET":
         user: User = request.user
@@ -339,11 +286,7 @@ def delete_token(request):
         key = request.GET['key']
     logger.debug("Delete token ({})".format(key))
 
-    user_perms = request.user.get_user_permissions()
-    group_perms = request.user.get_group_permissions()
-
-    # make a combined set (a set cannot contain duplicates)
-    permissions = user_perms | group_perms
+    permissions = request.user.get_all_permissions()
 
     if "django_rest_multitokenauth.delete_multitoken" not in permissions:
         raise PermissionDenied()
@@ -437,6 +380,9 @@ def download(request):
 @login_required()
 def query(request):
     logger.debug("query ({})".format(request.method))
+
+    if "ddosdb.add_query" not in request.user.get_all_permissions():
+        raise PermissionDenied()
 
     # { key: {$regex: /^0.*/ } }
     pp = pprint.PrettyPrinter(indent=4)
