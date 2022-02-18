@@ -69,23 +69,32 @@ def index(request):
 def fingerprints(request):
     logger.info("fingerprints ({})".format(request.method))
 
-    user_perms = request.user.get_user_permissions()
-    group_perms = request.user.get_group_permissions()
-
-    # make a combined set (a set cannot contain duplicates)
-    permissions = user_perms | group_perms
+    # user_perms = request.user.get_user_permissions()
+    # group_perms = request.user.get_group_permissions()
+    #
+    # # make a combined set (a set cannot contain duplicates)
+    permissions = request.user.get_all_permissions()
 
     if request.method == "GET":
         if "ddosdb.view_fingerprint" not in permissions:
             raise PermissionDenied()
         try:
-            # Only return shareable fingerprints
-            fps = _search({'shareable': True}, {'_id': 0})
-
             # logger.debug(fps)
-            results = []
+            results = {'shareable': [],
+                       'non-shareable': []}
+
+            # Only return shareable and 'own' fingerprints by default
+            fps = _search({'shareable': True}, {'_id': 0})
             for fp in fps:
-                results.append(fp['key'])
+                results['shareable'].append(fp['key'])
+
+            if "ddosdb.view_nonsync_fingerprint" in permissions:
+                fps = _search({'shareable': False}, {'_id': 0})
+            else:
+                fps = _search({'shareable': False, 'submitter': request.user.username}, {'_id': 0})
+            for fp in fps:
+                results['non-shareable'].append(fp['key'])
+
             return JsonResponse(results, safe=False)
 
         except ServerSelectionTimeoutError as e:
@@ -186,6 +195,8 @@ def fingerprint(request, key):
         fps = _search({'key': key}, {'_id': 0})
         logger.debug(fps)
         if len(fps) > 0:
+            # Check if this user is allowed to view this fingerprint...
+
             return JsonResponse(fps, safe=False)
         else:
             response = HttpResponse()
@@ -235,7 +246,7 @@ def unknown_fingerprints(request):
     # make a combined set (a set cannot contain duplicates)
     all_permissions = user_perms | group_perms
 
-    if "ddosdb.view_fingerprint" not in all_permissions:
+    if "ddosdb.add_fingerprint" not in all_permissions:
         raise PermissionDenied()
 
     if request.META['CONTENT_TYPE'] != "application/json":

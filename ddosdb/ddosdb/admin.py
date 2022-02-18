@@ -108,6 +108,11 @@ class RemoteDdosDbAdmin(admin.ModelAdmin):
 
     form = RemoteDdosDbForm
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['url'].widget.attrs['placeholder'] = "https://remote.ddosdb.url/"
+        return form
+
 
 class MISPForm(forms.ModelForm):
     class Meta:
@@ -124,6 +129,11 @@ class MISPAdmin(admin.ModelAdmin):
     fields = (('name', 'active','push','pull'), ('url','check_cert'), 'authkey')
 
     form = MISPForm
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['url'].widget.attrs['placeholder'] = "https://remote.misp.url/"
+        return form
 
 # class FailedLoginAdmin(admin.ModelAdmin):
 #     list_display = ("ipaddress", "logindatetime")

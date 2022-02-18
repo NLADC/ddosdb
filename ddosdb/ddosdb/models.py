@@ -39,9 +39,10 @@ class Fingerprint(models.Model):
     class Meta:
         managed = False
 
-        permissions = (
+        permissions = [
             ('upload_fingerprint', 'Can upload fingerprints'),
-        )
+            ('view_nonsync_fingerprint', 'Can view non-shared fingerprints'),
+        ]
 
 
 class FileUpload(models.Model):

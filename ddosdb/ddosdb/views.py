@@ -730,6 +730,10 @@ def overview(request):
     #    _search()
 
     try:
+        # Note that 'shareable' and 'submitter' must always be retrieved
+        # as they are also used to determine whether someone can see it
+        # (if a user has only 'view' rights, but not 'view_nonsync' then they
+        # should only see 'shareable' and their own fingerprints.
         context["headers"] = {
             #            "multivector_key"   : "multivector",
             "key": "key",
@@ -769,10 +773,7 @@ def overview(request):
         results = mdb_resp
         logger.info("Got {} results".format(len(results)))
 
-        #        pp.pprint(results)
-        # Only do this if there are actual results...
-        # and more than one, since one result does not need sorting
-        if len(results) > 1:
+        if len(results) > 0:
             df = pd.DataFrame.from_dict(results)
             # pp.pprint(df)
 
@@ -783,23 +784,29 @@ def overview(request):
                     context["headers"].pop(field)
             o = [context["o"]][0]
 
-            # Do a special sort if the column to sort by is 'submitter'
-            # Since people can put e-mail addresses in starting with upper/lower case
-            # Change the if statement to the following if you want to sort case insensitive
-            # on any column with string values: if df.dtypes[o] == np.object:
-            if o == "submitter":
-                onew = o + "_tmp"
-                df[onew] = df[o].str.lower()
-                df.sort_values(by=onew, ascending=(context["so"] == "asc"), inplace=True)
-                del df[onew]
-            else:
-                df.sort_values(by=o, ascending=(context["so"] == "asc"), inplace=True)
+            if "ddosdb.view_nonsync_fingerprint" not in user.get_all_permissions():
+                # Remove all fingerprints that are not shareable and not submitted by this user.
+                # (By only leaving fingerprints that are shareable or submitted by this user)
+                df = df[(df['submitter'] == user.username) | (df['shareable'] == True)]
 
-            # Make sure some columns are shown as int
-            if "total_ips" in df.columns:
-                df = df.astype({"total_ips": int})
-            if "ips_involved" in df.columns:
-                df = df.astype({"ips_involved": int})
+            if len(results) > 1:
+                # Do a special sort if the column to sort by is 'submitter'
+                # Since people can put e-mail addresses in starting with upper/lower case
+                # Change the if statement to the following if you want to sort case insensitive
+                # on any column with string values: if df.dtypes[o] == np.object:
+                if o == "submitter":
+                    onew = o + "_tmp"
+                    df[onew] = df[o].str.lower()
+                    df.sort_values(by=onew, ascending=(context["so"] == "asc"), inplace=True)
+                    del df[onew]
+                else:
+                    df.sort_values(by=o, ascending=(context["so"] == "asc"), inplace=True)
+
+                # Make sure some columns are shown as int
+                if "total_ips" in df.columns:
+                    df = df.astype({"total_ips": int})
+                if "ips_involved" in df.columns:
+                    df = df.astype({"ips_involved": int})
 
             context["results"] = df.to_dict(orient='records')
         else:
@@ -973,7 +980,7 @@ def remote_pull_sync():
             logger.debug("status:{}".format(r.status_code))
             if r.status_code == 200:
                 logger.info("Fingerprints at {}: {}".format(rdb.name, r.json()))
-                rem_fps = r.json()
+                rem_fps = r.json()['shareable']
                 for rem_fp in rem_fps:
                     if not rem_fp in fps:
                         unk_fps.append(rem_fp)
