@@ -65,6 +65,30 @@ Create a superuser for your user management:
 python manage.py createsuperuser
 ```
 
+#### Optional preparations
+
+*Group permissions*
+
+Permissions can be managed in Django by assigning permissions to users directly. 
+A better way to do this is to assign permissions to groups, rather than users. 
+Users can then be added to those groups and inherit the permissions of the groups they are assigned to.
+A reasonable collection of default groups can be created by the following command.
+
+```
+python manage.py initgroups
+```
+
+*Periodic tasks*
+
+For synchonization between DDoSDB instances periodic tasks are used. See also the section below on Celery worker and Celery beat.
+In case you need this in a development setup, use the following command to create a default synchronization schedule of once a day.
+
+```
+python manage.py initsync
+```
+Next to 'every day', this also creates intervals for 'every hour', 'every minute' and 'every 15 seconds'.
+The admin interface of Django can be used to adjust the periodic tasks to one of these alternative intervals.
+
 #### Web server
 For development the Django development server suffices, no need for a front-end webserver. Rather than a full-fledged SQL database the built-in support for sqlite3 will work just fine. 
 
@@ -93,6 +117,7 @@ In both cases the `--settings=website.settings-dev` argument ensures that the de
 #### Creating additional users
 
 Go to admin section of the website at [https://localhost:8000/admin](https://localhost:8000/admin) and log in using the credentials you created in the createsuperuser step. Create some other users you can use for viewing, uploading etc.
+The admin section can also be reached by clicking the cog wheel icon at the right of the banner at the top of every page.
 
 Finally, visit the start/search page of the ddosdb at [https://localhost:8000/](https://localhost:8000/)
 
