@@ -42,7 +42,7 @@
           <div title="Authorization tokens"><i class="bi-key menu-icon"></i></div>
         </a>
         {% endif %}
-        {% if request.user.is_superuser %}
+        {% if request.user.is_staff %}
           <a class="nav-link" target="_blank" href="/admin/">
             <div title="admin settings"><i class="bi-gear menu-icon"></i></div>
           </a>
