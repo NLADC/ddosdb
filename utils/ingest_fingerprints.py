@@ -83,7 +83,10 @@ def parser_add_arguments():
                         default=1)
 
     parser.add_argument("-c", "--verify",
-                        help="Check the server certificate in case of an https URL",
+                        help=textwrap.dedent('''\
+                        Check the server certificate in case of an https URL.
+                        The default behaviour is NOT to check server certificates.
+                        '''),
                         action="store_true")
 
     parser.add_argument("-v", "--verbose",
@@ -203,7 +206,8 @@ def main():
                 #     data['key'] = "".join([random.choice("abcdef0123456789") for i in range(15)])
                 for i in range(0, args.n):
                     print("\tUploading fingerprint {}: key={} response=".format(i, data['key']), end='')
-                    # urllib3.disable_warnings()
+                    if not args.verify:
+                        urllib3.disable_warnings()
                     r = requests.post("{}/api/fingerprint/".format(args.url),
                                       headers={'Authorization': 'Token {}'.format(args.token)},
                                       json=data,
