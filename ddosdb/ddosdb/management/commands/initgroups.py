@@ -19,24 +19,36 @@ class Command(BaseCommand):
                 '*admin': ['*'],
                 # Remote viewers only see/retrieve fingerprints with 'shareable' set to True
                 # Or their own (possible if they are an uploader as well)
-                '*viewer (other organisation)': ['view_fingerprint',
-                                      'view_multitoken',
-                                      ],
+                '*viewer (other organisation)': [
+                    'view_fingerprint',
+                    'view_multitoken',
+                ],
                 # local viewers (of the own organisation) can also see fingerprints not set to 'shareable'
-                '*viewer (own organisation)': ['view_fingerprint',
-                                     'view_nonsync_fingerprint',
-                                     ],
+                '*viewer (own organisation)': [
+                    'view_fingerprint',
+                    'view_nonsync_fingerprint',
+                    'view_multitoken',
+                ],
                 # Uploaders can upload/add fingerprints (obvs!)
-                '*uploader': ['upload_fingerprint',
-                               'add_fingerprint',
-                               'view_multitoken',
-                               ],
+                '*uploader': [
+                    'upload_fingerprint',
+                    'add_fingerprint',
+                    'view_multitoken',
+                ],
                 # Combine above with this one to be able to add/delete tokens
-                '*token creator': ['upload_fingerprint',
-                                    'view_multitoken',
-                                    'add_multitoken',
-                                    'delete_multitoken',
-                                    ],
+                '*token creator': [
+                    'upload_fingerprint',
+                    'view_multitoken',
+                    'add_multitoken',
+                    'delete_multitoken',
+                ],
+                # Ability to execute queries
+                '*queries': [
+                    'add_query',
+                    'view_query',
+                    'change_query',
+                    'delete_query',
+                ],
             }
 
             for grp, prms in def_groups.items():
