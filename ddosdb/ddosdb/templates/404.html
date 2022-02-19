@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<title>DDoSDB - 404 Error</title>
+
+{% include 'ddosdb/header.html' %}
+<body>
+{% with title="404 Not Found" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
+
+<div class="container align-items-center">
+  <div class="col-sm-12 alert alert-warning" role="alert">
+    <p class="lead"><br/>
+        The requested resource '{{ request.path }}' could not be found.
+    </p>
+  </div>
+  <div class="row">
+    <p class="lead">
+        Return to the <a href="{% url 'index' %}">start page</a>
+    </p>
+  </div>
+</div>
+
+
+{% include "ddosdb/footer.html" %}
+
+</body>
+</html>

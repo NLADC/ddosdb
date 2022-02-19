@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<title>DDoSDB - 403 Error</title>
+
+{% include 'ddosdb/header.html' %}
+<body>
+{% with title="403 Forbidden" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
+
+
+<div class="container align-items-center">
+  <div class="col-sm-12 alert alert-danger" role="alert">
+    <p class="lead"><br/>
+        User '{{ request.user.username }}' does not have the right permissions to access the url '{{ request.path }}'.
+        Either log in as a different user with appropriate permissions, or ask an admin of this DDoSDB instance to
+        grant user '{{ request.user.username }}' the extra permission(s) needed.
+    </p>
+  </div>
+  <div class="row">
+    <p class="lead">
+        Return to the <a href="{{ request.META.HTTP_REFERER }}">previous page</a> or the
+        <a href="{% url 'index' %}">start page</a>
+    </p>
+  </div>
+</div>
+
+
+{% include "ddosdb/footer.html" %}
+
+</body>
+</html>
