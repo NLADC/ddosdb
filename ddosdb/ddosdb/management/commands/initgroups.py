@@ -49,6 +49,17 @@ class Command(BaseCommand):
                     'change_query',
                     'delete_query',
                 ],
+                # Ability to do everything with fingerprints
+                '*fingerprints': [
+                    'add_fingerprint',
+                    'change_fingerprint',
+                    'delete_fingerprint',
+                    'edit_comment_fingerprint',
+                    'edit_sync_fingerprint',
+                    'upload_fingerprint',
+                    'view_fingerprint',
+                    'view_nonsync_fingerprint',
+                ],
             }
 
             for grp, prms in def_groups.items():
