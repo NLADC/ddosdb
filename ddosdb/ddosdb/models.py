@@ -6,6 +6,17 @@ from django.dispatch import receiver
 
 from website import settings
 
+from django.db.models.signals import pre_delete
+from django.dispatch.dispatcher import receiver
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+
+
+@receiver(pre_delete, sender=User)
+def delete_user(sender, instance, **kwargs):
+    if instance.is_superuser:
+        raise PermissionDenied
+
 
 class Query(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -42,6 +53,8 @@ class Fingerprint(models.Model):
         permissions = [
             ('upload_fingerprint', 'Can upload fingerprints'),
             ('view_nonsync_fingerprint', 'Can view non-shared fingerprints'),
+            ('edit_comment_fingerprint', 'Can edit comments of fingerprints'),
+            ('edit_sync_fingerprint', 'Can change shareability of fingerprints'),
         ]
 
 

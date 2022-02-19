@@ -1102,7 +1102,7 @@ def toggle_shareable(request):
 
     try:
         fp = _search_one({"key": key}, {"shareable": 1, "key": 1, "submitter": 1})
-        if fp["submitter"] == user.username or user.is_superuser:
+        if fp["submitter"] == user.username or "ddosdb.edit_sync_fingerprint" in user.get_all_permissions():
             logger.info("Setting key {} to Shareable={}".format(key, shareable))
             _update({'key': key}, {'$set': {"shareable": shareable}})
         else:
@@ -1168,7 +1168,7 @@ def edit_comment(request):
             response.reason_phrase = "Database unavailable"
             return response
 
-        if fp["submitter"] == user.username or user.is_superuser:
+        if fp["submitter"] == user.username or "ddosdb.edit_comment_fingerprint" in user.get_all_permissions():
             context["node"] = fp
             return HttpResponse(render(request, "ddosdb/edit-comment.html", context))
         else:
