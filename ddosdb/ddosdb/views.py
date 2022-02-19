@@ -1180,7 +1180,7 @@ def edit_comment(request):
         mdb = MongoClient(settings.MONGODB).ddosdb.fingerprints
 
         fp = mdb.find_one({"key": key}, {"comment": 1, "key": 1, "submitter": 1})
-        if fp["submitter"] == user.username or user.is_superuser:
+        if fp["submitter"] == user.username or "ddosdb.edit_comment_fingerprint" in user.get_all_permissions():
             try:
                 logger.info("Setting comment for fingerprint {} to '{}'".format(key, request.POST["comment"]))
                 mdb.find_one_and_update({'key': key}, {'$set': {"comment": request.POST["comment"]}})
