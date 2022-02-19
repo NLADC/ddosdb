@@ -9,7 +9,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         try:
             # put startup code here
-            logger.info("manage.py celery command")
+            logger.info("manage.py initsync command")
             # importing model classes
             from django_celery_beat.models import PeriodicTask, IntervalSchedule, CrontabSchedule
 

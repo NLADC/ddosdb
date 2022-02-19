@@ -645,6 +645,9 @@ def upload_file(request):
 def overview(request):
     logger.debug("overview ({})".format(request.method))
 
+    if "ddosdb.view_fingerprint" not in request.user.get_all_permissions():
+        raise PermissionDenied()
+
     pp = pprint.PrettyPrinter(indent=4)
 
     user: User = request.user
