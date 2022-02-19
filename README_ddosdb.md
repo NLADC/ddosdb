@@ -64,7 +64,6 @@ Create a superuser for your user management:
 ```
 python manage.py createsuperuser
 ```
-
 #### Optional preparations
 
 *Group permissions*
