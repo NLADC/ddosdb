@@ -20,7 +20,7 @@ if [ x"$doclean" = x"y" ]
 then
   docker-compose down -v
   docker-compose stop
-  docker image rm docker_nginx docker_ddosdb
+  docker image rm docker_nginx ddosdb/ddosdb
 fi
 
 printf "\n"
