@@ -218,17 +218,15 @@ def fingerprint(request, key):
 def permissions(request):
     logger.debug("permissions ")
 
-    user_perms = request.user.get_user_permissions()
-    group_perms = request.user.get_group_permissions()
+    user_permissions = list(request.user.get_all_permissions())
+    permissions = []
 
-    # make a combined set (a set cannot contain duplicates)
-    user_permissions = list(user_perms | group_perms)
-    user_permissions.sort()
+    for perm in user_permissions:
+        permissions.append(perm.split('.')[-1])
 
-    if user_permissions is None:
-        raise PermissionDenied()
+    permissions.sort()
 
-    return JsonResponse({str(request.user): user_permissions}, safe=False)
+    return JsonResponse({str(request.user): permissions}, safe=False)
 
 
 # ---------------------------------------------------------------------------------
