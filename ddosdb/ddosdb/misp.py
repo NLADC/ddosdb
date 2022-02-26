@@ -1,13 +1,10 @@
 import traceback
-import sys
 import logging
-from pprint import PrettyPrinter, pprint
 import requests
 import urllib3
 from pymisp import ExpandedPyMISP, MISPEvent, MISPObject, MISPAttribute, MISPTag
 import demjson
 import time
-from ddosdb.models import MISP
 
 logger = logging.getLogger(__name__)
 
@@ -76,54 +73,6 @@ def get_misp_fingerprints(misp):
 
 
 # ------------------------------------------------------------------------------
-def add_misp_event(misp, event):
-    misp_event = None
-
-    logger.info("Creating an event ({})".format(event))
-
-    try:
-        urllib3.disable_warnings()
-        r = requests.post("{0}{1}{2}".format(misp.url, "/events/add/", ""),
-                          json=event,
-                          headers={'Authorization': misp.authkey,
-                                   'Accept': 'application/json'},
-                          timeout=10, verify=misp.check_cert)
-        logger.debug("status:{}".format(r.status_code))
-        if r.status_code == 200:
-            misp_event = r.json()
-    except Exception as e:
-        logger.error("{}".format(e))
-
-    return misp_event
-
-
-# ------------------------------------------------------------------------------
-def add_misp_object(misp, event_id, misp_object):
-    m_o = None
-
-    logger.info("Creating an object for event #{}".format(event_id))
-
-    logger.debug("URL: {0}{1}{2}".format(misp.url, "objects/add/", event_id))
-    try:
-        urllib3.disable_warnings()
-        r = requests.post("{0}{1}{2}".format(misp.url, "objects/add/", event_id),
-                          json=misp_object,
-                          headers={'Authorization': misp.authkey,
-                                   'Accept': 'application/json'},
-                          timeout=60, verify=misp.check_cert)
-        logger.debug("status:{}".format(r.status_code))
-        if r.status_code == 200:
-            m_o = r.json()
-        else:
-            logger.debug(r)
-            print(r.text)
-    except Exception as e:
-        logger.error("{}".format(e))
-
-    return m_o
-
-
-# ------------------------------------------------------------------------------
 def add_misp_tag(misp, tag_name, tag_colour):
     misp_tag = None
 
@@ -175,7 +124,6 @@ def add_misp_fingerprint(rmisp, fp):
         misp = ExpandedPyMISP(rmisp.url, rmisp.authkey, ssl=rmisp.check_cert, tool="DDoSDB", debug=False)
 
         # Create the DDoSCH tag (returns existing one if already present)
-        # ddosch_tag = add_misp_tag(rmisp, 'DDoSCH', '#ed28c2')
         ddosch_tag = add_misp_tag(rmisp, 'DDoSCH', '#ff7dfd')
         logger.debug(ddosch_tag)
 
