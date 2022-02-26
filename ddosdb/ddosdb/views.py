@@ -675,7 +675,7 @@ def overview(request):
     if "son" in request.GET:
         context["son"] = request.GET["son"]
 
-    logger.debug("context: {}".format(context))
+    # logger.debug("context: {}".format(context))
     #    _search()
 
     try:
@@ -687,7 +687,7 @@ def overview(request):
             #            "multivector_key"   : "multivector",
             "key": "key",
             "shareable": "Sync",
-            "start_time": "start time",
+            "time_start": "start time",
             # "tags": "tags",
             "file_type": "capture",
             #            "duration_sec": "duration (seconds)",
