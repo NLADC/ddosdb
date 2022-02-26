@@ -15,11 +15,11 @@ class Database(object):
         pp = pprint.PrettyPrinter(indent=4)
 
         client = pymongo.MongoClient(Database.URI)
-        Database.DATABASE = client.ddosdb.fingerprints
+        db = client.ddosdb.fingerprints
         #
         # Database.DATABASE.drop_indexes()
         # # Create text index
-        Database.DATABASE.create_index([
+        db.create_index([
             ('key', 'text'),
             ('tags', 'text'),
             ('one_line_fingerprint', 'text'),
@@ -30,8 +30,12 @@ class Database(object):
             ('submitter', 'text'),
         ], name='text_index')
         logger.info("Database index created")
-        logger.debug(Database.DATABASE.index_information())
+        logger.debug(db.index_information())
 
     @staticmethod
     def getDB():
+        if not Database.DATABASE:
+            client = pymongo.MongoClient(Database.URI)
+            Database.DATABASE = client.ddosdb.fingerprints
+
         return Database.DATABASE
