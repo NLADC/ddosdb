@@ -17,7 +17,8 @@ class Command(BaseCommand):
             def_groups = {
                 # Admins can do everything
                 '*admin': ['*'],
-                # Remote viewers only see/retrieve fingerprints with 'shareable' set to True
+
+                # Remote viewers only see/retrieve fingerprints that have 'shareable' set to True
                 # Or their own (possible if they are an uploader as well)
                 '*viewer (other organisation)': [
                     'view_fingerprint',
@@ -29,7 +30,7 @@ class Command(BaseCommand):
                     'view_nonsync_fingerprint',
                     'view_multitoken',
                 ],
-                # Uploaders can upload/add fingerprints (obvs!)
+                # Uploaders can upload/add fingerprints (obvs!) and view tokens
                 '*uploader': [
                     'upload_fingerprint',
                     'add_fingerprint',
@@ -37,7 +38,6 @@ class Command(BaseCommand):
                 ],
                 # Combine above with this one to be able to add/delete tokens
                 '*token creator': [
-                    'upload_fingerprint',
                     'view_multitoken',
                     'add_multitoken',
                     'delete_multitoken',
