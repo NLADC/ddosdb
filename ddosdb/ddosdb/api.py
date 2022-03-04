@@ -1,9 +1,7 @@
 import logging
 import demjson
 from datetime import datetime
-# from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, renderer_classes
-from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import PermissionDenied
@@ -52,15 +50,6 @@ def _update(query=None, fields=None):
 def _delete(query=None):
     result = _mdb().delete_many(query)
     return result
-
-
-# Create your views here.
-@api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
-def index(request):
-    logger.debug("Index")
-    content = {'message': 'Hello {} ({})'.format(request.user, request.method)}
-    return JsonResponse(content)
 
 
 # ---------------------------------------------------------------------------------
@@ -181,11 +170,7 @@ def fingerprints(request):
 def fingerprint(request, key):
     logger.debug("fingerprint/{} ({})".format(key, request.method))
 
-    user_perms = request.user.get_user_permissions()
-    group_perms = request.user.get_group_permissions()
-
-    # make a combined set (a set cannot contain duplicates)
-    permissions = user_perms | group_perms
+    permissions = request.user.get_all_permissions()
 
     if request.method == "GET":
         if "ddosdb.view_fingerprint" not in permissions:
@@ -238,12 +223,10 @@ def unknown_fingerprints(request):
     """Allowing caller to then only upload fingerprints not yet known by this DDoS-DB"""
     """This is a REST method accepting only POST calls with JSON body content (application/json)"""
 
-    user_perms = request.user.get_user_permissions()
-    group_perms = request.user.get_group_permissions()
+    all_permissions = request.user.get_all_permissions()
 
-    # make a combined set (a set cannot contain duplicates)
-    all_permissions = user_perms | group_perms
-
+    # There is only a need to be able to use this call if you want
+    # to upload new fingerprints and need to check which are unknown
     if "ddosdb.add_fingerprint" not in all_permissions:
         raise PermissionDenied()
 
