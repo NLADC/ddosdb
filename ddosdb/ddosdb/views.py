@@ -790,6 +790,7 @@ def overview(request):
 @login_required()
 def delete(request):
     logger.debug("delete ({})".format(request.method))
+    pp = pprint.PrettyPrinter(indent=4)
 
     pp = pprint.PrettyPrinter(indent=4)
 
@@ -819,14 +820,21 @@ def delete(request):
         context["son"] = request.GET["son"]
 
     if "key" in request.GET:
-        if "ddosdb.delete_fingerprint" in user.get_all_permissions():
-            _delete({"key": request.GET["key"]})
-            logger.info("User {} delete fingerprint {}".format(user.username, request.GET["key"]))
-        else:
-            logger.error("********************************************************")
-            logger.error("********  delete request without permission ************")
-            logger.error("********      THIS SHOULD NOT HAPPEN        ************")
-            logger.error("********************************************************")
+        # Get the fingerprint first, to see if the user is the submitter
+        # Delete always allowed for ones 'own' fingerprints
+        results = _search({'key': request.GET['key']}, {'_id': 0})
+
+        if len(results) > 0:
+            fp = results[0]
+            if "ddosdb.delete_fingerprint" in user.get_all_permissions() or user.username == fp['submitter']:
+                _delete({"key": request.GET["key"]})
+                logger.info("User {} delete fingerprint {}".format(user.username, request.GET["key"]))
+            else:
+                logger.error("********************************************************")
+                logger.error("********  delete request without permission ************")
+                logger.error("********      THIS SHOULD NOT HAPPEN        ************")
+                logger.error("********   User '{}' trying nasty stuff?    ************".format(user.username))
+                logger.error("********************************************************")
 
     extra = []
     if "q" in request.GET:
