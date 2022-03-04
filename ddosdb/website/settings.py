@@ -22,7 +22,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 INSTALLED_APPS = [
     'ddosdb.apps.DdosdbConfig',
-    'django.contrib.admin',
+    # 'django.contrib.admin',
+    'ddosdb.apps.DdosdbAdminConfig',  # replaces 'django.contrib.admin'
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

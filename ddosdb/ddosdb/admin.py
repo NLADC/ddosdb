@@ -6,10 +6,8 @@ from django_rest_multitokenauth.admin import MultiTokenAdmin
 # from django.core.mail import send_mail
 from django import forms
 
-
 # from ddosdb.models import Query, AccessRequest, Blame, FileUpload, Profile, RemoteDdosDb, MISP, FailedLogin
 from ddosdb.models import Query, FileUpload, Profile, RemoteDdosDb, MISP, FailedLogin
-
 
 # class QueryAdmin(admin.ModelAdmin):
 #     list_display = ("user", "query", "timestamp")
@@ -72,8 +70,8 @@ from ddosdb.models import Query, FileUpload, Profile, RemoteDdosDb, MISP, Failed
 #
 # class FileUploadAdmin(admin.ModelAdmin):
 #     list_display = ("user", "filename", "timestamp")
-#
-#
+
+
 class ProfileInline(admin.StackedInline):
     model = Profile
     can_delete = False
@@ -99,10 +97,6 @@ class RemoteDdosDbForm(forms.ModelForm):
     class Meta:
         model = RemoteDdosDb
         fields = []
-# Uncommenting code below will give
-#        widgets = {
-#        'password': forms.PasswordInput(),
-#    }
 
 
 class RemoteDdosDbAdmin(admin.ModelAdmin):
@@ -121,10 +115,6 @@ class MISPForm(forms.ModelForm):
     class Meta:
         model = MISP
         fields = []
-# Uncommenting code below will give
-#        widgets = {
-#        'password': forms.PasswordInput(),
-#    }
 
 
 class MISPAdmin(admin.ModelAdmin):
