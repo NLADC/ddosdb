@@ -178,6 +178,10 @@ def main():
     logger = get_logger(args)
     pp = pprint.PrettyPrinter(indent=4)
 
+    url = args.url
+    if url.endswith('/'):
+        url = url[:-1]
+
     filename = args.filename
     filelist = []
 
@@ -208,7 +212,7 @@ def main():
                     print("\tUploading fingerprint {}: key={} response=".format(i, data['key']), end='')
                     if not args.verify:
                         urllib3.disable_warnings()
-                    r = requests.post("{}/api/fingerprint/".format(args.url),
+                    r = requests.post("{}/api/fingerprint/".format(url),
                                       headers={'Authorization': 'Token {}'.format(args.token)},
                                       json=data,
                                       timeout=10,
