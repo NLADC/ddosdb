@@ -17,7 +17,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import Permission, User, Group
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django.http import HttpResponse
@@ -29,7 +29,7 @@ from django.core.exceptions import PermissionDenied
 from django_rest_multitokenauth.models import MultiToken
 
 # from ddosdb.enrichment.team_cymru import TeamCymru
-from ddosdb.models import Query, RemoteDdosDb, FailedLogin, MISP, FileUpload
+from ddosdb.models import Query, RemoteDdosDb, FailedLogin, MISP, FileUpload, DDoSToken
 from ddosdb.database import Database
 import ddosdb.misp
 
@@ -184,6 +184,8 @@ def signin(request):
 def account(request):
     logger.debug("account ({})".format(request.method))
 
+    pp = pprint.PrettyPrinter(indent=4)
+
     user: User = request.user
     # token, created = Token.objects.get_or_create (user=request.user)
     # logger.debug(token)
@@ -195,6 +197,15 @@ def account(request):
         "success": "",
         "error": ""
     }
+
+    if user.is_superuser:
+        groups = Group.objects.all()
+        all_groups = {}
+        for grp in groups:
+            user_list = [user.username for user in User.objects.filter(groups__name=grp.name)]
+            all_groups[grp.name] = user_list
+        pp.pprint(all_groups)
+        context['groups'] = all_groups
 
     if request.method == "POST":
         if "email" in request.POST:
@@ -244,7 +255,7 @@ def tokens(request):
         def token_date(token: MultiToken):
             return token.created
 
-        tokens = list(MultiToken.objects.filter(user=request.user))
+        tokens = list(DDoSToken.objects.filter(user=request.user))
         tokens.sort(key=token_date, reverse=True)
         logger.debug(tokens)
         # token, created = Token.objects.get_or_create (user=request.user)
@@ -260,7 +271,7 @@ def tokens(request):
         return HttpResponse(render(request, "ddosdb/tokens.html", context))
 
     if request.method == "POST":
-        if "django_rest_multitokenauth.add_multitoken" not in permissions:
+        if "ddosdb.add_token" not in permissions:
             raise PermissionDenied()
 
         description='New Token'
@@ -269,9 +280,9 @@ def tokens(request):
             if len(descr) > 0:
                 description = descr
 
-        token = MultiToken.objects.create(
+        token = DDoSToken.objects.create(
             user=request.user,
-            user_agent=description,
+            description=description,
             last_known_ip=request.META.get('REMOTE_ADDR'),
         )
 

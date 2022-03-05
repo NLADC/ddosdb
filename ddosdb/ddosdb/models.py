@@ -3,6 +3,7 @@ from django.core.mail import send_mail
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django_rest_multitokenauth.models import MultiToken
 
 from website import settings
 
@@ -157,6 +158,30 @@ class FailedLogin(models.Model):
 
     def __str__(self):
         return self.ipaddress
+
+
+class DDoSToken(MultiToken):
+
+    class Meta:
+        verbose_name = "Token"
+        verbose_name_plural = "Tokens"
+        permissions = [
+            ('add_token', 'Can add token'),
+            ('view_token', 'Can view Token'),
+            ('edit_token', 'Can change Token'),
+            ('delete_token', 'Can delete Token'),
+        ]
+
+    description = models.CharField(
+        max_length=256,
+        verbose_name="Description",
+        default=""
+    )
+
+    def __str__(self):
+        return "{} (user {} with description  {})".format(
+            self.key, self.user, self.description
+        )
 
 
 @receiver(post_save, sender=User)

@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django.conf.urls import url
 import logging
 import pprint
+from . import views
 
 logger = logging.getLogger(__name__)
 
@@ -8,6 +10,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 
 class MyAdminSite(admin.AdminSite):
+
     def get_app_list(self, request):
         """
         Return a sorted list of all the installed apps that have been
@@ -42,7 +45,7 @@ class MyAdminSite(admin.AdminSite):
             'Clocked': 4,
         }
 
-        # Sort the models alphabetically within each app.
+        # Sort the models reverse alphabetically within each app.
         for app in app_list:
             if app['app_label'] == 'django_celery_beat':
                 app['models'].sort(key=lambda x: celery_order[x['name']])

@@ -208,6 +208,7 @@ def permissions(request):
 
     for perm in user_permissions:
         permissions.append(perm.split('.')[-1])
+        # permissions.append(perm)
 
     permissions.sort()
 

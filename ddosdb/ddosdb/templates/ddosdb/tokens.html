@@ -37,7 +37,7 @@
       {% for token in tokens %}
         <tr>
           <td>
-            {% if perms.django_rest_multitokenauth.delete_multitoken %}
+            {% if perms.ddosdb.delete_token %}
               <a href="{% url "delete-token" %}?key={{ token.key }}">
                 <i class="bi-trash overview-icon"></i>
               </a>
@@ -45,7 +45,7 @@
                 <i class="bi-trash ddosdb-lightgrey overview-icon"></i>
             {% endif %}
           </td>
-          <td>{{ token.user_agent }}</td>
+          <td>{{ token.description }}</td>
           <td>{{ token.key }}</td>
           <td>{{ token.created }}</td>
         </tr>
@@ -55,7 +55,7 @@
 
 
 </div>
-{% if perms.django_rest_multitokenauth.add_multitoken %}
+{% if perms.ddosdb.add_token %}
 <div class="container text-centered">
     <div class="row">
         <p class="lead">Create a new token by typing a description in the field below and clicking the 'Add Token' button.</p>
