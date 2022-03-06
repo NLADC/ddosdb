@@ -29,7 +29,7 @@ from django.core.exceptions import PermissionDenied
 from django_rest_multitokenauth.models import MultiToken
 
 # from ddosdb.enrichment.team_cymru import TeamCymru
-from ddosdb.models import Query, RemoteDdosDb, FailedLogin, MISP, FileUpload, DDoSToken
+from ddosdb.models import Query, RemoteDdosDb, MISP, DDoSToken
 from ddosdb.database import Database
 import ddosdb.misp
 
@@ -140,39 +140,18 @@ def signin(request):
         timeout = False
         timeout_sec = 0
         # Check failed logins in last 5 minutes
-
-        fls = FailedLogin.objects.filter(ipaddress=ip, logindatetime__gt=timezone.now() - timedelta(seconds=300))
-        logger.info("Failed login attempts from {} in the last 5 minutes: {}".format(ip, len(fls)))
-
-        if len(fls) < 3:
-            username = request.POST['username']
-            password = request.POST['password']
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                # Remove old failed attempts from this ip older than 10 minutes
-                # FailedLogin.objects.filter(ipaddress=ip, logindatetime__lte=timezone.now() - timedelta(minutes=10)).delete()
-
-                login(request, user)
-                if "next" in request.GET:
-                    return redirect(request.GET["next"])
-                else:
-                    return redirect("index")
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            if "next" in request.GET:
+                return redirect(request.GET["next"])
             else:
-                logger.info("Login fail from {}".format(ip))
-                fl = FailedLogin()
-                fl.ipaddress = ip
-                fl.logindatetime = timezone.now()
-                fl.save()
-                context = {"failed": True, "message": "Invalid username or password"}
-                if len(fls) >= 2:
-                    context["message"] = "Invalid username or password, wait 5 minutes"
+                return redirect("index")
         else:
-            logger.info("Already too many failed attempts from {}, automatic fail".format(ip))
-            fl = FailedLogin()
-            fl.ipaddress = ip
-            fl.logindatetime = timezone.now()
-            fl.save()
-            context = {"failed": True, "message": "Too many failed logins, wait 60 seconds"}
+            logger.info("Login fail from {}".format(ip))
+            context = {"failed": True, "message": "Invalid username or password"}
     else:
         context = {}
 

@@ -9,7 +9,6 @@ from django.core.exceptions import PermissionDenied
 # from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 
-from ddosdb.models import FileUpload
 from ddosdb.database import Database
 
 Database.initialize()
