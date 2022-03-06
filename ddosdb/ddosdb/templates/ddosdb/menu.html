@@ -33,7 +33,7 @@
         <a class="nav-link" target="_blank" href="{% url 'account' %}">
           <div title="user '{{ request.user.username }}' account information"><i class="bi-person menu-icon" ></i></div>
         </a>
-        {% if perms.django_rest_multitokenauth.view_multitoken %}
+        {% if perms.ddosdb.view_own_token %}
         <a class="nav-link" target="_blank" href="{% url 'tokens' %}">
           <div title="Authorization tokens for user '{{ request.user.username }}'"><i class="bi-key menu-icon"></i></div>
         </a>

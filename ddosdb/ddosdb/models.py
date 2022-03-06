@@ -166,10 +166,9 @@ class DDoSToken(MultiToken):
         verbose_name = "Token"
         verbose_name_plural = "Tokens"
         permissions = [
-            ('add_token', 'Can add token'),
-            ('view_token', 'Can view Token'),
-            ('edit_token', 'Can change Token'),
-            ('delete_token', 'Can delete Token'),
+            ('add_own_token', 'Can add own Tokens'),
+            ('view_own_token', 'Can view own Tokens'),
+            ('delete_own_token', 'Can delete own Tokens'),
         ]
 
     description = models.CharField(

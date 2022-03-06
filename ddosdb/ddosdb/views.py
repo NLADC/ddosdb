@@ -271,7 +271,7 @@ def tokens(request):
         return HttpResponse(render(request, "ddosdb/tokens.html", context))
 
     if request.method == "POST":
-        if "ddosdb.add_token" not in permissions:
+        if "ddosdb.add_own_token" not in permissions:
             raise PermissionDenied()
 
         description='New Token'

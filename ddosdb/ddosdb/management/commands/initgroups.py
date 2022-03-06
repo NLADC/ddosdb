@@ -22,25 +22,25 @@ class Command(BaseCommand):
                 # Or their own (possible if they are an uploader as well)
                 '*viewer (other organisation)': [
                     'view_fingerprint',
-                    'view_token',
+                    'view_own_token',
                 ],
                 # local viewers (of the own organisation) can also see fingerprints not set to 'shareable'
                 '*viewer (own organisation)': [
                     'view_fingerprint',
                     'view_nonsync_fingerprint',
-                    'view_token',
+                    'view_own_token',
                 ],
                 # Uploaders can upload/add fingerprints (obvs!) and view tokens
                 '*uploader': [
                     'upload_fingerprint',
                     'add_fingerprint',
-                    'view_token',
+                    'view_own_token',
                 ],
                 # Combine above with this one to be able to add/delete tokens
                 '*token creator': [
-                    'view_token',
-                    'add_token',
-                    'delete_token',
+                    'view_own_token',
+                    'add_own_token',
+                    'delete_own_token',
                 ],
                 # Ability to execute queries
                 '*queries': [

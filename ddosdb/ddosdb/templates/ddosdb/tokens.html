@@ -37,7 +37,7 @@
       {% for token in tokens %}
         <tr>
           <td>
-            {% if perms.ddosdb.delete_token %}
+            {% if perms.ddosdb.delete_own_token %}
               <a href="{% url "delete-token" %}?key={{ token.key }}">
                 <i class="bi-trash overview-icon"></i>
               </a>
@@ -55,7 +55,7 @@
 
 
 </div>
-{% if perms.ddosdb.add_token %}
+{% if perms.ddosdb.add_own_token %}
 <div class="container text-centered">
     <div class="row">
         <p class="lead">Create a new token by typing a description in the field below and clicking the 'Add Token' button.</p>
