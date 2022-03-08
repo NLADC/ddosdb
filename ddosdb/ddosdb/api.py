@@ -96,10 +96,6 @@ def fingerprints(request):
 
         if "ddosdb.add_fingerprint" not in permissions:
             raise PermissionDenied()
-            # response = HttpResponse()
-            # response.status_code = 401
-            # response.reason_phrase = "Invalid credentials or no permission"
-            # return response
 
         if request.META['CONTENT_TYPE'] != "application/json":
             response = HttpResponse()
@@ -114,10 +110,10 @@ def fingerprints(request):
             # Register record
             _delete({'key': fp['key']})
             _insert(fp)
-            file_upload = FileUpload()
-            file_upload.user = request.user
-            file_upload.filename = fp["key"]
-            file_upload.save()
+            # file_upload = FileUpload()
+            # file_upload.user = request.user
+            # file_upload.filename = fp["key"]
+            # file_upload.save()
 
         fps = demjson.decode(request.body)
         if type(fps) is list:

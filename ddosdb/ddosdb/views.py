@@ -668,10 +668,10 @@ def upload_file(request):
             pcap_fp.close()
 
             # Register record
-            file_upload = FileUpload()
-            file_upload.user = user
-            file_upload.filename = filename
-            file_upload.save()
+            # file_upload = FileUpload()
+            # file_upload.user = user
+            # file_upload.filename = filename
+            # file_upload.save()
 
         response = HttpResponse()
         response.status_code = 201
@@ -1359,10 +1359,10 @@ def fingerprints(request):
             # Register record
             _delete({'key': fp['key']})
             _insert(fp)
-            file_upload = FileUpload()
-            file_upload.user = user_perms["user"]
-            file_upload.filename = fp["key"]
-            file_upload.save()
+            # file_upload = FileUpload()
+            # file_upload.user = user_perms["user"]
+            # file_upload.filename = fp["key"]
+            # file_upload.save()
 
         fps = demjson.decode(request.body)
         if type(fps) is list:
