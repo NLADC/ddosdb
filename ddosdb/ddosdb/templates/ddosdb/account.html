@@ -51,20 +51,51 @@
                 <button type="submit" class="btn btn-ddosdb float-right">Save new password</button>
                 <div class="clearfix"></div>
             </form>
-
-
         </div>
+
         <div class="col-1"></div>
         <div class="col ml-4">
                         <h4 class="mb-3 text-center">Permissions</h4>
             <p class="lead">The following permissions have been assigned to your account:</p>
-            <i class="bi-check-lg ddosdb-green"></i> Query DDoSDB<br/>
-            <i class="bi-check-lg ddosdb-green"></i> Download fingerprints<br/>
-            <i class="bi-check-lg ddosdb-green"></i> Download attack vectors<br/>
+            {% if "ddosdb.add_query" in permissions %}
+                <i class="bi-check-lg ddosdb-green"></i> Query DDoSDB<br/>
+            {% else %}
+                <i class="bi-x-lg ddosdb-red"></i> Query DDoSDB<br/>
+            {% endif %}
+            {% if "ddosdb.view_fingerprint" in permissions %}
+                <i class="bi-check-lg ddosdb-green"></i> View Own/Shareable Fingerprints<br/>
+            {% else %}
+                <i class="bi-x-lg ddosdb-red"></i> View Fingerprints<br/>
+            {% endif %}
+            {% if "ddosdb.view_nonsync_fingerprint" in permissions %}
+                <i class="bi-check-lg ddosdb-green"></i> View All Fingerprints<br/>
+            {% else %}
+                <i class="bi-x-lg ddosdb-red"></i> View All Fingerprints<br/>
+            {% endif %}
             {% if "ddosdb.upload_fingerprint" in permissions %}
                 <i class="bi-check-lg ddosdb-green"></i> Upload fingerprints<br/>
             {% else %}
                 <i class="bi-x-lg ddosdb-red"></i> Upload fingerprints<br/>
+            {% endif %}
+            {% if "ddosdb.view_own_token" in permissions %}
+                <i class="bi-check-lg ddosdb-green"></i> View Authorization Tokens<br/>
+            {% else %}
+                <i class="bi-x-lg ddosdb-red"></i> View Authorization Tokens<br/>
+            {% endif %}
+            {% if "ddosdb.add_own_token" in permissions %}
+                <i class="bi-check-lg ddosdb-green"></i> Create Authorization Tokens<br/>
+            {% else %}
+                <i class="bi-x-lg ddosdb-red"></i> Create Authorization Tokens<br/>
+            {% endif %}
+            {% if "ddosdb.delete_own_token" in permissions %}
+                <i class="bi-check-lg ddosdb-green"></i> Delete Authorization Tokens<br/>
+            {% else %}
+                <i class="bi-x-lg ddosdb-red"></i> Delete Authorization Tokens<br/>
+            {% endif %}
+            {% if "auth.view_group" in permissions %}
+                <i class="bi-check-lg ddosdb-green"></i> View Groups/Members<br/>
+            {% else %}
+                <i class="bi-x-lg ddosdb-red"></i> View Groups/Members<br/>
             {% endif %}
         </div>
     </div>
