@@ -18,13 +18,16 @@ class MyAdminSite(admin.AdminSite):
         """
         ordering = {
             'auth': 0,
-            'django_rest_multitokenauth': 1,
-            'ddosdb': 2,
-            'django_celery_beat': 3,
-            'django_celery_results': 4,
+            # 'django_rest_multitokenauth': 1,
+            'ddosdb': 1,
+            'django_celery_beat': 2,
+            'django_celery_results': 3,
         }
 
         app_dict = self._build_app_dict(request)
+        if 'django_rest_multitokenauth' in app_dict:
+            del app_dict['django_rest_multitokenauth']
+
         app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
 
         for app in app_list:
@@ -32,8 +35,6 @@ class MyAdminSite(admin.AdminSite):
             if not app['app_label'] in ordering:
                 ordering[app['app_label']] = len(ordering)
             # Change name for specific app(s)
-            if app['app_label'] == 'django_rest_multitokenauth':
-                app['name'] = 'Tokens'
 
         app_list = sorted(app_dict.values(), key=lambda x: ordering[x['app_label']])
 
