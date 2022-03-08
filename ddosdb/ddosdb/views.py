@@ -177,13 +177,15 @@ def account(request):
         "error": ""
     }
 
-    if user.is_superuser:
+    # if user.is_superuser:
+    if "auth.view_group" in user.get_all_permissions():
         groups = Group.objects.all()
         all_groups = {}
         for grp in groups:
             user_list = [user.username for user in User.objects.filter(groups__name=grp.name)]
             all_groups[grp.name] = user_list
-        pp.pprint(all_groups)
+        # pp.pprint(all_groups)
+
         context['groups'] = all_groups
 
     if request.method == "POST":
@@ -219,6 +221,57 @@ def account(request):
                 context["error"] = "The new passwords are not the same"
 
     return HttpResponse(render(request, "ddosdb/account.html", context))
+
+
+# -------------------------------------------------------------------------------------------------------------------
+@login_required()
+def groups(request):
+    logger.debug("groups ({})".format(request.method))
+
+    pp = pprint.PrettyPrinter(indent=4)
+
+    user: User = request.user
+
+    if "auth.view_group" not in user.get_all_permissions():
+        raise PermissionDenied()
+
+    grps = Group.objects.all()
+    all_groups = []
+
+    for grp in grps:
+        user_list = [user.username for user in User.objects.filter(groups__name=grp.name)]
+        if len(user_list) == 0:
+            user_list = ['<NONE>']
+        content_type_groups = {}
+        grp_perms = list(grp.permissions.all())
+        grp_types = sorted(list(set([str(perm.content_type) for perm in grp_perms])))
+        for grp_type in grp_types:
+            content_type_groups[grp_type] = []
+        for perm in grp_perms:
+            content_type_groups[str(perm.content_type)].append('_'.join(perm.codename.split('_')[:-1]))
+
+        grp_topics = ['{}'.format(ct) for ct in content_type_groups.keys()]
+        grp_perms = ['{}'.format(', '.join(content_type_groups[ct])) for ct in content_type_groups.keys()]
+        all_groups.append({
+            'name': grp.name,
+            'members': user_list,
+            # 'permissions': list(grp.permissions.all()),
+            'topics': grp_topics,
+            'permissions': grp_perms,
+        })
+
+    all_groups = sorted(all_groups, key=lambda d: d['name'])
+    # pp.pprint(all_groups)
+
+    context = {
+        "user": user,
+        "permissions": user.get_all_permissions(),
+        "groups": all_groups,
+        "success": "",
+        "error": ""
+    }
+
+    return HttpResponse(render(request, "ddosdb/groups.html", context))
 
 
 # -------------------------------------------------------------------------------------------------------------------

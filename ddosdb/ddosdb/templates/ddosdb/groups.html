@@ -1,0 +1,62 @@
+{% load static %}
+{% load get_item %}
+<!DOCTYPE html>
+<html lang="en">
+<title>DDoSDB - Groups Information</title>
+
+{% include 'ddosdb/header.html' %}
+<body>
+{% with title="Groups Information" %}
+    {% include 'ddosdb/menu.html' %}
+{% endwith %}
+
+<div class="container">
+   <div>
+            <h4 class="mb-3">Groups, members, and permissions</h4>
+            <p class="lead">The table below shows all the groups, their members,
+                the topcis for which a group has permissions and the permissions for that topic.
+          {% if request.user.is_staff %}
+          <br/>Modifications to Groups, permissions, and memberships can be made via the <a target="_blank" href="/admin/">admin</a> page.
+          {% endif %}
+            </p>
+  </div>
+
+  <table class="table table-sm table-hover text-start ddosdb-table" align="center">
+    <thead>
+      <tr>
+        <th nowrap="nowrap">Group</th>
+        <th nowrap="nowrap">Members</th>
+        <th nowrap="nowrap">Topic</th>
+        <th nowrap="nowrap">Permissions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for group in groups %}
+      <tr>
+          <td> <div class="text-start">{{ group.name }}</div></td>
+        <td>
+          {% for member in group.members %}
+          <div class="text-start">{{ member }}</div>
+          {% endfor %}
+        </td>
+        <td>
+          {% for topic in group.topics %}
+          <div class="text-start">{{ topic }}</div>
+          {% endfor %}
+        </td>
+        <td>
+          {% for perms in group.permissions %}
+          <div class="text-start">{{ perms }}</div>
+          {% endfor %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+
+</div>
+
+{% include "ddosdb/footer.html" %}
+
+</body>
+</html>

@@ -9,6 +9,7 @@ urlpatterns = [
     path('login', views.signin, name='login'),
     # path('request-access', views.request_access, name='request-access'),
     path('account', views.account, name='account'),
+    path('groups', views.groups, name='groups'),
     path('tokens', views.tokens, name='tokens'),
     path('delete-token', views.delete_token, name='delete-token'),
     path('logout', views.signout, name='logout'),

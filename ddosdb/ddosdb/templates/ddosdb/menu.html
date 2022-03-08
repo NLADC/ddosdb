@@ -21,6 +21,9 @@
           <div title="account information"><i class="bi-person menu-icon"></i></div>
         </a>
         <a class="nav-link disabled" target="_blank">
+          <div title="Groups and permissions"><i class="bi-people menu-icon"></i></div>
+        </a>
+        <a class="nav-link disabled" target="_blank">
           <div title="Authorization tokens"><i class="bi-key menu-icon"></i></div>
         </a>
         <a class="nav-link disabled" target="_blank">
@@ -30,11 +33,20 @@
           <div title="log in"><i class="bi-box-arrow-in-right menu-icon" ></i></div>
         </a>
       {% else %}
-        <a class="nav-link" target="_blank" href="{% url 'account' %}">
+        <a class="nav-link" href="{% url 'account' %}">
           <div title="user '{{ request.user.username }}' account information"><i class="bi-person menu-icon" ></i></div>
         </a>
+        {% if perms.auth.view_group %}
+        <a class="nav-link" href="{% url 'groups' %}">
+          <div title="Groups and permissions"><i class="bi-people menu-icon"></i></div>
+        </a>
+        {% else %}
+        <a class="nav-link disabled" target="_blank">
+          <div title="Groups and permissions"><i class="bi-people menu-icon"></i></div>
+        </a>
+        {% endif %}
         {% if perms.ddosdb.view_own_token %}
-        <a class="nav-link" target="_blank" href="{% url 'tokens' %}">
+        <a class="nav-link" href="{% url 'tokens' %}">
           <div title="Authorization tokens for user '{{ request.user.username }}'"><i class="bi-key menu-icon"></i></div>
         </a>
         {% else %}
