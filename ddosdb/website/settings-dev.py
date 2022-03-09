@@ -42,9 +42,6 @@ INTERNAL_IPS = ['127.0.0.1', ]
 INSTALLED_APPS = [
     'sslserver',
     'debug_toolbar',
-    'ddosdb.apps.DdosdbConfig',
-    # 'django.contrib.admin',
-    'ddosdb.apps.DdosdbAdminConfig',  # replaces 'django.contrib.admin'
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -58,6 +55,9 @@ INSTALLED_APPS = [
     # 'rest_auth.registration',
     # 'rest_framework.authtoken',
     'django_rest_multitokenauth',
+    'ddosdb.apps.DdosdbConfig',
+    # 'django.contrib.admin',
+    'ddosdb.apps.DdosdbAdminConfig',  # replaces 'django.contrib.admin'
 ]
 
 

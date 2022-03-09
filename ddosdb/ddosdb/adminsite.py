@@ -1,12 +1,7 @@
 from django.contrib import admin
-from django.conf.urls import url
 import logging
-import pprint
-from . import views
 
 logger = logging.getLogger(__name__)
-
-pp = pprint.PrettyPrinter(indent=4)
 
 
 class MyAdminSite(admin.AdminSite):
@@ -25,8 +20,8 @@ class MyAdminSite(admin.AdminSite):
         }
 
         app_dict = self._build_app_dict(request)
-        if 'django_rest_multitokenauth' in app_dict:
-            del app_dict['django_rest_multitokenauth']
+        # if 'django_rest_multitokenauth' in app_dict:
+        #     del app_dict['django_rest_multitokenauth']
 
         app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
 
