@@ -282,6 +282,9 @@ def tokens(request):
     permissions = request.user.get_all_permissions()
 
     if request.method == "GET":
+        if "ddosdb.view_own_token" not in permissions:
+            raise PermissionDenied()
+
         user: User = request.user
 
         def token_date(token: MultiToken):
@@ -331,7 +334,7 @@ def delete_token(request):
 
     permissions = request.user.get_all_permissions()
 
-    if "django_rest_multitokenauth.delete_multitoken" not in permissions:
+    if "ddosdb.delete_own_token" not in permissions:
         raise PermissionDenied()
 
     # User is allowed to delete tokens. But do check first wether the specified token belongs to this user.
