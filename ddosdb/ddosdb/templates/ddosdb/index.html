@@ -20,7 +20,11 @@
             &nbsp;&nbsp;&nbsp;&nbsp;
             OR
             &nbsp;&nbsp;&nbsp;&nbsp;
+            {% if perms.ddosdb.add_query %}
             <a class="btn btn-ddosdb" href="{% url "query" %}?q=">Search</a>
+            {% else %}
+            <a class="btn btn-ddosdb disabled" >Search</a>
+            {% endif %}
         </div>
     </div>
 </div>
