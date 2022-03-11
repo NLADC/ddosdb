@@ -135,17 +135,19 @@ def add_misp_fingerprint(rmisp, fp):
         # ATTACK VECTORS
         for attack_vector, i in zip(fp['attack_vectors'], range(len(fp['attack_vectors']))):
             ddos = MISPObject(name="ddos")
-            logger.warning("TODO: ATTACK VECTOR SERVICE")
-
             # ATTACK VECTOR PROTOCOL
             ddos.add_attribute('protocol',
                                attack_vector['protocol'],
-                               comment=f'Vector {i} ({attack_vector["service"]})')
+                               comment=f'vector {i}')
+
+            # ATTACK VECTOR SERVICE
+            event.add_attribute(category='Network activity', type='comment', value=attack_vector['service'],
+                                comment=f'vector {i} service')
 
             # ATTACK VECTOR SOURCE_PORT
             if type(attack_vector['source_port']) == int:
                 logger.info('Adding source ports')
-                ddos.add_attribute('src-port', attack_vector['source_port'])
+                ddos.add_attribute('src-port', attack_vector['source_port'], comment='src-port')
 
             # ATTACK VECTOR FRACTION OF ATTACK
             if type(attack_vector['fraction_of_attack']) == float:
