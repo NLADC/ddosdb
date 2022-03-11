@@ -411,8 +411,9 @@ def download(request):
 
         try:
             results = _search({'key': key}, {'_id': 0})
+
             # context["results"] = results
-            return HttpResponse(results, headers={
+            return HttpResponse(demjson.encode(results), headers={
                 'Content-Type': 'application/json',
                 'Content-Disposition': 'attachment; filename="{}.json"'.format(key)})
 
