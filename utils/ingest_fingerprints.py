@@ -214,10 +214,12 @@ def main():
                         urllib3.disable_warnings()
                     r = requests.post("{}/api/fingerprint/".format(url),
                                       headers={'Authorization': 'Token {}'.format(args.token)},
-                                      json=data,
+                                      json=json.dumps(data),
                                       timeout=10,
                                       verify=args.verify)
                     print(r.status_code)
+                    if r.status_code != 201:
+                        print(r.reason)
                     data['key'] = "".join([random.choice("abcdef0123456789") for i in range(15)])
             except Exception as e:
                 logger.error(e)
@@ -227,5 +229,3 @@ def main():
 if __name__ == '__main__':
     # Run the main process
     main()
-
-

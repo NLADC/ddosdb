@@ -1,4 +1,6 @@
 import logging
+import pprint
+
 import demjson
 from datetime import datetime
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, renderer_classes
@@ -115,7 +117,7 @@ def fingerprints(request):
             # file_upload.filename = fp["key"]
             # file_upload.save()
 
-        fps = demjson.decode(request.body)
+        fps = demjson.decode(request.data)
         if type(fps) is list:
             for fp in fps:
                 # Replace name in fingerprint with the name of the user submitting it

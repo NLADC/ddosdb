@@ -940,7 +940,7 @@ def remote_push_sync():
 
                     r = requests.post("{}api/fingerprint/".format(rdb.url),
                                       headers={'Authorization': 'Token {}'.format(rdb.authkey)},
-                                      json=fps_to_sync,
+                                      json=demjson.encode(fps_to_sync),
                                       timeout=10, verify=rdb.check_cert)
             rdbs.append({"name": rdb.name,
                          "type": "push",

@@ -30,7 +30,7 @@ pandas==1.2.4
 prompt-toolkit==3.0.19
 psycopg2-binary==2.9.1
 pymisp==2.4.152
-pymongo==3.11.3
+pymongo==3.12.1
 pyrsistent==0.18.1
 python-crontab==2.5.1
 python-dateutil==2.8.2
