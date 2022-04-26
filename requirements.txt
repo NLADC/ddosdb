@@ -12,7 +12,7 @@ click-plugins==1.1.1
 click-repl==0.2.0
 demjson==2.2.4
 Deprecated==1.2.13
-Django==3.2.12
+Django>=3.2.13
 django-celery-beat==2.2.0
 django-celery-results==2.2.0
 django-debug-toolbar==3.2.1
