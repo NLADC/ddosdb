@@ -1,7 +1,7 @@
 import logging
 import pprint
+import json
 
-import demjson
 from datetime import datetime
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated
@@ -117,7 +117,7 @@ def fingerprints(request):
             # file_upload.filename = fp["key"]
             # file_upload.save()
 
-        fps = demjson.decode(request.data)
+        fps = json.loads(request.data)
         if type(fps) is list:
             for fp in fps:
                 # Replace name in fingerprint with the name of the user submitting it
@@ -236,7 +236,7 @@ def unknown_fingerprints(request):
         response.reason_phrase = "Wrong content type"
         return response
 
-    data = demjson.decode(request.body)
+    data = json.loads(request.body)
     unk_fps = []
 
     try:

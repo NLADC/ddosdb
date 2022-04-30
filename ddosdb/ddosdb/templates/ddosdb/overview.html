@@ -17,15 +17,61 @@
     {% include 'ddosdb/menu.html' %}
 {% endwith %}
 
-{% comment %}
+
 <div class="container">
-  {% if q != "" %}
-    <h1 align="center" class="display-4 ddosdb-subtitle">Overview of some fingerprints ({{ results|length }}) - (<a href="{% url "overview" %}?q=&o={{ o }}&so={{ so }}&son={{ son }}">show all</a>)</h1>
-  {% else %}
-    <h1 align="center" class="display-4 ddosdb-subtitle">Overview of all fingerprints ({{ results|length }})</h1>
-  {% endif %}
+  <div class="row align-items-center">
+    <div class="col-sm"></div>
+    <div class="col-sm-1"></div>
+    <div class="col-sm-1 text-end">
+      {% if p > 0 %}
+      <a href="{% url "overview" %}?q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p=0">
+       <i class="bi-skip-backward-fill ddosdb-black"></i>
+      </a>
+      {% else %}
+       <i class="bi-skip-backward ddosdb-grey"></i>
+      {% endif %}
+      &nbsp;
+      {% if p > 0 %}
+        <a href="{% url "overview" %}?q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ pprev }}">
+        <i class="bi-skip-start-fill ddosdb-black"></i>
+        </a>
+      {% else %}
+        <i class="bi-skip-start ddosdb-grey"></i>
+      {% endif %}
+    </div>
+    <div class="col-sm-1 text-center">
+      {{ p|add:1 }}/{{ plast|add:1 }}
+    </div>
+    <div class="col-sm-1 text-start">
+      {% if pnext > 0 %}
+        <a href="{% url "overview" %}?q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ pnext }}">
+        <i class="bi-skip-end-fill ddosdb-black"></i>
+        </a>
+      {% else %}
+        <i class="bi-skip-end ddosdb-grey"></i>
+      {% endif %}
+      &nbsp;
+      {% if plast > 0 and plast > p %}
+      <a href="{% url "overview" %}?q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ plast }}">
+       <i class="bi-skip-forward-fill ddosdb-black"></i>
+      </a>
+      {% else %}
+       <i class="bi-skip-forward ddosdb-grey"></i>
+      {% endif %}
+    </div>
+    <div class="col-sm-1">
+      <form class="form-inline" action="{% url "overview" %}" method="get">
+        {% csrf_token %}
+        <input type="text" class="form-control col-sm-1 text-end" name="plen" placeholder="#results/page" value="{{ plen }}"/>
+        <input type="hidden" name="q" value="{{ q }}"/>
+        <input type="hidden" name="o" value="{{ o }}"/>
+        <input type="hidden" name="so" value="{{ so }}"/>
+        <input type="hidden" name="son" value="{{ son }}"/>
+      </form>
+    </div>
+    <div class="col-sm">results per page</div>
+  </div>
 </div>
-{% endcomment %}
 
 <div class="container">
   <table class="table table-sm table-hover text-center ddosdb-table" align="center">
@@ -37,18 +83,18 @@
           <th nowrap="nowrap">
           {% if hdr == o %}
             <div title="change to {{ son }} sort order">
-            <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ son }}&son={{ so }}">
+            <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ son }}&son={{ so }}&plen={{ plen }}&p={{ p }}">
               <img width="16" height="16" src="{% static "ddosdb/img/" %}{{ so }}.png" alt="sort order is {{ so }}">
           {% else %}
             <div title="order by '{{name}}' ({{ so }})">
-            <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ so }}&son={{ son }}">
+            <a href="{% url "overview" %}?q={{ q }}&o={{ hdr }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}">
               <img width="16" height="16" src="{% static "ddosdb/img/empty_sort.png" %}">
           {% endif %}
               {{ name }}
             </a>
-          {% if hdr == "submitter" and q != "" %}
-            <a href="{% url "overview" %}?q=&o={{ o }}&so={{ so }}&son={{ son }}">
-              <i class="bi-x-lg overview-icon ddosdb-red"></i>
+          {% if hdr == "submitter" and q|length > 0 %}
+            <a href="{% url "overview" %}?q=&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}">
+              <i class="bi-x-circle overview-icon ddosdb-red"></i>
             </a>
           {% endif %}
             </div>
@@ -62,9 +108,9 @@
           <td>
             {% if user.username == node|get_item:"submitter" or perms.ddosdb.delete_fingerprint %}
               {% if o %}
-                <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}">
+                <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}">
               {% else %}
-                <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o=key&so={{ so }}&son={{ son }}">
+                <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o=key&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}">
               {% endif %}
                   <div title="delete {{ node|get_item:'key' }}"><i class="bi-trash overview-icon"></i></div>
                 </a>
@@ -95,14 +141,14 @@
               </div>
             {% elif hdr == "submitter" %}
               <div title="click to show only fingerprints submitted by user '{{node|get_item:hdr}}'">
-                <a href="{% url "overview" %}?q=submitter:{{ node|get_item:hdr|urlencode }}&o={{ o }}&so={{ so }}&son={{ son }}">
+                <a href="{% url "overview" %}?q=submitter:{{ node|get_item:hdr|urlencode }}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}">
                   {{node|get_item:hdr}}
                 </a>
               </div>
             {% elif hdr == "shareable" %}
                 {% if user.username == node|get_item:"submitter" or perms.ddosdb.edit_sync_fingerprint %}
                   <div title="click to toggle shareable status">
-                    <a href="{% url "toggle-shareable" %}?q={{ q }}&key={{node|get_item:"key"}}&o={{ o }}&so={{ so }}&son={{ son }}&shareable={{node|get_item:hdr}}">
+                    <a href="{% url "toggle-shareable" %}?q={{ q }}&key={{node|get_item:"key"}}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}&shareable={{node|get_item:hdr}}">
                     {% if node|get_item:hdr == True %}
                       <i class="bi-check-circle overview-icon ddosdb-green" ></i>
                     {% else %}

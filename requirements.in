@@ -2,7 +2,6 @@ django
 celery
 django_celery_beat
 django_celery_results
-demjson
 requests
 pandas
 pymongo

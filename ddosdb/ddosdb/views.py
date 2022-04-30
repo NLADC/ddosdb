@@ -1,7 +1,8 @@
 import math
 import os
 import time
-import demjson
+import json
+
 import requests
 import base64
 from datetime import datetime
@@ -47,7 +48,7 @@ def _insert(data):
     _mdb().insert(data, check_keys=False)
 
 
-def _search(query=None, fields=None, order=None):
+def _search(query=None, fields=None, page=0, pagesize=0, order=None):
     q = query
     if order:
         q = {}
@@ -55,8 +56,29 @@ def _search(query=None, fields=None, order=None):
         q["$orderby"] = order
 
     logger.info("filter={}, fields={}".format(q, fields))
-    result = list(_mdb().find(q, fields))
+    if pagesize == 0:
+        result = list(_mdb().find(q, fields))
+    else:
+        result = list(_mdb().find(q, fields).skip(page*pagesize).limit(pagesize))
     return result
+
+
+# query: {attack_vectors: {$elemMatch: { service: 'NTP' } } }
+def _search2(query=None, fields=None, page=0, pagesize=0, order=None, sortorder=1):
+    q = query
+    if order:
+        q = {}
+        q["$query"] = query
+        q["$orderby"] = {order: sortorder}
+
+    logger.info("filter={}, fields={}".format(q, fields))
+
+    result = list(_mdb().find(q, fields))
+    total = len(result)
+
+    if pagesize > 0:
+        result = list(_mdb().find(q, fields).skip(page*pagesize).limit(pagesize))
+    return result, total
 
 
 def _search_one(query=None, fields=None):
@@ -413,7 +435,7 @@ def download(request):
             results = _search({'key': key}, {'_id': 0})
 
             # context["results"] = results
-            return HttpResponse(demjson.encode(results), headers={
+            return HttpResponse(json.dumps(results), headers={
                 'Content-Type': 'application/json',
                 'Content-Disposition': 'attachment; filename="{}.json"'.format(key)})
 
@@ -439,7 +461,7 @@ def query(request):
         "results": [],
         "comments": {},
         "q": "{}",
-        "f": "{_id:0}",
+        "f": '{"_id":0}',
         "o": "",
         "amount": 0,
         "error": "",
@@ -464,7 +486,7 @@ def query(request):
 
         try:
             logger.info("Query: {}".format(q))
-            qjson = demjson.decode(q)
+            qjson = json.loads(q)
         except Exception as e:
             logger.info("Error in query command: {}".format(q))
             context["error"] = "Error interpreting query: {}".format(str(e))
@@ -477,7 +499,7 @@ def query(request):
         try:
             logger.info("Order: {}".format(o))
             if len(o) > 0:
-                ojson = demjson.decode(o)
+                ojson = json.loads(o)
 
         except Exception as e:
             logger.info("Error in Order specification: {}".format(o))
@@ -489,7 +511,7 @@ def query(request):
 
         try:
             logger.info("Fields: {}".format(f))
-            fjson = demjson.decode(f)
+            fjson = json.loads(f)
         except Exception as e:
             logger.info("Error in Fields specification: {}".format(f))
             context["error"] = "Error in Fields specification: {}".format(str(e))
@@ -502,7 +524,7 @@ def query(request):
             # { 'attack_vector.dns_qry_name': {$regex: '\.'}  }
             # results = _search(qjson, fields={"_id":0})
             logger.info("q={}, o={}, f={}".format(qjson, ojson, fjson))
-            results = _search(qjson, fields=fjson, order=ojson)
+            results = _search(qjson, fields=fjson, order=ojson, pagesize=20)
             # pp.pprint(results)
             context["time"] = time.time() - start
             logger.info("Results: {}".format(len(results)))
@@ -514,6 +536,8 @@ def query(request):
             context["time"] = time.time() - start
             context["results"] = []
             context["amount"] = 0
+
+    logger.info(HttpResponse(render(request, "ddosdb/query.html", context)))
 
     return HttpResponse(render(request, "ddosdb/query.html", context))
 
@@ -560,8 +584,8 @@ def upload_file(request):
             json_content = request.FILES["json"].read()
             data = None
             try:
-                data = demjson.decode(json_content)
-            except demjson.JSONDecodeError as e:
+                data = json.loads(json_content)
+            except json.JSONDecodeError as e:
                 logger.error("Fingerprint JSON decode error ({})".format(e))
                 response = HttpResponse()
                 response.status_code = 400
@@ -640,7 +664,8 @@ def upload_file(request):
             except IOError:
                 pass
             # Save JSON upload to file (not really needed to be honest)
-            demjson.encode_to_file(settings.RAW_PATH + filename + ".json", data)
+            with open(settings.RAW_PATH + filename + ".json", 'w', encoding='utf-8') as outfile:
+                json.dump(data, outfile)
 
             logger.info("Fingerprint {}: {}".format(data["key"], data))
 
@@ -690,7 +715,7 @@ def upload_file(request):
 # -------------------------------------------------------------------------------------------------------------------
 @login_required()
 def overview(request):
-    logger.debug("overview ({})".format(request.method))
+    logger.debug("overview2 ({})".format(request.method))
 
     if "ddosdb.view_fingerprint" not in request.user.get_all_permissions():
         raise PermissionDenied()
@@ -699,31 +724,55 @@ def overview(request):
 
     user: User = request.user
 
+    sort_order = {'asc':1, 'desc':-1}
+
     start = time.time()
+
     context = {
         "user": user,
         "permissions": user.get_all_permissions(),
         "results": [],
-        "q": "",
-        "p": 1,
-        "o": "key",
-        "so": "asc",
-        "son": "desc",
+        "o": 'key1',
+        "so": 'asc',
+        "son": 'desc',
+        "plen": 20,
+        "p": 0,
+        "pprev": 0,
+        "pnext": 1,
+        "plast": 0,
+        "total": 0,
         "error": "",
-        "time": 0
+        "time": 0,
+        "q": "",
     }
+
+    if "p" in request.GET:
+        try:
+            context["p"] = int(request.GET["p"])
+        except ValueError:
+            logger.error('Non integer value supplied for p (page number)')
+
+    if "plen" in request.GET:
+        try:
+            context["plen"] = int(request.GET["plen"])
+        except ValueError:
+            logger.error('Non integer value supplied for plen (page size)')
+        if context['plen'] < 1:
+            context['plen'] = 1
+
+    if "o" in request.GET:
+        context["o"] = request.GET["o"]
+
+    if "so" in request.GET:
+        context["so"] = request.GET["so"]
+        if context["so"] not in sort_order:
+            context['so'] = 'asc'
+
+    if context['so'] == 'desc':
+        context['son'] = 'asc'
 
     if "q" in request.GET:
         context["q"] = request.GET["q"]
-    if "o" in request.GET:
-        context["o"] = request.GET["o"]
-    if "so" in request.GET:
-        context["so"] = request.GET["so"]
-    if "son" in request.GET:
-        context["son"] = request.GET["son"]
-
-    # logger.debug("context: {}".format(context))
-    #    _search()
 
     try:
         # Note that 'shareable' and 'submitter' must always be retrieved
@@ -731,43 +780,62 @@ def overview(request):
         # (if a user has only 'view' rights, but not 'view_nonsync' then they
         # should only see 'shareable' and their own fingerprints.
         context["headers"] = {
-            #            "multivector_key"   : "multivector",
             "key": "key",
             "shareable": "Sync",
             "time_start": "start time",
-            # "tags": "tags",
-            "file_type": "capture",
-            #            "duration_sec": "duration (seconds)",
             "total_packets": "# packets",
-            #            "amplifiers_size"    : "IP's involved",
-            #            "ips_involved": "IP's involved",
             "total_ips": "# IPs",
             "avg_bps": "bits/second",
-            #            "avg_pps"           : "packets/second",
-            #            "total_dst_ports": "# ports",
             "submit_timestamp": "submitted",
             "submitter": "by",
             "comment": "comment",
         }
 
+        if context["o"] not in context['headers']:
+            context['o'] = 'key'
         # Only retrieve the fields that we display
         fields = dict.fromkeys(list(context["headers"].keys()), 1)
 
         q = "*"
         query = {}
+        query_limit=""
+        if "ddosdb.view_nonsync_fingerprint" not in user.get_all_permissions():
+             query = {"$or": [{'submitter': user.username}, {'shareable': True}]}
         if (context["q"]):
             q = context["q"]
         q_dis = q.split(':')
         if q_dis[0] == 'submitter':
-            query = {"submitter": q_dis[1]}
-        mdb_resp = _search(query=query, fields=fields)
-        #        pp.pprint(mdb_resp)
+            query["submitter"] = q_dis[1]
+        mdb_resp = _search2(query=query, fields=fields, order=context['o'],
+                            sortorder=sort_order[context['so']],
+                            page=context['p'], pagesize=context['plen'])
+        # pp.pprint(mdb_resp)
 
         context["time"] = time.time() - start
         logger.debug("Search took {} seconds".format(context["time"]))
         #        results = [x["_source"] for x in response["hits"]["hits"]]
-        results = mdb_resp
-        logger.info("Got {} results".format(len(results)))
+        results = mdb_resp[0]
+        context["total"] = mdb_resp[1]
+        context["plast"] = int(mdb_resp[1]/context['plen'])-1
+        if mdb_resp[1] % context['plen'] > 0:
+            context["plast"] = context["plast"] + 1
+
+        if context['plast'] < 0:
+            context['plast'] = 0
+
+        if context["p"] < context["plast"]:
+            context["pnext"] = context["p"] + 1
+        else:
+            context["pnext"] = 0
+
+        if context["p"] > 0:
+            context['pprev'] = context["p"]-1
+
+        context["total"] = mdb_resp[1]
+        logger.info("Got {} results ({} - {}) of {}".format(len(results),
+                                                            context['p']*context['plen'],
+                                                            context['p']*context['plen']+len(results)-1,
+                                                            mdb_resp[1]))
 
         if len(results) > 0:
             df = pd.DataFrame.from_dict(results)
@@ -778,31 +846,11 @@ def overview(request):
             for field in fields:
                 if not field in avail_cols:
                     context["headers"].pop(field)
-            o = [context["o"]][0]
 
             if "ddosdb.view_nonsync_fingerprint" not in user.get_all_permissions():
                 # Remove all fingerprints that are not shareable and not submitted by this user.
                 # (By only leaving fingerprints that are shareable or submitted by this user)
                 df = df[(df['submitter'] == user.username) | (df['shareable'] == True)]
-
-            if len(results) > 1:
-                # Do a special sort if the column to sort by is 'submitter'
-                # Since people can put e-mail addresses in starting with upper/lower case
-                # Change the if statement to the following if you want to sort case insensitive
-                # on any column with string values: if df.dtypes[o] == np.object:
-                if o == "submitter":
-                    onew = o + "_tmp"
-                    df[onew] = df[o].str.lower()
-                    df.sort_values(by=onew, ascending=(context["so"] == "asc"), inplace=True)
-                    del df[onew]
-                else:
-                    df.sort_values(by=o, ascending=(context["so"] == "asc"), inplace=True)
-
-                # Make sure some columns are shown as int
-                if "total_ips" in df.columns:
-                    df = df.astype({"total_ips": int})
-                if "ips_involved" in df.columns:
-                    df = df.astype({"ips_involved": int})
 
             context["results"] = df.to_dict(orient='records')
         else:
@@ -829,6 +877,8 @@ def overview(request):
         for misp in misps:
             rdbs.append({"name": misp.name})
         context["misps"] = rdbs
+
+    # pp.pprint(context)
 
     return HttpResponse(render(request, "ddosdb/overview.html", context))
 
@@ -940,7 +990,7 @@ def remote_push_sync():
 
                     r = requests.post("{}api/fingerprint/".format(rdb.url),
                                       headers={'Authorization': 'Token {}'.format(rdb.authkey)},
-                                      json=demjson.encode(fps_to_sync),
+                                      json=json.dumps(fps_to_sync),
                                       timeout=10, verify=rdb.check_cert)
             rdbs.append({"name": rdb.name,
                          "type": "push",
@@ -1174,12 +1224,19 @@ def toggle_shareable(request):
         extra.append("q=" + request.GET["q"])
     else:
         extra.append("q=")
-    if "o" in request.GET:
-        extra.append("o=" + request.GET["o"])
-    if "so" in request.GET:
-        extra.append("so=" + request.GET["so"])
-    if "son" in request.GET:
-        extra.append("son=" + request.GET["son"])
+
+    req_args=['o', 'so', 'son', 'plen', 'p']
+    for req_arg in req_args:
+        if req_arg in request.GET:
+            extra.append(req_arg+'='+request.GET[req_arg])
+    # if "o" in request.GET:
+    #     extra.append("o=" + request.GET["o"])
+    # if "so" in request.GET:
+    #     extra.append("so=" + request.GET["so"])
+    # if "son" in request.GET:
+    #     extra.append("son=" + request.GET["son"])
+    # if "plen" in request.GET:
+    #     extra.append("plen=" + request.GET["plen"])
 
     extrastr = ""
     if len(extra) > 0:
@@ -1368,7 +1425,7 @@ def fingerprints(request):
             # file_upload.filename = fp["key"]
             # file_upload.save()
 
-        fps = demjson.decode(request.body)
+        fps = json.loads(request.body)
         if type(fps) is list:
             for fp in fps:
                 # Replace name in fingerprint with the name of the user submitting it
@@ -1441,7 +1498,7 @@ def unknown_fingerprints(request):
             response.reason_phrase = "Wrong content type"
             return response
 
-        data = demjson.decode(request.body)
+        data = json.loads(request.body)
         unk_fps = []
 
         try:
@@ -1563,7 +1620,7 @@ def csp_report(request):
 
     if request.method == "POST":
         logger.info(request.body)
-        # report = demjson.decode(request.body)
+        # report = json.loads(request.body)
         # logger.info(report)
         response = HttpResponse()
         response.status_code = 200
