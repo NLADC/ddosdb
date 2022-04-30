@@ -2,8 +2,8 @@ import traceback
 import logging
 import requests
 import urllib3
-from pymisp import ExpandedPyMISP, MISPEvent, MISPObject, MISPAttribute, MISPTag
-import demjson
+from pymisp import ExpandedPyMISP, MISPEvent, MISPObject
+import json
 import time
 
 logger = logging.getLogger(__name__)
@@ -120,6 +120,54 @@ def add_misp_fingerprint(rmisp, fp):
     logger.info("Creating/adding a DDOS object")
     start = time.time()
 
+    # Maximum number of source IPs to include
+    # 0 means all (no limit)
+    source_ips_limit = 1
+
+    # Possible dicts in each attack_vector of the fingerprint
+    # that will be added as comments (with the dict as value) to the event (not the ddos objects)
+    attack_vector_dicts = [
+        'ttl',
+        'tcp_flags',
+        'fragmentation_offset',
+        'ethernet_type',
+        'frame_len',
+        'dns_query_name',
+        'dns_query_type',
+        'ICMP type',
+        'ntp_requestcode',
+        'http_uri',
+        'http_method',
+        'http_user_agent',
+    ]
+
+    # Possible fields in each attack_vector of the fingerprint
+    # that will be added as comments to the event (not the ddos objects)
+    attack_vector_fields = [
+        'service',
+        'fraction_of_attack',
+        'nr_flows',
+        'nr_packets',
+        'nr_megabytes',
+        'time_start',
+        'duration_seconds',
+    ]
+
+    # Possible fields in the fingerprint
+    # that will be added as comments to the event
+    fingerprint_fields = [
+        'time_start',
+        'time_end',
+        'duration_seconds',
+        'total_flows',
+        'total_megabytes',
+        'total_packets',
+        'total_ips',
+        'avg_bps',
+        'avg_pps',
+        'avg_Bpp',
+    ]
+
     try:
         misp = ExpandedPyMISP(rmisp.url, rmisp.authkey, ssl=rmisp.check_cert, tool="DDoSDB", debug=False)
 
@@ -132,6 +180,24 @@ def add_misp_fingerprint(rmisp, fp):
         event = MISPEvent()
         event.info = fp['key']
 
+        # TARGET
+        event.add_attribute(category='Network activity', type='ip-dst', value=fp['target'], comment='target')
+        # KEY
+        event.add_attribute(category='Network activity', type='md5', value=fp['key'], comment='attack key')
+
+        for fp_field in fingerprint_fields:
+            if fp_field in fp:
+                event.add_attribute(category='Network activity',
+                                    type='comment',
+                                    value=fp[fp_field],
+                                    comment=fp_field)
+
+        # TAGS
+        if 'tags' in fp:
+            for tag in fp['tags']:
+                event.add_tag(tag=tag)
+        event.add_tag(tag='validated')
+
         # ATTACK VECTORS
         for attack_vector, i in zip(fp['attack_vectors'], range(len(fp['attack_vectors']))):
             ddos = MISPObject(name="ddos")
@@ -140,21 +206,24 @@ def add_misp_fingerprint(rmisp, fp):
                                attack_vector['protocol'],
                                comment=f'vector {i}')
 
-            # ATTACK VECTOR SERVICE
-            event.add_attribute(category='Network activity', type='comment', value=attack_vector['service'],
-                                comment=f'vector {i} service')
+            for av_dict in attack_vector_dicts:
+                if av_dict in attack_vector and type(attack_vector[av_dict]) == dict:
+                    logger.info(f'Adding {av_dict}')
+                    event.add_attribute(category='Network activity', type='comment',
+                                        value=json.dumps(attack_vector[av_dict]),
+                                        comment=f'vector {i} {av_dict} ({av_dict}:fraction)')
+
+            for av_field in attack_vector_fields:
+                if av_field in attack_vector and attack_vector[av_field]:
+                    logger.info(f'Adding {av_field}')
+                    event.add_attribute(category='Network activity', type='comment',
+                                        value=attack_vector[av_field],
+                                        comment=f'vector {i} {av_field}')
 
             # ATTACK VECTOR SOURCE_PORT
             if type(attack_vector['source_port']) == int:
                 logger.info('Adding source ports')
                 ddos.add_attribute('src-port', attack_vector['source_port'], comment='src-port')
-
-            # ATTACK VECTOR FRACTION OF ATTACK
-            if type(attack_vector['fraction_of_attack']) == float:
-                event.add_attribute(category='Network activity',
-                                    type='comment',
-                                    value=attack_vector['fraction_of_attack'],
-                                    comment=f'vector {i} fraction_of_attack')
 
             # ATTACK VECTOR DESTINATION PORTS
             if type(attack_vector['destination_ports']) == dict:
@@ -163,75 +232,27 @@ def add_misp_fingerprint(rmisp, fp):
                     ddos.add_attribute('dst-port', int(port),
                                        comment='fraction={}'.format(attack_vector['destination_ports'][port]))
 
-            # ATTACK VECTOR TCP FLAGS
-            if type(attack_vector['tcp_flags']) == dict:
-                logger.info('Adding TCP flags')
-                event.add_attribute(category='Network activity', type='comment',
-                                    value=demjson.encode(attack_vector['tcp_flags']),
-                                    comment=f'vector {i} TCP flags (flags:fraction)')
+            # ATTACK VECTOR DNS
+            if 'dns_query_name' in attack_vector or 'dns_query_type' in attack_vector:
+                ddos.add_attribute('type', 'dns', comment='type of attack vector')
+                ddos.add_attribute('type', 'dns-amplification', comment='type of attack vector')
 
-            # ATTACK VECTOR NR FLOWS
-            event.add_attribute(category='Network activity', type='comment',
-                                value=attack_vector['nr_flows'], comment=f'vector {i} nr_flows')
+            # ATTACK VECTOR ICMP
+            if 'ICMP type' in attack_vector:
+                ddos.add_attribute('type', 'icmp', comment='type of attack vector')
 
-            # ATTACK VECTOR NR PACKETS
-            event.add_attribute(category='Network activity', type='comment',
-                                value=attack_vector['nr_packets'], comment=f'vector {i} nr_packets')
-
-            # ATTACK VECTOR NR MEGABYTES
-            event.add_attribute(category='Network activity', type='comment',
-                                value=attack_vector['nr_megabytes'], comment=f'vector {i} nr_megabytes')
-
-            # ATTACK VECTOR TIME START
-            event.add_attribute(category='Network activity', type='comment',
-                                value=attack_vector['time_start'], comment=f'vector {i} time_start')
-
-            # ATTACK VECTOR DURATION SECONDS
-            event.add_attribute(category='Network activity', type='comment',
-                                value=attack_vector['duration_seconds'], comment=f'vector {i} duration_seconds')
+            # ATTACK VECTOR NTP
+            if 'ntp_requestcode' in attack_vector:
+                ddos.add_attribute('type', 'ntp-amplification', comment='type of attack vector')
 
             # ATTACK VECTOR SOURCE IPS
-            # Also for this: this convenience method does not seem to work
-            # ddos.add_attributes('ip-src', attack_vector['source_ips'])
-            if 'source_ips' in attack_vector:
+            if 'source_ips' in attack_vector and source_ips_limit > 0:
                 for src_ip, i in zip(attack_vector['source_ips'], range(len(attack_vector['source_ips']))):
                     ddos.add_attribute('ip-src', src_ip, comment='source IP list truncated')
-                    if i >= 0:
+                    if i >= source_ips_limit-1:
                         break
 
             event.add_object(ddos, pythonify=True)
-
-        # TARGET
-        event.add_attribute(category='Network activity', type='ip-dst', value=fp['target'], comment='target')
-        # KEY
-        event.add_attribute(category='Network activity', type='md5', value=fp['key'], comment='attack key')
-        # TIME START
-        event.add_attribute(category='Network activity', type='comment', value=fp['time_start'],
-                            comment='attack time_start')
-        # DURATION SECONDS
-        event.add_attribute(category='Network activity', type='comment', value=fp['duration_seconds'],
-                            comment='attack duration_seconds')
-        # TOTAL FLOWS
-        event.add_attribute(category='Network activity', type='comment', value=fp['total_flows'], comment='total_flows')
-        # TOTAL MEGABYTES
-        event.add_attribute(category='Network activity', type='comment', value=fp['total_megabytes'],
-                            comment='total_megabytes')
-        # TOTAL PACKETS
-        event.add_attribute(category='Network activity', type='comment', value=fp['total_packets'],
-                            comment='total_packets')
-        # TOTAL IPS
-        event.add_attribute(category='Network activity', type='comment', value=fp['total_ips'], comment='total_ips')
-        # AVG BPS
-        event.add_attribute(category='Network activity', type='comment', value=fp['avg_bps'], comment='avg_bps')
-        # AVG PPS
-        event.add_attribute(category='Network activity', type='comment', value=fp['avg_pps'], comment='avg_pps')
-        # AVG BPP
-        event.add_attribute(category='Network activity', type='comment', value=fp['avg_Bpp'], comment='avg_Bpp')
-
-        # TAGS
-        for tag in fp['tags']:
-            event.add_tag(tag=tag)
-        event.add_tag(tag='validated')
 
         event.publish()
         # event = misp.add_event(event, pythonify=True)
