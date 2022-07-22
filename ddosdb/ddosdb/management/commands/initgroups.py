@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
             def_groups = {
                 # Admins can do everything
-                '*admin': ['*'],
+                # '*admin': ['*'],
 
                 "*manager": [
                     "add_group",
@@ -36,6 +36,7 @@ class Command(BaseCommand):
                     "delete_remoteddosdb",
                     "view_ddostoken",
                     "view_user",
+                    "view_group",
                     "view_groupresult",
                     "view_misp",
                     "view_periodictask",
