@@ -1,9 +1,61 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django_rest_multitokenauth.models import MultiToken
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.admin import GroupAdmin
 from django import forms
 from ddosdb.models import Query, RemoteDdosDb, MISP, DDoSToken
+
+
+class CustomUserAdmin(UserAdmin):
+    readonly_fields = [
+        'date_joined',
+        'user_permissions',
+    ]
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        is_superuser = request.user.is_superuser
+        disabled_fields = set()  # type: Set[str]
+
+        disabled_fields |= {
+            'user_permissions',
+        }
+
+        if not is_superuser:
+            disabled_fields |= {
+                'is_superuser',
+            }
+
+        # Prevent non-superusers from editing their own permissions
+        if (
+                not is_superuser
+                and obj is not None
+                and obj == request.user
+        ):
+            disabled_fields |= {
+                'is_staff',
+                'is_superuser',
+                'groups',
+            }
+
+        # Prevent non-superusers from deactivating superusers
+        if (
+                not is_superuser
+                and obj is not None
+                and obj.is_superuser
+        ):
+            disabled_fields |= {
+                'is_active',
+                'is_staff',
+                'is_superuser',
+            }
+
+        for f in disabled_fields:
+            if f in form.base_fields:
+                form.base_fields[f].disabled = True
+
+        return form
 
 
 class RemoteDdosDbForm(forms.ModelForm):
@@ -77,3 +129,7 @@ admin.site.register(DDoSToken, DDoSTokenAdmin)
 admin.site.register(RemoteDdosDb, RemoteDdosDbAdmin)
 admin.site.register(MISP, MISPAdmin)
 
+# Unregister the provided model admin
+admin.site.unregister(User)
+# Register out own model admin, based on the default UserAdmin
+admin.site.register(User, CustomUserAdmin)
