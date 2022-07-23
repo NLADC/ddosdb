@@ -175,6 +175,15 @@ def add_misp_fingerprint(rmisp, fp):
         ddosch_tag = add_misp_tag(rmisp, 'DDoSCH', '#ff7dfd')
         logger.debug(ddosch_tag)
 
+        # Retrieve (or create) the sharing group
+        sharing_group = None
+        if rmisp.sharing_group != "":
+            sharing_group = [sh_grp for sh_grp in misp.sharing_groups(pythonify=True) if sh_grp.name == rmisp.sharing_group]
+            if len(sharing_group) == 0:
+                sharing_group = misp.add_sharing_group({'name': rmisp.sharing_group}, pythonify=True)
+            else:
+                sharing_group = sharing_group[0]
+
         # Create an event to link everything to
         logger.info("Creating a new event")
         event = MISPEvent()
@@ -254,9 +263,10 @@ def add_misp_fingerprint(rmisp, fp):
 
             event.add_object(ddos, pythonify=True)
 
-        event.publish()
-        # event = misp.add_event(event, pythonify=True)
         event = misp.add_event(event, pythonify=True)
+        if sharing_group:
+            event = misp.change_sharing_group_on_entity(event, sharing_group.id, pythonify=True)
+        event.publish()
 
         result = add_misp_tag_to_event(rmisp, event.id, ddosch_tag['Tag']['id'])
         logger.debug(result)

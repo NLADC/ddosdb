@@ -73,6 +73,9 @@ class MISP(models.Model):
     check_cert = models.BooleanField(default=True,
                                      help_text="""Whether to check remote certificate on https""")
 
+    sharing_group = models.CharField('Sharing Group', max_length=255, default="", blank=True,
+                               help_text="""(Optional) Sharing Group to Distribute to, leave empty for default""")
+
     def __str__(self):
         postfix = ' (inactive)'
         if (self.active):
