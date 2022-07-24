@@ -1117,10 +1117,11 @@ def remote_misp_push_sync():
             }
 
             known_fps = misp_instance.search_misp_events(filter)
+            known_keys = [fps['info'] for fps in known_fps]
             unk_fps = []
             unk_fps_keys = []
             for fp in fingerprints:
-                if not fp['key'] in known_fps:
+                if not fp['key'] in known_keys:
                     unk_fps.append(fp)
                     unk_fps_keys.append(fp['key'])
 

@@ -9,7 +9,6 @@ from pymisp.exceptions import PyMISPError
 from typing import Optional
 import logging
 
-
 LOGGER = logging.getLogger(__name__)
 
 __all__ = ['MispInstance']
