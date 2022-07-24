@@ -32,7 +32,7 @@ from django_rest_multitokenauth.models import MultiToken
 # from ddosdb.enrichment.team_cymru import TeamCymru
 from ddosdb.models import Query, RemoteDdosDb, MISP, DDoSToken
 from ddosdb.database import Database
-import ddosdb.misp
+from . import misp
 
 Database.initialize()
 
@@ -1099,10 +1099,24 @@ def remote_misp_push_sync():
         logger.error("Could not setup a connection to MongoDB")
         return []
 
-    for misp in misps:
-        logger.info("Contacting remote MISP:{} @ {}".format(misp.name, misp.url))
+    for misp_entry in misps:
+        logger.info(misp_entry.url)
+        logger.info(misp_entry.url.split('/')[-2])
+        logger.info(misp_entry.url.split(':')[0])
+        misp_instance = misp.MispInstance(misp_entry.url.split('/')[-2], misp_entry.authkey, misp_entry.url.split(':')[0],
+                                     verify_tls=misp_entry.check_cert,
+                                     sharing_group=misp_entry.sharing_group if misp_entry.sharing_group!="" else None)
+
+        logger.info("Contacting remote MISP:{} @ {}".format(misp_entry.name, misp_entry.url))
         try:
-            known_fps = ddosdb.misp.get_misp_fingerprints(misp)
+            filter = {
+                "minimal": False,
+                "sort": "publish_timestamp",
+                "direction": "desc",
+                "tag": "DDoSCH",
+            }
+
+            known_fps = misp_instance.search_misp_events(filter)
             unk_fps = []
             unk_fps_keys = []
             for fp in fingerprints:
@@ -1110,12 +1124,12 @@ def remote_misp_push_sync():
                     unk_fps.append(fp)
                     unk_fps_keys.append(fp['key'])
 
-            logger.info("MISP {} needs sync for {} fingerprints {}".format(misp.name, len(unk_fps_keys), unk_fps_keys))
+            logger.info("MISP {} needs sync for {} fingerprints {}".format(misp_entry.name, len(unk_fps_keys), unk_fps_keys))
             for fp in unk_fps:
                 logger.debug("Syncing fingerprint {}".format(fp['key']))
-                ddosdb.misp.add_misp_fingerprint(misp, fp)
+                misp_instance.add_misp_fingerprint(fp)
 
-            rmisps.append({"name": misp.name,
+            rmisps.append({"name": misp_entry.name,
                            "type": "push",
                            "status": 200,
                            "status_reason": 'OK',
@@ -1124,7 +1138,7 @@ def remote_misp_push_sync():
                            })
         except Exception as e:
             logger.error("{}".format(e))
-            rmisps.append({"name": misp.name,
+            rmisps.append({"name": misp_entry.name,
                            "type": "push",
                            "status": 555,
                            "status_reason": 'Connection failed',
