@@ -1118,6 +1118,7 @@ def remote_misp_push_sync():
 
             known_fps = misp_instance.search_misp_events(filter)
             known_keys = [fps['info'] for fps in known_fps]
+            logger.info("MISP {} knows these fingerprints: {}".format(misp_entry.name, known_keys))
             unk_fps = []
             unk_fps_keys = []
             for fp in fingerprints:
