@@ -59,7 +59,7 @@ def _search(query=None, fields=None, page=0, pagesize=0, order=None):
     if pagesize == 0:
         result = list(_mdb().find(q, fields))
     else:
-        result = list(_mdb().find(q, fields).skip(page*pagesize).limit(pagesize))
+        result = list(_mdb().find(q, fields).skip(page * pagesize).limit(pagesize))
     return result
 
 
@@ -77,7 +77,7 @@ def _search2(query=None, fields=None, page=0, pagesize=0, order=None, sortorder=
     total = len(result)
 
     if pagesize > 0:
-        result = list(_mdb().find(q, fields).skip(page*pagesize).limit(pagesize))
+        result = list(_mdb().find(q, fields).skip(page * pagesize).limit(pagesize))
     return result, total
 
 
@@ -331,7 +331,7 @@ def tokens(request):
         if "ddosdb.add_own_token" not in permissions:
             raise PermissionDenied()
 
-        description='New Token'
+        description = 'New Token'
         if "description" in request.POST:
             descr = request.POST["description"].strip()
             if len(descr) > 0:
@@ -724,7 +724,7 @@ def overview(request):
 
     user: User = request.user
 
-    sort_order = {'asc':1, 'desc':-1}
+    sort_order = {'asc': 1, 'desc': -1}
 
     start = time.time()
 
@@ -798,9 +798,9 @@ def overview(request):
 
         q = "*"
         query = {}
-        query_limit=""
+        query_limit = ""
         if "ddosdb.view_nonsync_fingerprint" not in user.get_all_permissions():
-             query = {"$or": [{'submitter': user.username}, {'shareable': True}]}
+            query = {"$or": [{'submitter': user.username}, {'shareable': True}]}
         if (context["q"]):
             q = context["q"]
         q_dis = q.split(':')
@@ -816,7 +816,7 @@ def overview(request):
         #        results = [x["_source"] for x in response["hits"]["hits"]]
         results = mdb_resp[0]
         context["total"] = mdb_resp[1]
-        context["plast"] = int(mdb_resp[1]/context['plen'])-1
+        context["plast"] = int(mdb_resp[1] / context['plen']) - 1
         if mdb_resp[1] % context['plen'] > 0:
             context["plast"] = context["plast"] + 1
 
@@ -829,12 +829,12 @@ def overview(request):
             context["pnext"] = 0
 
         if context["p"] > 0:
-            context['pprev'] = context["p"]-1
+            context['pprev'] = context["p"] - 1
 
         context["total"] = mdb_resp[1]
         logger.info("Got {} results ({} - {}) of {}".format(len(results),
-                                                            context['p']*context['plen'],
-                                                            context['p']*context['plen']+len(results)-1,
+                                                            context['p'] * context['plen'],
+                                                            context['p'] * context['plen'] + len(results) - 1,
                                                             mdb_resp[1]))
 
         if len(results) > 0:
@@ -1100,14 +1100,18 @@ def remote_misp_push_sync():
         return []
 
     for misp_entry in misps:
-        logger.info(misp_entry.url)
-        logger.info(misp_entry.url.split('/')[-2])
-        logger.info(misp_entry.url.split(':')[0])
-        misp_instance = misp.MispInstance(misp_entry.url.split('/')[-2], misp_entry.authkey, misp_entry.url.split(':')[0],
-                                     verify_tls=misp_entry.check_cert,
-                                     sharing_group=misp_entry.sharing_group if misp_entry.sharing_group!="" else None)
+        host = misp_entry.url.split('://')[-1].split('/')[0]
+        protocol = misp_entry.url.split('://')[0]
+        if protocol.lower() not in ['http', 'https']:
+            logger.error('MISP instance URLs should contain http(s) protocol.')
+            return []
+        logger.info(f"MISP instance: {protocol}://{host}")
+        misp_instance = misp.MispInstance(host=host, token=misp_entry.authkey, protocol=protocol,
+                                          verify_tls=misp_entry.check_cert,
+                                          sharing_group=misp_entry.sharing_group
+                                          if misp_entry.sharing_group != "" else None)
 
-        logger.info("Contacting remote MISP:{} @ {}".format(misp_entry.name, misp_entry.url))
+        logger.info("Contacting remote MISP: {} @ {}".format(misp_entry.name, misp_entry.url))
         try:
             filter = {
                 "minimal": False,
@@ -1126,7 +1130,8 @@ def remote_misp_push_sync():
                     unk_fps.append(fp)
                     unk_fps_keys.append(fp['key'])
 
-            logger.info("MISP {} needs sync for {} fingerprints {}".format(misp_entry.name, len(unk_fps_keys), unk_fps_keys))
+            logger.info(
+                "MISP {} needs sync for {} fingerprints {}".format(misp_entry.name, len(unk_fps_keys), unk_fps_keys))
             for fp in unk_fps:
                 logger.debug("Syncing fingerprint {}".format(fp['key']))
                 misp_instance.add_misp_fingerprint(fp)
@@ -1241,10 +1246,10 @@ def toggle_shareable(request):
     else:
         extra.append("q=")
 
-    req_args=['o', 'so', 'son', 'plen', 'p']
+    req_args = ['o', 'so', 'son', 'plen', 'p']
     for req_arg in req_args:
         if req_arg in request.GET:
-            extra.append(req_arg+'='+request.GET[req_arg])
+            extra.append(req_arg + '=' + request.GET[req_arg])
     # if "o" in request.GET:
     #     extra.append("o=" + request.GET["o"])
     # if "so" in request.GET:
