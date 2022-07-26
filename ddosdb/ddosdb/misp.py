@@ -113,7 +113,7 @@ class MispInstance:
 
         # Maximum number of source IPs to include
         # 0 means all (no limit)
-        source_ips_limit = 1
+        source_ips_limit = 10
 
         # Possible dicts in each attack_vector of the fingerprint
         # that will be added as comments (with the dict as value) to the event (not the ddos objects)
@@ -229,33 +229,33 @@ class MispInstance:
             # ATTACK VECTOR SOURCE_PORT
             if type(attack_vector['source_port']) == int:
                 LOGGER.debug('Adding source ports')
-                ddos_object.add_attribute('src-port', attack_vector['source_port'], comment='src-port')
+                ddos_object.add_attribute('src-port', attack_vector['source_port'], comment=f'vector {v_i} src-port')
 
             # ATTACK VECTOR DESTINATION PORTS
             if type(attack_vector['destination_ports']) == dict:
                 LOGGER.debug('Adding destination ports')
                 for port in attack_vector['destination_ports'].keys():
                     ddos_object.add_attribute('dst-port', int(port),
-                                              comment='fraction={}'.format(attack_vector['destination_ports'][port]))
+                                              comment=f'vector {v_i} destination port (fraction:{attack_vector["destination_ports"][port]}')
 
             # ATTACK VECTOR DNS
             if 'dns_query_name' in attack_vector or 'dns_query_type' in attack_vector:
-                ddos_object.add_attribute('type', 'dns', comment='type of attack vector')
-                ddos_object.add_attribute('type', 'dns-amplification', comment='type of attack vector')
+                ddos_object.add_attribute('type', 'dns', comment=f'vector {v_i}  type of attack vector')
+                ddos_object.add_attribute('type', 'dns-amplification', comment=f'vector {v_i} type of attack vector')
 
             # ATTACK VECTOR ICMP
             if 'ICMP type' in attack_vector:
-                ddos_object.add_attribute('type', 'icmp', comment='type of attack vector')
+                ddos_object.add_attribute('type', 'icmp', comment=f'vector {v_i} type of attack vector')
 
             # ATTACK VECTOR NTP
             if 'ntp_requestcode' in attack_vector:
-                ddos_object.add_attribute('type', 'ntp-amplification', comment='type of attack vector')
+                ddos_object.add_attribute('type', 'ntp-amplification', comment=f'vector {v_i} type of attack vector')
 
             # ATTACK VECTOR SOURCE IPS
-            if 'source_ips' in attack_vector and source_ips_limit > 0:
+            if 'source_ips' in attack_vector:
                 for i, src_ip in enumerate(attack_vector['source_ips'], start=1):
-                    ddos_object.add_attribute('ip-src', src_ip, comment='source IP list truncated')
-                    if i >= source_ips_limit:
+                    ddos_object.add_attribute('ip-src', src_ip, comment=f'vector {v_i}  source IP')
+                    if i >= source_ips_limit > 0:
                         break
 
             event.add_object(ddos_object, pythonify=True)
