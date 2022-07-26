@@ -1117,7 +1117,7 @@ def remote_misp_push_sync():
                 "minimal": False,
                 "sort": "publish_timestamp",
                 "direction": "desc",
-                "tag": "DDoSCH",
+                "tag": misp_instance.ddosch_tag_name,
             }
 
             known_fps = misp_instance.search_misp_events(filter)

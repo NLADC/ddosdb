@@ -15,6 +15,10 @@ __all__ = ['MispInstance']
 
 
 class MispInstance:
+
+    ddosch_tag_name = 'DDoS Clearing House'
+    ddosch_tag_colour = '#ff7dfd'
+
     def __init__(self, host: str, token: str, protocol: str, verify_tls: bool,  sharing_group: str):
         self.host = host
         self.token = token
@@ -160,7 +164,7 @@ class MispInstance:
         ]
 
         # Create the DDoSCH tag (returns existing one if already present)
-        ddosch_tag = self.add_misp_tag('DDoSCH', '#ff7dfd')
+        ddosch_tag = self.add_misp_tag(self.ddosch_tag_name, self.ddosch_tag_colour)
         LOGGER.debug(ddosch_tag)
 
         # Retrieve (or create) the sharing group if specified
@@ -261,10 +265,15 @@ class MispInstance:
             event.add_object(ddos_object, pythonify=True)
 
         event = self.misp.add_event(event, pythonify=True)
+
+        # Add DDoS Clearing House tag (created/retrieved one, or just as text if that failed)
+        if ddosch_tag:
+            self.add_misp_tag_to_event(event.id, ddosch_tag['Tag']['id'])
+        else:
+            event.add_tag(tag=self.ddosch_tag_name)
+
         if misp_sharing_group:
             event = self.misp.change_sharing_group_on_entity(event, misp_sharing_group.id, pythonify=True)
         event.publish()
 
-        result = self.add_misp_tag_to_event(event.id, ddosch_tag['Tag']['id'])
-        LOGGER.debug(result)
         LOGGER.debug('That took {} seconds'.format(time.time() - start))
