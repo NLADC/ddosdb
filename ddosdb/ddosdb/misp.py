@@ -1,12 +1,10 @@
-import sys
-
 import requests
 import urllib3
 import json
 import time
 from pymisp import ExpandedPyMISP, MISPEvent, MISPObject
 from pymisp.exceptions import PyMISPError
-from typing import Optional
+from typing import Optional, Union
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -15,11 +13,10 @@ __all__ = ['MispInstance']
 
 
 class MispInstance:
-
-    ddosch_tag_name = 'DDoS Clearing House'
+    ddosch_tag_name = 'DDoSCH'
     ddosch_tag_colour = '#ff7dfd'
 
-    def __init__(self, host: str, token: str, protocol: str, verify_tls: bool,  sharing_group: str):
+    def __init__(self, host: str, token: str, protocol: str, verify_tls: bool, sharing_group: str):
         self.host = host
         self.token = token
         self.protocol = protocol
@@ -58,6 +55,32 @@ class MispInstance:
             LOGGER.critical(f'Retrieving MISP events responded with status code:{response.status_code}')
             return None
 
+    def get_misp_tag(self, tag_name) -> Optional[dict]:
+        """
+        Search in MISP for a tag with tag_name, return the tag dict if it exists.
+        :param tag_name: Name of the tag to retrieve
+        :return: Tag or None
+        """
+        LOGGER.info(f'Searching for {tag_name} tag in MISP')
+
+        if not self.verify_tls:
+            urllib3.disable_warnings()
+        response = requests.get(f'{self.protocol}://{self.host}/tags/search/{self.ddosch_tag_name}',
+                                headers={'Authorization': self.token,
+                                         'Accept': 'application/json'},
+                                timeout=10, verify=self.verify_tls)
+        try:
+            response.raise_for_status()
+            for item in response.json():
+                if item['Tag']['name'] == self.ddosch_tag_name:
+                    return item
+            else:
+                LOGGER.info(f'No tags found with name "{self.ddosch_tag_name}"')
+                return None
+        except requests.HTTPError:
+            LOGGER.critical(f'Searching for MISP Tag responded with status code:{response.status_code}')
+            return None
+
     def add_misp_tag(self, tag_name, tag_color) -> Optional[dict]:
         """
         Create a new tag in MISP
@@ -74,30 +97,6 @@ class MispInstance:
                                  headers={'Authorization': self.token,
                                           'Accept': 'application/json'},
                                  timeout=10, verify=self.verify_tls)
-        try:
-            response.raise_for_status()
-            return response.json()
-        except requests.HTTPError:
-            LOGGER.critical(f'Creating MISP Tag responded with status code:{response.status_code}')
-            return None
-
-    def add_misp_tag_to_event(self, event_id, tag_id):
-        """
-        Add MISP tag to MISP event
-        :param event_id:
-        :param tag_id:
-        :return:
-        """
-        LOGGER.debug('Adding DDoSCH tag to the event')
-
-        if not self.verify_tls:
-            urllib3.disable_warnings()
-        response = requests.post(f'{self.protocol}://{self.host}/events/addTag/{event_id}/{tag_id}',
-                                 headers={'Authorization': self.token,
-                                          'Accept': 'application/json'},
-                                 timeout=10, verify=self.verify_tls)
-        LOGGER.debug(f'status: {response.status_code}')
-
         try:
             response.raise_for_status()
             return response.json()
@@ -164,13 +163,16 @@ class MispInstance:
         ]
 
         # Create the DDoSCH tag (returns existing one if already present)
-        ddosch_tag = self.add_misp_tag(self.ddosch_tag_name, self.ddosch_tag_colour)
+        ddosch_tag = self.get_misp_tag(self.ddosch_tag_name)
+        if ddosch_tag is None:
+            ddosch_tag = self.add_misp_tag(self.ddosch_tag_name, self.ddosch_tag_colour)
         LOGGER.debug(ddosch_tag)
 
         # Retrieve (or create) the sharing group if specified
         misp_sharing_group = None
         if self.sharing_group:
-            misp_sharing_group = [sh_grp for sh_grp in self.misp.sharing_groups(pythonify=True) if sh_grp.name == self.sharing_group]
+            misp_sharing_group = [sh_grp for sh_grp in self.misp.sharing_groups(pythonify=True) if
+                                  sh_grp.name == self.sharing_group]
             if len(misp_sharing_group) == 0:
                 misp_sharing_group = self.misp.add_sharing_group({'name': self.sharing_group}, pythonify=True)
             else:
@@ -206,6 +208,8 @@ class MispInstance:
             for tag in fingerprint_json['tags']:
                 event.add_tag(tag=tag)
         event.add_tag(tag='validated')
+        if ddosch_tag is not None:
+            event.add_tag(tag=self.ddosch_tag_name)
 
         # Add each attack vector as a MISP object to the MISP event
         for v_i, attack_vector in enumerate(fingerprint_json['attack_vectors']):
@@ -240,7 +244,8 @@ class MispInstance:
                 LOGGER.debug('Adding destination ports')
                 for port in attack_vector['destination_ports'].keys():
                     ddos_object.add_attribute('dst-port', int(port),
-                                              comment=f'vector {v_i} destination port (fraction:{attack_vector["destination_ports"][port]}')
+                                              comment=f'vector {v_i} destination port '
+                                                      f'(fraction:{attack_vector["destination_ports"][port]}')
 
             # ATTACK VECTOR DNS
             if 'dns_query_name' in attack_vector or 'dns_query_type' in attack_vector:
@@ -266,14 +271,9 @@ class MispInstance:
 
         event = self.misp.add_event(event, pythonify=True)
 
-        # Add DDoS Clearing House tag (created/retrieved one, or just as text if that failed)
-        if ddosch_tag:
-            self.add_misp_tag_to_event(event.id, ddosch_tag['Tag']['id'])
-        else:
-            event.add_tag(tag=self.ddosch_tag_name)
-
         if misp_sharing_group:
             event = self.misp.change_sharing_group_on_entity(event, misp_sharing_group.id, pythonify=True)
+        LOGGER.info(f'event: {event}')
         event.publish()
 
         LOGGER.debug('That took {} seconds'.format(time.time() - start))
