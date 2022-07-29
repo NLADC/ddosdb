@@ -83,8 +83,8 @@ class MISPForm(forms.ModelForm):
 
 
 class MISPAdmin(admin.ModelAdmin):
-    list_display = ("name", "sharing_group", "active", "push", "pull", "url", "check_cert")
-    fields = (('name', 'active', 'push', 'pull'), ('url', 'check_cert'), 'authkey', 'sharing_group')
+    list_display = ('name', 'sharing_group', 'active', 'publish', 'push', 'pull', 'url', 'check_cert')
+    fields = (('name', 'active', 'publish', 'push', 'pull'), ('url', 'check_cert'), 'authkey', 'sharing_group')
 
     form = MISPForm
 

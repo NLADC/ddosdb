@@ -16,13 +16,14 @@ class MispInstance:
     ddosch_tag_name = 'DDoSCH'
     ddosch_tag_colour = '#ff7dfd'
 
-    def __init__(self, host: str, token: str, protocol: str, verify_tls: bool, sharing_group: str):
+    def __init__(self, host: str, token: str, protocol: str, verify_tls: bool, sharing_group: str, publish: bool = False):
         self.host = host
         self.token = token
         self.protocol = protocol
         self.verify_tls = verify_tls
         self.misp: ExpandedPyMISP
         self.sharing_group = sharing_group
+        self.publish = publish
 
         try:
             self.misp = ExpandedPyMISP(f'{self.protocol}://{self.host}', self.token, ssl=self.verify_tls,
@@ -269,11 +270,14 @@ class MispInstance:
 
             event.add_object(ddos_object, pythonify=True)
 
+        if misp_sharing_group:
+            self.misp.change_sharing_group_on_entity(event, misp_sharing_group.id, pythonify=True)
+
+        if self.publish:
+            event.publish()
+
         event = self.misp.add_event(event, pythonify=True)
 
-        if misp_sharing_group:
-            event = self.misp.change_sharing_group_on_entity(event, misp_sharing_group.id, pythonify=True)
         LOGGER.info(f'event: {event}')
-        event.publish()
 
         LOGGER.debug('That took {} seconds'.format(time.time() - start))

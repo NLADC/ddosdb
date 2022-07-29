@@ -1109,7 +1109,8 @@ def remote_misp_push_sync():
         misp_instance = misp.MispInstance(host=host, token=misp_entry.authkey, protocol=protocol,
                                           verify_tls=misp_entry.check_cert,
                                           sharing_group=misp_entry.sharing_group
-                                          if misp_entry.sharing_group != "" else None)
+                                          if misp_entry.sharing_group != "" else None,
+                                          publish=misp_entry.publish)
 
         logger.info("Contacting remote MISP: {} @ {}".format(misp_entry.name, misp_entry.url))
         try:

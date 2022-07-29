@@ -76,6 +76,8 @@ class MISP(models.Model):
     sharing_group = models.CharField('Sharing Group', max_length=255, default="", blank=True,
                                help_text="""(Optional) Sharing Group to Distribute to, leave empty for default""")
 
+    publish = models.BooleanField(default=False, help_text="""Automatically publish""")
+
     def __str__(self):
         postfix = ' (inactive)'
         if (self.active):
