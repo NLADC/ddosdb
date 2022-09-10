@@ -107,48 +107,31 @@ def fingerprints(request):
 
         logger.info("Inserting fingerprint(s)")
 
-        def insert(fp):
-            logger.info("Inserting fingerprint {}".format(fp["key"]))
-            # Register record
-            _delete({'key': fp['key']})
-            _insert(fp)
-            # file_upload = FileUpload()
-            # file_upload.user = request.user
-            # file_upload.filename = fp["key"]
-            # file_upload.save()
-
         fps = json.loads(request.data)
-        if type(fps) is list:
-            for fp in fps:
-                # Replace name in fingerprint with the name of the user submitting it
-                # so as not to transfer usernames over different DBs
-                fp["submitter"] = request.user.username
-                # Set shareable to false to prevent it being shared further on by default
-                fp["shareable"] = False
-                # Set submit timestamp
-                fp["submit_timestamp"] = datetime.utcnow().isoformat()
-                if not 'comment' in fp:
-                    fp['comment'] = ""
+        if type(fps) is not list:
+            fps = [fps]
 
-                try:
-                    insert(fp)
-                except Exception as e:
-                    response = HttpResponse()
-                    response.status_code = 400
-                    response.reason_phrase = str(e)
-                    return response
-        else:
+        for fp in fps:
+            logger.info("Inserting fingerprint {}".format(fp["key"]))
             # Replace name in fingerprint with the name of the user submitting it
             # so as not to transfer usernames over different DBs
-            fps["submitter"] = request.user.username
-            # Set shareable to false to prevent it being shared further on by default
-            fps["shareable"] = False
+            fp["submitter"] = request.user.username
+            # Set shareable to false by default
+            if 'shareable' not in fp:
+                fp["shareable"] = False
             # Set submit timestamp
-            fps["submit_timestamp"] = datetime.utcnow().isoformat()
-            if not 'comment' in fps:
-                fps['comment'] = ""
+            fp["submit_timestamp"] = datetime.utcnow().isoformat()
+            if 'comment' not in fp:
+                fp['comment'] = ""
+
             try:
-                insert(fps)
+                # Register record
+                _delete({'key': fp['key']})
+                _insert(fp)
+                # file_upload = FileUpload()
+                # file_upload.user = request.user
+                # file_upload.filename = fp["key"]
+                # file_upload.save()
             except Exception as e:
                 response = HttpResponse()
                 response.status_code = 400
