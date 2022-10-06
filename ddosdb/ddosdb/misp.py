@@ -26,8 +26,8 @@ class MispInstance:
         self.publish = publish
 
         try:
-            self.misp = ExpandedPyMISP(f'{self.protocol}://{self.host}', self.token, ssl=self.verify_tls,
-                                       tool='dissector')
+            self.misp = ExpandedPyMISP(url=f'{self.protocol}://{self.host}', key=self.token, ssl=self.verify_tls,
+                                       tool='DDoSDB')
         except PyMISPError:
             LOGGER.critical(f'Could not connect to MISP instance at "{self.protocol}://{self.host}".')
             self.misp = None
@@ -167,10 +167,8 @@ class MispInstance:
         ddosch_tag = self.get_misp_tag(self.ddosch_tag_name)
         if ddosch_tag is None:
             ddosch_tag = self.add_misp_tag(self.ddosch_tag_name, self.ddosch_tag_colour)
-        LOGGER.debug(ddosch_tag)
-
+        LOGGER.info(f'Found tag: {ddosch_tag}')
         # Retrieve (or create) the sharing group if specified
-        misp_sharing_group = None
         if self.sharing_group:
             misp_sharing_group = [sh_grp for sh_grp in self.misp.sharing_groups(pythonify=True) if
                                   sh_grp.name == self.sharing_group]

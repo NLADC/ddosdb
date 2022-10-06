@@ -1100,7 +1100,7 @@ def remote_misp_push_sync():
         return []
 
     for misp_entry in misps:
-        host = misp_entry.url.split('://')[-1].split('/')[0]
+        host = misp_entry.url.split('://')[-1]
         protocol = misp_entry.url.split('://')[0]
         if protocol.lower() not in ['http', 'https']:
             logger.error('MISP instance URLs should contain http(s) protocol.')
