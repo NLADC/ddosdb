@@ -6,6 +6,8 @@ from datetime import datetime
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponse, JsonResponse
+from rest_framework.response import Response
+from rest_framework import status
 from django.core.exceptions import PermissionDenied
 
 # from pymongo import MongoClient
@@ -56,7 +58,14 @@ def _delete(query=None):
 # ---------------------------------------------------------------------------------
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
-def fingerprints(request):
+def fingerprints(request, format=None):
+    """
+    Returns the list of fingerprint keys if no key is specified or a specific fingerprint
+    if fingerprint/<key> is invoked
+
+    Use the header 'Authorization: Token <token>' to authorize API calls.
+
+    """
     logger.info("fingerprints ({})".format(request.method))
 
     # user_perms = request.user.get_user_permissions()
@@ -85,14 +94,11 @@ def fingerprints(request):
             for fp in fps:
                 results['non-shareable'].append(fp['key'])
 
-            return JsonResponse(results, safe=False)
+            return Response(results)
 
         except ServerSelectionTimeoutError as e:
             logger.error("MongoDB unreachable")
-            response = HttpResponse()
-            response.status_code = 500
-            response.reason_phrase = "Error with MongoDB"
-            return response
+            return Response({"detail": "Error with MongoDB"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     elif request.method == "POST":
 
@@ -100,71 +106,45 @@ def fingerprints(request):
             raise PermissionDenied()
 
         if request.META['CONTENT_TYPE'] != "application/json":
-            response = HttpResponse()
-            response.status_code = 400
-            response.reason_phrase = "Wrong content type"
-            return response
+            return Response({"detail": "Wrong content type"}, status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
         logger.info("Inserting fingerprint(s)")
 
-        def insert(fp):
-            logger.info("Inserting fingerprint {}".format(fp["key"]))
-            # Register record
-            _delete({'key': fp['key']})
-            _insert(fp)
-            # file_upload = FileUpload()
-            # file_upload.user = request.user
-            # file_upload.filename = fp["key"]
-            # file_upload.save()
-
         fps = json.loads(request.data)
-        if type(fps) is list:
-            for fp in fps:
-                # Replace name in fingerprint with the name of the user submitting it
-                # so as not to transfer usernames over different DBs
-                fp["submitter"] = request.user.username
-                # Set shareable to false to prevent it being shared further on by default
-                fp["shareable"] = False
-                # Set submit timestamp
-                fp["submit_timestamp"] = datetime.utcnow().isoformat()
-                if not 'comment' in fp:
-                    fp['comment'] = ""
+        if type(fps) is not list:
+            fps = [fps]
 
-                try:
-                    insert(fp)
-                except Exception as e:
-                    response = HttpResponse()
-                    response.status_code = 400
-                    response.reason_phrase = str(e)
-                    return response
-        else:
+        for fp in fps:
+            logger.info("Inserting fingerprint {}".format(fp["key"]))
             # Replace name in fingerprint with the name of the user submitting it
             # so as not to transfer usernames over different DBs
-            fps["submitter"] = request.user.username
-            # Set shareable to false to prevent it being shared further on by default
-            fps["shareable"] = False
+            fp["submitter"] = request.user.username
+            # Set shareable to false by default
+            if 'shareable' not in fp:
+                fp["shareable"] = False
             # Set submit timestamp
-            fps["submit_timestamp"] = datetime.utcnow().isoformat()
-            if not 'comment' in fps:
-                fps['comment'] = ""
-            try:
-                insert(fps)
-            except Exception as e:
-                response = HttpResponse()
-                response.status_code = 400
-                response.reason_phrase = str(e)
-                return response
+            fp["submit_timestamp"] = datetime.utcnow().isoformat()
+            if 'comment' not in fp:
+                fp['comment'] = ""
 
-        response = HttpResponse()
-        response.status_code = 201
-        response.reason_phrase = "Fingerprints added successfully"
-        return response
+            try:
+                # Register record
+                _delete({'key': fp['key']})
+                _insert(fp)
+                # file_upload = FileUpload()
+                # file_upload.user = request.user
+                # file_upload.filename = fp["key"]
+                # file_upload.save()
+            except Exception as e:
+                return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"detail": "OK"}, status.HTTP_201_CREATED)
 
 
 # ---------------------------------------------------------------------------------
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def fingerprint(request, key):
+def fingerprint(request, key, format=None):
     logger.debug("fingerprint/{} ({})".format(key, request.method))
 
     permissions = request.user.get_all_permissions()
@@ -179,43 +159,41 @@ def fingerprint(request, key):
         if len(fps) > 0:
             # Check if this user is allowed to view this fingerprint...
 
-            return JsonResponse(fps, safe=False)
+            return Response(fps)
         else:
-            response = HttpResponse()
-            response.status_code = 404
-            response.reason_phrase = "Fingerprint {} not found".format(key)
-            return response
+            return Response(f"Fingerprint {key} not found", status=status.HTTP_404_NOT_FOUND)
 
     except ServerSelectionTimeoutError as e:
-        logger.error("MongoDB unreachable")
-        response = HttpResponse()
-        response.status_code = 500
-        response.reason_phrase = "Error with MongoDB"
-        return response
+        return Response({"detail": "Error with MongoDB"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ---------------------------------------------------------------------------------
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def permissions(request):
+def permissions(request, format=None):
+    """
+    Returns the permissions of the user linked to the token used to authorize this
+    and other API calls.
+    Use the header 'Authorization: Token <token>' to authorize API calls.
+
+    """
     logger.debug("permissions ")
 
     user_permissions = list(request.user.get_all_permissions())
     permissions = []
 
     for perm in user_permissions:
-        # permissions.append(perm.split('.')[-1])
         permissions.append(perm)
 
     permissions.sort()
 
-    return JsonResponse({str(request.user): permissions}, safe=False)
+    return Response({str(request.user): permissions})
 
 
 # ---------------------------------------------------------------------------------
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def unknown_fingerprints(request):
+def unknown_fingerprints(request, format=None):
     logger.debug("unknown_fingerprints ({})".format(request.method))
     """Takes a list of fingerprint keys and returns the fingerprint keys not present in the database"""
     """Allowing caller to then only upload fingerprints not yet known by this DDoS-DB"""
@@ -231,10 +209,7 @@ def unknown_fingerprints(request):
     if request.META['CONTENT_TYPE'] != "application/json":
         logger.warning("unknown_fingerprints called with wrong content type")
         logger.warning("Should be 'application/json', is '{}'".format(request.META['CONTENT_TYPE']))
-        response = HttpResponse()
-        response.status_code = 400
-        response.reason_phrase = "Wrong content type"
-        return response
+        return Response({"detail": "Wrong content type"}, status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     data = json.loads(request.body)
     unk_fps = []
@@ -251,12 +226,8 @@ def unknown_fingerprints(request):
             if not fp in known_fps:
                 unk_fps.append(fp)
 
-        return JsonResponse(unk_fps, safe=False)
+        return Response(unk_fps)
 
     except ServerSelectionTimeoutError as e:
-        logger.error("MongoDB unreachable")
-        response = HttpResponse()
-        response.status_code = 500
-        response.reason_phrase = "Error reaching MongoDB"
-        return response
+        return Response({"detail": "Error with MongoDB"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
