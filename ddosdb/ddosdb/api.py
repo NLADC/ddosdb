@@ -121,6 +121,7 @@ def fingerprints(request, format=None):
             fp["submitter"] = request.user.username
             # Set shareable to false by default
             if 'shareable' not in fp:
+                logger.info('Shareable not in FP, setting to false')
                 fp["shareable"] = False
             # Set submit timestamp
             fp["submit_timestamp"] = datetime.utcnow().isoformat()

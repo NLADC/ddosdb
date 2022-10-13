@@ -639,7 +639,8 @@ def upload_file(request):
 
             # Assume normally all fingerprints can be shared.
             # Add some edit function for this later...
-            data["shareable"] = False
+            if not data.get('shareable', False):
+                data["shareable"] = False
 
             #        else:
             #            if "amplifiers" in data:
