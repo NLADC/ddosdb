@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/python-v3.6+-blue.svg)
 [![GitHub Issues](https://img.shields.io/github/issues/ddos-clearing-house/ddosdb)](https://github.com/ddos-clearing-house/ddosdb/issues)
 ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://opensource.org/license/gpl-3-0/)
 <img alt="GitHub commits since tagged version" src="https://img.shields.io/github/last-commit/ddos-clearing-house/ddos_dissector">
 
  <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/concordia-logo.png?raw=true"></p>
