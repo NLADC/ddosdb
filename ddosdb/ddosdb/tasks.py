@@ -41,6 +41,11 @@ def _insert(data):
     _mdb().insert(data)
 
 
+@app.task(name='ddosdb.tasks.fingerprint_cleanup', bind=True)
+def fingerprint_cleanup(self, days=0):
+    return views.fingerprint_cleanup(days)
+
+
 @app.task(name='ddosdb.tasks.push_sync', bind=True)
 def push_sync(self):
     return remote_push_sync()

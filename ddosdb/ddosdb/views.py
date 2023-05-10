@@ -1086,6 +1086,30 @@ def remote_pull_sync():
 
 
 # -------------------------------------------------------------------------------------------------------------------
+def fingerprint_cleanup(days):
+    fps_removed = []
+    if days <= 0:
+        logger.info(f'Task for cleaning up fingerprints: "days" set to {days}, doing no cleanup')
+    else:
+        logger.info(f"Task for cleaning up fingerprints: Cleaning up fingerprints older than {days} days")
+        cutoff = datetime.utcnow() - timedelta(days = days)
+        logger.info(f'Removing fingerprints submitted before {cutoff}')
+
+        fields = ['key', 'submit_timestamp']
+        mdb_resp = _search(query={"submit_timestamp": {"$lt": (datetime.utcnow()-timedelta(days=days)).isoformat()}},
+                           fields=fields)
+        logger.info(f"Found {len(mdb_resp)} fingerprints:")
+        fps_removed = []
+        for fp in mdb_resp:
+            logger.info(f"fingerprint {fp['key']}, submitted {fp['submit_timestamp']}")
+            fps_removed.append(fp['key'])
+            # delete this fingerprint...
+            _delete({"key": fp["key"]})
+
+    return fps_removed
+
+
+# -------------------------------------------------------------------------------------------------------------------
 def remote_misp_push_sync():
     rmisps = []
     misps = MISP.objects.filter(active=True, push=True)
