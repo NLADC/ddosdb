@@ -59,26 +59,26 @@ printf "\nGenerating self-signed certificate for localhost\n"
 openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=EU/ST=N\/A/L=N\/A/O=Concordia/OU=DDoS Clearing House/CN=localhost" -keyout ./temp/ddosdb-localhost.key  -out ./temp/ddosdb-localhost.crt
 
 printf "\n${COL} Building volumes, images, and containers${NC}\n\n"
-docker-compose build
-docker-compose up -d
+docker compose build
+docker compose up -d
 
 # Initialize the ddosdb Django App
 #printf "\n${COL} Collecting Django static files${NC}\n\n"
-#docker-compose exec ddosdb python manage.py collectstatic --noinput
+#docker compose exec ddosdb python manage.py collectstatic --noinput
 #
 #printf "\n${COL} Applying Django migrations${NC}\n\n"
-#docker-compose exec ddosdb python manage.py migrate --noinput
+#docker compose exec ddosdb python manage.py migrate --noinput
 
 #printf "\n${COL} Creating Django superuser${NC}\n\n"
-#docker-compose exec ddosdb python manage.py createsuperuser --noinput
+#docker compose exec ddosdb python manage.py createsuperuser --noinput
 
 #printf "\n${COL} Setting up default Celery (beat) tasks ${NC}\n\n"
-#docker-compose exec ddosdb python manage.py celery
+#docker compose exec ddosdb python manage.py celery
 
 printf "\n\n${COL}** Finished **\n\n"
-printf "Stop ddosdb by executing 'docker-compose down' in this directory\n"
-printf " 'docker-compose up' will restart ddosdb\n"
-printf " 'docker-compose up --build' will rebuild and restart\n"
+printf "Stop ddosdb by executing 'docker compose down' in this directory\n"
+printf " 'docker compose up' will restart ddosdb\n"
+printf " 'docker compose up --build' will rebuild and restart\n"
 printf "\nTo reset ddosdb to factory settings: \n"
 printf " Run ./clean.sh to bring down the containers and delete all data \n"
 printf " Followed by './build.sh' to rebuild & restart ${NC}\n\n"
