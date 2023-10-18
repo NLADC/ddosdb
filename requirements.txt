@@ -36,7 +36,7 @@ pytz==2022.1
 requests==2.31.0
 six==1.15.0
 sqlparse==0.4.4
-urllib3==1.26.17
+urllib3==1.26.18
 vine==5.0.0
 wcwidth==0.2.5
 wrapt==1.13.3
