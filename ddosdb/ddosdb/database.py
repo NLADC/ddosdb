@@ -34,7 +34,7 @@ class Database(object):
 
     @staticmethod
     def getDB():
-        if not Database.DATABASE:
+        if Database.DATABASE == None:
             client = pymongo.MongoClient(Database.URI)
             Database.DATABASE = client.ddosdb.fingerprints
 
