@@ -109,7 +109,7 @@
           <td>
             {% if user.username == node|get_item:"submitter" or perms.ddosdb.delete_fingerprint %}
               {% if o %}
-                <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}">
+                <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o={{ o }}&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}" onclick="return confirm('Are you sure you want to delete this fingerprint?')">
               {% else %}
                 <a href="{% url "delete" %}?key={{node|get_item:'key'}}&q={{ q }}&o=key&so={{ so }}&son={{ son }}&plen={{ plen }}&p={{ p }}">
               {% endif %}
