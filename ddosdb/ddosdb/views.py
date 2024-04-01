@@ -782,11 +782,11 @@ def overview(request):
         # should only see 'shareable' and their own fingerprints.
         context["headers"] = {
             "key": "key",
-            "shareable": "Sync",
+            "shareable": "sync",
             "time_start": "start time",
-            "total_packets": "# packets",
+            "total_packets": "# pkts",
             "total_ips": "# IPs",
-            "avg_bps": "bits/second",
+            "avg_bps": "bits/s",
             "submit_timestamp": "submitted",
             "submitter": "by",
             "comment": "comment",

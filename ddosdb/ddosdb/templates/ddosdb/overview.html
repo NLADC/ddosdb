@@ -6,6 +6,7 @@
 {% load precision %}
 {% load str_todatetime %}
 {% load short_list %}
+{% load hr_bps %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -129,14 +130,14 @@
             {% comment %}
               <a href="{% url "query" %}?q=multivector_key:{{ node|get_item:hdr|urlencode }}">
             {% endcomment %}
-                {{node|get_item:hdr}}
+                {{node|get_item:hdr|truncatechars:8}}
             {% comment %}
               </a>
             {% endcomment %}
             {% elif hdr == "key" %}
               <div title="open detailed view">
                 <a  href="{% url "details" %}?key={{ node|get_item:hdr|urlencode }}">
-                  {{node|get_item:hdr}}
+                  {{node|get_item:hdr|truncatechars:8}}
                 </a>
               </div>
             {% elif hdr == "submitter" %}
@@ -168,15 +169,17 @@
             {% elif hdr == "duration_sec" %}
                 {{node|get_item:hdr|precision:3}}
             {% elif hdr == "avg_bps" %}
-                <div class="text-end">{{node|get_item:hdr|precision:0|intcomma}}</div>
+                <div class="text-end">{{node|get_item:hdr|precision:0|hr_bps}}</div>
             {% elif hdr == "avg_pps" %}
                 <div class="text-end">{{node|get_item:hdr|precision:0|intcomma}}</div>
             {% elif hdr == "total_ips" %}
                 <div class="text-end">{{node|get_item:hdr|precision:0|intcomma}}</div>
             {% elif hdr == "total_packets" %}
-                <div class="text-end">{{node|get_item:hdr|precision:0|intcomma}}</div>
+                <div class="text-end">{{node|get_item:hdr|precision:0|hr_bps:''}}</div>
             {% elif hdr == "submit_timestamp" %}
                 {{node|get_item:hdr|str_todatetime|date:'Y-m-d'}}
+            {% elif hdr == "time_start" %}
+                {{node|get_item:hdr|str_todatetime|date:'Y-m-d G:i:s'}}
             {% elif hdr == "tags" %}
               <div title="{{node|get_item:hdr|short_list:1}}">
                 {{node|get_item:hdr|short_list:0}}
@@ -190,7 +193,7 @@
                     </a>
                   </span>
                 {% endif %}
-                {{node|get_item:hdr|truncatechars:10}}
+                {{node|get_item:hdr|truncatechars:32}}
               </div>
             {% else %}
               {{node|get_item:hdr}}
