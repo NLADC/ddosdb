@@ -20,7 +20,7 @@ django-sslserver==0.22
 django-timezone-field==4.1.2
 djangorestframework==3.13.1
 gunicorn==22.0.0
-idna==2.10
+idna==3.7
 jsonschema==4.5.1
 kombu==5.2.3
 numpy==1.22.2
@@ -28,14 +28,14 @@ pandas==1.2.4
 prompt-toolkit==3.0.19
 psycopg2-binary==2.9.1
 pymisp==2.4.159
-pymongo==3.12.1
+pymongo==4.6.3
 pyrsistent==0.18.1
 python-crontab==2.5.1
 python-dateutil==2.8.2
 pytz==2022.1
 requests==2.31.0
 six==1.15.0
-sqlparse==0.4.4
+sqlparse==0.5.0
 urllib3==1.26.18
 vine==5.0.0
 wcwidth==0.2.5
