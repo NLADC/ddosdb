@@ -25,7 +25,7 @@ def _mdb():
 
 
 def _insert(data):
-    _mdb().insert(data, check_keys=False)
+    _mdb().insert_one(data)
 
 
 def _search(query=None, fields=None, order=None):
@@ -137,6 +137,7 @@ def fingerprints(request, format=None):
                 # file_upload.filename = fp["key"]
                 # file_upload.save()
             except Exception as e:
+                logger.info(e)
                 return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"detail": "OK"}, status.HTTP_201_CREATED)
