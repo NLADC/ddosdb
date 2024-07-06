@@ -18,7 +18,7 @@ django-ipware==3.0.7
 django-rest-multitokenauth==1.4.0
 django-sslserver==0.22
 django-timezone-field==6.1.0
-djangorestframework==3.15.1
+djangorestframework==3.15.2
 dnspython==2.6.1
 gunicorn==22.0.0
 idna==3.7
