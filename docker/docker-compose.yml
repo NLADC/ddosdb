@@ -108,7 +108,8 @@ services:
   # Specific version of rabbitmq, later one (3.9) causes issues
   rabbitmq:
     container_name: ddosdb_rabbitmq
-    image: rabbitmq:3.8.19
+#    image: rabbitmq:3.8.19
+    image: rabbitmq:3.13.6-alpine
     expose:
       - 5672
     networks:

@@ -1,5 +1,5 @@
 # Explicitly specify linux/amd64 for M1/M2 Macs to force emulation
-FROM --platform=linux/amd64 python:3.9-slim
+FROM --platform=linux/amd64 python:3.11-slim
 
 RUN apt-get update && apt-get install -y netcat-traditional
 
