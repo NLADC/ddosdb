@@ -1,19 +1,23 @@
-<p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/ddos_dissector/blob/3.0/media/header.png?raw=true"></p>
+<div style="text-align: center; vertical-align: center">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://raw.githubusercontent.com/NLADC/dissector/main/media/logo-CONCORDIA.png" style="width: 30%; padding-right: 3%" alt="Concordia logo">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://raw.githubusercontent.com/NLADC/dissector/main/media/header.png" style="width: 25%; padding-right: 3%" alt="DDoS Clearing House logo">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://raw.githubusercontent.com/NLADC/dissector/main/media/nomoreddos.svg#gh-light-mode-only" style="width: 30%; padding-right: 3%" alt="NoMoreDDoS logo">
+<img src="https://raw.githubusercontent.com/NLADC/dissector/main/media/nomoreddos-light.png#gh-dark-mode-only" style="width: 30%; padding-right: 3%" alt="NoMoreDDoS logo">
+</div>
 
+<br/>
 
+<div style="content-align: center;">
 
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![Python](https://img.shields.io/badge/python-v3.6+-blue.svg)
-[![Build Status](https://api.travis-ci.com/joaoceron/new_dissector.svg?token=8TMUECLCUVrxas7wXfVY&branch=master)](https://travis-ci.com/github/joaoceron/new_dissector)
-[![GitHub Issues](https://img.shields.io/github/issues/ddos-clearing-house/ddos_dissector)](https://github.com/ddos-clearing-house/ddos_dissector/issues)
+![Python](https://img.shields.io/badge/python-v3.11+-blue.svg)
+[![GitHub Issues](https://img.shields.io/github/issues/nladc/dissector)](https://github.com/nladc/dissector/issues)
 ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-<img alt="GitHub commits since tagged version" src="https://img.shields.io/github/last-commit/ddos-clearing-house/ddos_dissector">
-
- <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/concordia-logo.png?raw=true"></p>
- <p align="center"><img width=30.5% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/No-More-DDoS-2-removebg-preview.png?raw=true"></p>
-
+[![License](https://img.shields.io/badge/license-AGPL-blue.svg)](https://opensource.org/licenses/AGPL)
+![Last commit](https://img.shields.io/github/last-commit/nladc/ddosdb)
+</div>
 
 
 # DDoSDB
@@ -116,7 +120,6 @@ You can enable and use Mongo Express to export the database and importing it bac
 To enable Mongo Express uncomment the relevant lines in the docker-compose.yml file and restarting the containers.
 
 Please note that Mongo Express is bound to the 127.0.0.1 (localhost) address, meaning you can only access it on the DDoSDB machine itself (for safety reasons) at http://localhost:8081. The username and password are the superuser ones you specified in the first step. 
-<p align="center"></p><img width=50% src="https://github.com/ddos-clearing-house/dddosdb-in-a-box/blob/master/imgs/mongo-express.png?raw=true"></p>
 
 If - for some reason - updating this way fails, then one final (nuclear) option to try is to remove all images (intermediate and otherwise) as well as all volumes from docker.
 
@@ -155,6 +158,15 @@ docker logs -f ddosdb_ddosdb
 ```
 
 Where `ddosdb_ddosdb` is the container name of the ddosdb itself (Use `docker ps` to list them, as mentioned above)
+
+## Using podman instead of docker
+Podman is a drop-in replacement for docker. Do make sure that the podman machine is rootful! This is needed because of the use of privileged ports (80 and 443) by ddosb. Simply replace 'docker' with 'podman' for all commands listed above. 
+
+To build ddosdb using podman add podman as an argument to the build script:
+```
+./build.sh podman
+```
+
 
 ## Acknowledgements
 
