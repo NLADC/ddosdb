@@ -4,6 +4,13 @@ COL='\033[0;37m'
 RED='\033[1;31m'
 NC='\033[0m' # No Color
 
+if [ $# -gt 0 ]
+then
+  DOCKER=$1
+else
+  DOCKER='docker'
+fi
+
 cp django/env.dev temp/environment.prod
 printf "SECRET_KEY=\'%s\'\n" $(./lib/secret_key.py) >> temp/environment.prod
 
@@ -59,8 +66,8 @@ printf "\nGenerating self-signed certificate for localhost\n"
 openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=EU/ST=N\/A/L=N\/A/O=Concordia/OU=DDoS Clearing House/CN=localhost" -keyout ./temp/ddosdb-localhost.key  -out ./temp/ddosdb-localhost.crt
 
 printf "\n${COL} Building volumes, images, and containers${NC}\n\n"
-docker compose build
-docker compose up -d
+${DOCKER} compose build
+${DOCKER} compose up -d
 
 # Initialize the ddosdb Django App
 #printf "\n${COL} Collecting Django static files${NC}\n\n"
