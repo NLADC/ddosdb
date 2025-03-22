@@ -20,7 +20,7 @@ django-sslserver==0.22
 django-timezone-field==6.1.0
 djangorestframework==3.15.2
 dnspython==2.6.1
-gunicorn==22.0.0
+gunicorn==23.0.0
 idna==3.7
 kombu==5.3.7
 numpy==1.26.4
@@ -37,6 +37,7 @@ pytz==2024.1
 requests==2.32.3
 six==1.16.0
 sqlparse==0.5.0
+typing-extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.2
 vine==5.1.0
