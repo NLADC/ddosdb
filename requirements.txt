@@ -10,7 +10,7 @@ click-plugins==1.1.1
 click-repl==0.3.0
 cron-descriptor==1.4.3
 deprecated==1.2.14
-django==4.2.21
+django==4.2.22
 django-celery-beat==2.6.0
 django-celery-results==2.5.1
 django-debug-toolbar==4.4.2
