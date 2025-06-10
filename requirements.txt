@@ -34,7 +34,7 @@ pymongo==4.6.3
 python-crontab==3.1.0
 python-dateutil==2.9.0.post0
 pytz==2024.1
-requests==2.32.3
+requests==2.32.4
 six==1.16.0
 sqlparse==0.5.0
 typing-extensions==4.12.2
