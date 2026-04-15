@@ -34,7 +34,7 @@ services:
 #    restart: unless-stopped
 #
   db:
-    image: postgres:13-alpine
+    image: postgres:14-alpine
     container_name: ddosdb_db
     volumes:
       - ddosdb_postgres:/var/lib/postgresql/data/
