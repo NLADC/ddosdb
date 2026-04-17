@@ -40,7 +40,7 @@ then
 
   printf "${COL}\n Restore fingerprints? [y/N]:${NC}"
   read mongodb
-  if [ x"mongodb" = x"y" ]
+  if [ x"$mongodb" = x"y" ]
   then
     # Restore MongoDB with fingerprints
     docker cp "$BACKUP/mongodb" ddosdb_mongo:/dump
