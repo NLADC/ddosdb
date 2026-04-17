@@ -57,14 +57,14 @@ Once you have MongoDB and RabbitMQ up and running, change to the `ddosdb` direct
 Perform the Django migrations:
 
 ```
-python manage.py migrate
+python manage.py migrate --settings=website.settings-dev
 ```
 
 Create a superuser for your user management:
 
 
 ```
-python manage.py createsuperuser
+python manage.py createsuperuser --settings=website.settings-dev
 ```
 #### Optional preparations
 
@@ -76,7 +76,7 @@ Users can then be added to those groups and inherit the permissions of the group
 A reasonable collection of default groups can be created by the following command.
 
 ```
-python manage.py initgroups
+python manage.py initgroups --settings=website.settings-dev
 ```
 
 *Periodic tasks*
@@ -85,7 +85,7 @@ For synchonization between DDoSDB instances periodic tasks are used. See also th
 In case you need this in a development setup, use the following command to create a default synchronization schedule of once a day.
 
 ```
-python manage.py initsync
+python manage.py initsync --settings=website.settings-dev
 ```
 Next to 'every day', this also creates intervals for 'every hour', 'every minute' and 'every 15 seconds'.
 The admin interface of Django can be used to adjust the periodic tasks to one of these alternative intervals.
