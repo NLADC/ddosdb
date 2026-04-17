@@ -21,15 +21,15 @@ then
   if [ x"$nginx" = x"y" ]
   then
     # Copy NGINX conf files
-    docker cp etc/conf.d/ ddosdb_nginx:/etc/nginx/.
+    docker cp "$BACKUP/nginx/conf.d/" ddosdb_nginx:/etc/nginx/.
 
     # Copy Let's Encrypt settings and certificates
-    docker cp etc/letsencrypt/ ddosdb_nginx:/etc/.
+    docker cp "$BACKUP/nginx/letsencrypt/" ddosdb_nginx:/etc/.
   fi
 
   printf "${COL}\n Restore DDoS-DB users and website configuration? [y/N]:${NC}"
   read postgres
-  if [ x"postgres" = x"y" ]
+  if [ x"$postgres" = x"y" ]
   then
     # Restore DDoS-DB postgres database with users
     docker cp "$BACKUP/postgres_backup.sql" ddosdb_db:/tmp/postgres_backup.sql
