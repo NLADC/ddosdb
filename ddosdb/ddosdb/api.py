@@ -110,7 +110,8 @@ def fingerprints(request, format=None):
 
         logger.info("Inserting fingerprint(s)")
 
-        fps = json.loads(request.data)
+        fps = json.loads(request.data) if isinstance(request.data, str) else request.data
+
         if type(fps) is not list:
             fps = [fps]
 
